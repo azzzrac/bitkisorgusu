@@ -1,0 +1,15 @@
+@echo off
+cd /d "%~dp0"
+title Bitki Kesif Portali - Masaustu Uygulamasi
+
+echo ========================================================
+echo   BITKI KESIF PORTALI MASAUSTU UYGULAMASI BASLATILIYOR
+echo ========================================================
+echo.
+
+java BitkiGUI.java
+if %errorlevel% neq 0 (
+    echo.
+    echo [HATA] Uygulama baslatilamadi. Lutfen Java'nin (JDK 11+) yuklu oldugundan emin olun.
+    pause
+)

@@ -22,22 +22,16 @@
 
 ## 🚀 Çalıştırma Rehberi
 
-### 1. Masaüstü Arayüzü (Java GUI)
-Proje klasöründeyken terminalde (PowerShell veya CMD) şu komutu çalıştırabilirsiniz:
+### ⚡ Hızlı Başlatma (Çift Tıklayarak)
+* **`Uygulamayi_Baslat.cmd`**: Çift tıkladığınızda açılan menüden Masaüstü, Web veya CLI sürümlerinden istediğinizi tek tıkla başlatabilirsiniz.
+* **`BitkiGUI.cmd`**: Çift tıklayarak doğrudan Java Masaüstü Görsel Arayüzünü açabilirsiniz.
+* **`web_sunucu.cmd`**: Çift tıklayarak Web & Mobil sunucusunu başlatabilir ve tarayıcıda açabilirsiniz.
 
-```bash
-java BitkiGUI.java
-```
+---
 
-### 2. Web & Mobil Sürümü
-Tarayıcı üzerinden kullanmak için `web_sunucu.cmd` dosyasına çift tıklayabilir veya yerel bir sunucu başlatarak `index.html` sayfasını açabilirsiniz.
-
-### 3. Komut Satırı Sürümü (CLI)
-Konsol üzerinden hızlı sorgulama yapmak için:
-
-```bash
-.\BitkiSorgu.cmd "Gül"
-```
+### 💻 Komut Satırından Çalıştırma
+* **Masaüstü (GUI):** `java BitkiGUI.java`
+* **Komut Satırı (CLI):** `.\BitkiSorgu.cmd "Gül"`
 
 ---
 
