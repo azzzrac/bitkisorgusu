@@ -249,11 +249,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (sonuc && sonuc.baslik) {
                 currentSonuc = sonuc;
 
-                // Keşif Sayacı
-                const prevSize = kesfedilenBitkiler.size;
-                kesfedilenBitkiler.add(sonuc.baslik);
-                if (kesfedilenBitkiler.size > prevSize) {
-                    updateUserRank();
+                // Keşif Sayacı (Sadece Giriş Yapıldığında Rozet Kazanılır)
+                if (currentUser) {
+                    const prevSize = kesfedilenBitkiler.size;
+                    kesfedilenBitkiler.add(sonuc.baslik);
+                    if (kesfedilenBitkiler.size > prevSize) {
+                        updateUserRank();
+                    }
                 }
 
                 // Aramalar Geçmişi

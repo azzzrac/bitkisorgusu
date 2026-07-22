@@ -1341,12 +1341,14 @@ public class BitkiGUI extends JFrame {
                     if (sonuc.baslik() != null && !sonuc.baslik().isEmpty()) {
                         currentWikiUrl = sonuc.wikiUrl();
 
-                        int prevCount = kesfedilenBitkiler.size();
-                        kesfedilenBitkiler.add(sonuc.baslik());
-                        int newCount = kesfedilenBitkiler.size();
+                        if (isLoggedIn) {
+                            int prevCount = kesfedilenBitkiler.size();
+                            kesfedilenBitkiler.add(sonuc.baslik());
+                            int newCount = kesfedilenBitkiler.size();
 
-                        if (newCount > prevCount && (newCount == 1 || newCount == 5 || newCount == 10 || newCount == 20 || newCount == 30)) {
-                            JOptionPane.showMessageDialog(BitkiGUI.this, "🎉 TEBRİKLER! Yeni Bir Botanikçi Rozeti Kazandınız!\nToplam Keşfedilen Bitki: " + newCount, "Rozet Kazanıldı", JOptionPane.INFORMATION_MESSAGE);
+                            if (newCount > prevCount && (newCount == 1 || newCount == 5 || newCount == 10 || newCount == 20 || newCount == 30)) {
+                                JOptionPane.showMessageDialog(BitkiGUI.this, "🎉 TEBRİKLER! Yeni Bir Botanikçi Rozeti Kazandınız!\nToplam Keşfedilen Bitki: " + newCount, "Rozet Kazanıldı", JOptionPane.INFORMATION_MESSAGE);
+                            }
                         }
 
                         if (!sonAramalar.contains(bitkiAdi)) {
