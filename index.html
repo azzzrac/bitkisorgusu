@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌱 Bitki Keşif Portalı | Mobil & Web</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Günün Bitkisi Banner -->
+        <div class="banner-card" id="potdBanner">
+            <div class="banner-content">
+                <span class="banner-badge">🌟 GÜNÜN BİTKİSİ</span>
+                <span class="banner-text"><b>LAVANTA</b> - Stresi azaltan harika kokulu mor mucize!</span>
+            </div>
+            <button class="btn btn-sm btn-primary" id="btnPotdExplore">🔍 Keşfet</button>
+        </div>
+
+        <!-- Header -->
+        <header class="header-card">
+            <div class="brand">
+                <h1 class="brand-title">🌱 Bitki Keşif Portalı</h1>
+                <p class="brand-subtitle">Bitkileri isimleriyle arayın, özelliklerini ve görsellerini inceleyin.</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-profile" id="btnProfile">👤 Hesabım</button>
+                <button class="btn btn-icon" id="btnThemeToggle" title="Temayı Değiştir">🌙</button>
+            </div>
+        </header>
+
+        <!-- Arama Alanı -->
+        <section class="card input-card">
+            <div class="input-group">
+                <label for="searchInput" class="input-label">Bitki Adı:</label>
+                <div class="search-box-wrapper">
+                    <input type="text" id="searchInput" placeholder="Örn: Gül, Papatya, Orkide, Lavanta..." autocomplete="off">
+                    <div id="autocompleteList" class="autocomplete-popup"></div>
+                </div>
+                <select id="historySelect" class="select-history">
+                    <option value="">📜 Son Aramalar</option>
+                </select>
+            </div>
+            <div class="button-row">
+                <button class="btn btn-success" id="btnSearch">🔍 Sorgula</button>
+                <button class="btn btn-teal" id="btnRandom">🎲 Rastgele</button>
+                <button class="btn btn-secondary" id="btnClear">🧹 Temizle</button>
+            </div>
+        </section>
+
+        <!-- Sonuç Alanı -->
+        <section class="card result-card" id="resultCard">
+            <div class="result-layout">
+                <!-- Sol Görsel Kutusu -->
+                <div class="image-box-wrapper">
+                    <div class="image-box" id="imageBox">
+                        <span id="imagePlaceholderText">Resim burada görünür.</span>
+                        <img id="plantImage" src="" alt="Bitki Görseli" style="display: none;">
+                        <span class="zoom-hint" id="zoomHint">🔍 Dokun/Tıkla (Tam Ekran)</span>
+                    </div>
+                </div>
+
+                <!-- Sağ Detay Kutusu -->
+                <div class="details-box">
+                    <div class="result-scroll-area" id="resultScrollArea">
+                        <div class="info-placeholder" id="infoPlaceholder">Detaylı sonuçlar burada görünecektir...</div>
+                        <div id="resultContent" style="display: none;">
+                            <h2 class="plant-title" id="plantTitle">🌿 BİTKİ ADI</h2>
+                            <p class="botanical-name" id="botanicalName">🧬 Botanik Adı: -</p>
+                            <div class="divider"></div>
+                            <p class="plant-description" id="plantDescription"></p>
+                        </div>
+                    </div>
+
+                    <!-- Alt Bilgiler: Bakım Rehberi & Trivia -->
+                    <div class="info-cards-wrapper">
+                        <div class="care-card" id="careCard">
+                            <span class="care-item" id="careSun">☀️ Güneş: -</span>
+                            <span class="care-item" id="careWater">💧 Sulama: -</span>
+                            <span class="care-item" id="careTemp">🌡️ Sıcaklık: -</span>
+                        </div>
+                        <div class="trivia-card" id="triviaCard">
+                            <span id="triviaText">💡 Biliyor muydunuz? Bitkiler dünyadaki oksijenin %99'unu üretir!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sonuç Alt Araç Çubuğu -->
+            <div class="result-action-bar">
+                <div class="action-left">
+                    <button class="btn btn-orange" id="btnFavAdd" disabled>⭐ Favorile</button>
+                    <button class="btn btn-brown" id="btnSaveImg" disabled>💾 Resmi Kaydet</button>
+                    <button class="btn btn-purple" id="btnWiki" disabled>🌐 Vikipedi'de Oku</button>
+                    <button class="btn btn-blue" id="btnFullscreen" disabled>🖼️ Görseli Büyüt</button>
+                </div>
+                <div class="status-bar" id="statusBar">Hazır</div>
+            </div>
+        </section>
+    </div>
+
+    <!-- MODALLAR -->
+
+    <!-- Hesabım Modalı -->
+    <div class="modal-overlay" id="profileModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>👤 Hesabım & Profil Merkezi</h3>
+                <button class="modal-close" id="btnCloseProfile">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="user-profile-header">
+                    <div class="avatar-circle" id="userAvatar">🌿</div>
+                    <div class="user-meta">
+                        <h4 id="userNameDisplay">Botanik Sevdalısı</h4>
+                        <p class="user-rank" id="userRankDisplay">Unvan: Acemi Botanikçi</p>
+                    </div>
+                    <button class="btn btn-sm btn-outline" id="btnEditName">✏️ İsmi Düzenle</button>
+                </div>
+
+                <!-- 4 Ana Araç -->
+                <div class="profile-tools-grid">
+                    <button class="btn btn-badge" id="btnOpenBadges">🏆 Keşifler & Rozetler (<span id="countBadges">0</span>)</button>
+                    <button class="btn btn-quiz" id="btnOpenQuiz">🎮 Bitki Quizi Oyna</button>
+                    <button class="btn btn-rem" id="btnOpenWatering">⏰ Sulama Takvimim</button>
+                    <button class="btn btn-fav" id="btnOpenFavs">⭐ Favori Bitkilerim (<span id="countFavs">0</span>)</button>
+                </div>
+
+                <!-- İstatistikler -->
+                <div class="stats-grid">
+                    <div class="stat-box"><b>🔍 Toplam Arama:</b> <span id="statSearchCount">0</span></div>
+                    <div class="stat-box"><b>🌿 Keşfedilen Tür:</b> <span id="statSpeciesCount">0</span></div>
+                    <div class="stat-box"><b>⭐ Favori Sayısı:</b> <span id="statFavCount">0</span></div>
+                    <div class="stat-box"><b>🏆 Quiz Skoru:</b> <span id="statQuizScore">0 Puan</span></div>
+                </div>
+
+                <!-- Botanik Günlüğüm -->
+                <div class="journal-section">
+                    <h4>📝 Botanik Günlüğüm (Kişisel Notlarım)</h4>
+                    <ul class="notes-list" id="notesList">
+                        <li class="empty-note">Henüz not eklenmedi.</li>
+                    </ul>
+                    <div class="note-input-row">
+                        <input type="text" id="newNoteInput" placeholder="Notunuzu yazın...">
+                        <button class="btn btn-success" id="btnAddNote">➕ Ekle</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keşifler & Rozetler Modalı -->
+    <div class="modal-overlay" id="badgesModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>🏆 Botanikçi Rozetlerim</h3>
+                <button class="modal-close" id="btnCloseBadges">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-subtitle">Keşfedilen Toplam Tür: <b id="badgeTotalCount">0</b></p>
+                <div class="badges-list" id="badgesListContainer">
+                    <!-- Rozet Satırları JS ile Eklenecek -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bitki Quizi Modalı -->
+    <div class="modal-overlay" id="quizModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>🎮 Bitki Bilgi Yarışması (Quiz)</h3>
+                <button class="modal-close" id="btnCloseQuiz">&times;</button>
+            </div>
+            <div class="modal-body quiz-body">
+                <div class="quiz-score-header">🏆 Toplam Puan: <b id="quizScoreDisplay">0</b></div>
+                <h4 class="quiz-question">Soru: Bu hangi bitkidir?</h4>
+                <div class="quiz-image-box">
+                    <img id="quizImage" src="" alt="Quiz Bitki Görseli">
+                    <span id="quizLoadingText">⏳ Görsel Yükleniyor...</span>
+                </div>
+                <div class="quiz-options-grid" id="quizOptionsGrid">
+                    <button class="btn btn-quiz-opt" data-opt="0">A) -</button>
+                    <button class="btn btn-quiz-opt" data-opt="1">B) -</button>
+                    <button class="btn btn-quiz-opt" data-opt="2">C) -</button>
+                    <button class="btn btn-quiz-opt" data-opt="3">D) -</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sulama Takvimi Modalı -->
+    <div class="modal-overlay" id="wateringModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>⏰ Evdeki Bitkilerim & Sulama Takvimi</h3>
+                <button class="modal-close" id="btnCloseWatering">&times;</button>
+            </div>
+            <div class="modal-body">
+                <ul class="watering-list" id="homePlantsList">
+                    <li class="empty-note">Henüz ev bitkisi eklenmedi.</li>
+                </ul>
+                <div class="add-plant-form">
+                    <input type="text" id="homePlantName" placeholder="Bitki Adı (Örn: Salon Kaktüsü)">
+                    <input type="number" id="homePlantDays" placeholder="Kaç günde bir" value="3">
+                    <button class="btn btn-success" id="btnAddHomePlant">➕ Ekle</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Favoriler Modalı -->
+    <div class="modal-overlay" id="favsModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>⭐ Favori Bitkilerim</h3>
+                <button class="modal-close" id="btnCloseFavs">&times;</button>
+            </div>
+            <div class="modal-body">
+                <ul class="favs-list" id="favsListContainer">
+                    <li class="empty-note">Favorilere henüz bitki eklenmedi.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tam Ekran Görsel Modalı -->
+    <div class="modal-overlay fullscreen-overlay" id="fullscreenModal">
+        <div class="fullscreen-header">
+            <span id="fullscreenTitle">🌿 BİTKİ GÖRSELİ</span>
+            <button class="btn btn-danger" id="btnCloseFullscreen">❌ Kapat (ESC)</button>
+        </div>
+        <div class="fullscreen-body">
+            <img id="fullscreenImage" src="" alt="Tam Ekran Bitki Görseli">
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
