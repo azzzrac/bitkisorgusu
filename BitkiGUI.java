@@ -183,12 +183,12 @@ public class BitkiGUI extends JFrame {
 
         setupAutoComplete();
 
-        // Bakım Rehberi Kartı Setup
-        careCard.setLayout(new FlowLayout(FlowLayout.LEFT, 16, 6));
-        careCard.setBorder(new EmptyBorder(6, 12, 6, 12));
+        // Bakım Rehberi Kartı Setup (2 Sütunlu Izgara Düzeni)
+        careCard.setLayout(new GridLayout(3, 2, 16, 8));
+        careCard.setBorder(new EmptyBorder(10, 16, 10, 16));
 
-        Font careFont = new Font("Segoe UI", Font.BOLD, 12);
-        Color careColor = new Color(40, 75, 45);
+        Font careFont = new Font("Segoe UI", Font.BOLD, 13);
+        Color careColor = new Color(27, 94, 32);
 
         careSunLabel.setFont(careFont);
         careWaterLabel.setFont(careFont);
@@ -205,10 +205,10 @@ public class BitkiGUI extends JFrame {
         careRebloomLabel.setForeground(careColor);
 
         careCard.add(careSunLabel);
-        careCard.add(careWaterLabel);
-        careCard.add(careTempLabel);
         careCard.add(careSeasonLabel);
+        careCard.add(careWaterLabel);
         careCard.add(careRegionLabel);
+        careCard.add(careTempLabel);
         careCard.add(careRebloomLabel);
 
         // Trivia Kartı Setup
