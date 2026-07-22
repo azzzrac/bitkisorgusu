@@ -71,6 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const careSun = document.getElementById('careSun');
     const careWater = document.getElementById('careWater');
     const careTemp = document.getElementById('careTemp');
+    const careSeason = document.getElementById('careSeason');
+    const careRegion = document.getElementById('careRegion');
+    const careRebloom = document.getElementById('careRebloom');
     const triviaText = document.getElementById('triviaText');
 
     const btnFavAdd = document.getElementById('btnFavAdd');
@@ -400,18 +403,59 @@ document.addEventListener('DOMContentLoaded', () => {
         return '💡 Biliyor muydunuz? Bitkiler dünyadaki oksijenin %99\'unu üreterek yaşamın devamlılığını sağlar!';
     }
 
-    function updateCareTips(sun, water, temp) {
-        careSun.textContent = `☀️ Güneş: ${sun}`;
-        careWater.textContent = `💧 Sulama: ${water}`;
-        careTemp.textContent = `🌡️ Sıcaklık: ${temp}`;
+    function updateCareTips(sun, water, temp, season = '-', region = '-', rebloom = '-') {
+        if (careSun) careSun.textContent = `☀️ Güneş: ${sun}`;
+        if (careWater) careWater.textContent = `💧 Sulama: ${water}`;
+        if (careTemp) careTemp.textContent = `🌡️ Sıcaklık: ${temp}`;
+        if (careSeason) careSeason.textContent = `🗓️ Dönem: ${season}`;
+        if (careRegion) careRegion.textContent = `🗺️ Bölge: ${region}`;
+        if (careRebloom) careRebloom.textContent = `🔄 Solarsa Yeniden Açar Mı?: ${rebloom}`;
     }
 
     function updateCareTipsForPlant(name) {
         const p = name.toLowerCase();
-        if (p.includes('kaktüs') || p.includes('sukulent')) updateCareTips('Bol Doğrudan Güneş', '2-3 Haftada Bir', '15°C - 30°C');
-        else if (p.includes('orkide')) updateCareTips('Yarı Gölge / Parlak', 'Haftada 1 Kez', '18°C - 25°C');
-        else if (p.includes('lavanta') || p.includes('nane') || p.includes('fesleğen')) updateCareTips('Bol Güneşli', 'Toprak Kurudukça', '15°C - 28°C');
-        else updateCareTips('Parlak Dolaylı Işık', 'Haftada 1-2 Kez', '18°C - 24°C');
+        let sun = 'Parlak Dolaylı Işık', water = 'Haftada 1-2 Kez', temp = '18°C - 24°C';
+        let season = 'İlkbahar - Yaz', region = 'Türkiye Geneli & Ilıman Bölgeler', rebloom = 'Evet (Çok yıllıktır, solan çiçekler budandığında tekrar açar)';
+
+        if (p.includes('lavanta')) {
+            sun = 'Bol Güneşli'; water = 'Toprak Kurudukça (Az)'; temp = '15°C - 30°C';
+            season = 'Yaz Başı (Haziran - Ağustos)'; region = 'Akdeniz Havzası & Ege (Isparta)';
+            rebloom = 'Evet (Çok yıllık çalıdır, her yaz mor çiçeklerini tekrar açar)';
+        } else if (p.includes('gül')) {
+            sun = 'Tam Güneş (Günde 6 Saat)'; water = 'Haftada 2-3 Kez'; temp = '15°C - 26°C';
+            season = 'İlkbahar - Sonbahar (Mayıs - Ekim)'; region = 'Ilıman Bölgeler, Anadolu & Akdeniz';
+            rebloom = 'Evet (Solan çiçek başları budandıkça sezon boyunca tekrar tekrar açar)';
+        } else if (p.includes('orkide')) {
+            sun = 'Filtrelenmiş Parlak Işık'; water = 'Haftada 1 Kez (Daldırma)'; temp = '18°C - 25°C';
+            season = 'Sonbahar - İlkbahar (Yılda 1-2 Kez)'; region = 'Tropikal & Yarı Tropikal Yağmur Ormanları';
+            rebloom = 'Evet (Çiçek sapı 3. boğumdan budanıp nem sağlandığında tekrar açar)';
+        } else if (p.includes('papatya')) {
+            sun = 'Bol Doğrudan Güneş'; water = 'Haftada 1-2 Kez'; temp = '12°C - 25°C';
+            season = 'İlkbahar - Yaz (Nisan - Temmuz)'; region = 'Tüm Türkiye Çayırları & Ilıman Avrupa';
+            rebloom = 'Evet (Sezon içinde solanlar budanırsa yeni tomurcuk verir)';
+        } else if (p.includes('kaktüs') || p.includes('sukulent')) {
+            sun = 'Bol Doğrudan Güneş'; water = '2-3 Haftada Bir (İyice Kuruyunca)'; temp = '15°C - 35°C';
+            season = 'İlkbahar - Yaz Ortası (Nadir Çiçeklenme)'; region = 'Çöl & Kurak İklim Bölgeleri (Meksika/Afrika)';
+            rebloom = 'Evet (Güneş ve kış dinlenmesi sağlandığında her yıl tekrar çiçeklenir)';
+        } else if (p.includes('lale')) {
+            sun = 'Güneşli / Yarı Gölge'; water = 'Haftada 1 Kez'; temp = '10°C - 20°C';
+            season = 'Erken İlkbahar (Mart - Mayıs)'; region = 'Orta Asya, Anadolu & Hollanda';
+            rebloom = 'Evet (Soğanı toprakta kaldığı sürece her ilkbaharda tekrar açar)';
+        } else if (p.includes('begonvil')) {
+            sun = 'Tam Güneşli'; water = 'Haftada 2 Kez'; temp = '20°C - 35°C';
+            season = 'Yaz - Sonbahar (Mayıs - Kasım)'; region = 'Akdeniz & Ege Kıyı Şeridi (Bodrum/Marmaris)';
+            rebloom = 'Evet (Sıcak iklimde soldukça tüm yaz boyunca sarmaşık şeklinde coşkuyla açar)';
+        } else if (p.includes('nane') || p.includes('fesleğen') || p.includes('biberiye')) {
+            sun = 'Bol Güneşli'; water = 'Nemli Toprak (Düzenli)'; temp = '15°C - 28°C';
+            season = 'İlkbahar - Sonbahar (Tüm Sezon)'; region = 'Akdeniz Havzası & Tüm Ilıman Bölgeler';
+            rebloom = 'Evet (Yaprak ve çiçekleri budandıkça sürekli daha gür yeniden büyür)';
+        } else if (p.includes('limon') || p.includes('zeytin')) {
+            sun = 'Tam Güneş'; water = 'Haftada 1-2 Kez'; temp = '15°C - 32°C';
+            season = 'İlkbahar (Çiçek) / Sonbahar (Meyve)'; region = 'Akdeniz & Ege Kıyı Bölgesi';
+            rebloom = 'Evet (Çok yıllık ağaçtır, her yıl baharda kokulu çiçekler açar)';
+        }
+
+        updateCareTips(sun, water, temp, season, region, rebloom);
     }
 
     function updateHistoryDropdown() {

@@ -50,10 +50,13 @@ public class BitkiGUI extends JFrame {
     private final JLabel statusLabel = new JLabel("Hazır", SwingConstants.LEFT);
     private final JPopupMenu suggestPopup = new JPopupMenu();
 
-    // Bakım İpuçları Etiketleri
+    // Bakım İpuçları & Yetişme Bilgileri Etiketleri
     private final JLabel careSunLabel = new JLabel("☀️ Güneş: -");
     private final JLabel careWaterLabel = new JLabel("💧 Sulama: -");
     private final JLabel careTempLabel = new JLabel("🌡️ Sıcaklık: -");
+    private final JLabel careSeasonLabel = new JLabel("🗓️ Dönem: -");
+    private final JLabel careRegionLabel = new JLabel("🗺️ Bölge: -");
+    private final JLabel careRebloomLabel = new JLabel("🔄 Yeniden Açma: -");
     private final RoundedPanel careCard = new RoundedPanel(14, new Color(238, 246, 239), new Color(200, 225, 202));
 
     // Trivia Kartı
@@ -181,21 +184,32 @@ public class BitkiGUI extends JFrame {
         setupAutoComplete();
 
         // Bakım Rehberi Kartı Setup
-        careCard.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 6));
+        careCard.setLayout(new FlowLayout(FlowLayout.LEFT, 16, 6));
         careCard.setBorder(new EmptyBorder(6, 12, 6, 12));
 
         Font careFont = new Font("Segoe UI", Font.BOLD, 12);
+        Color careColor = new Color(40, 75, 45);
+
         careSunLabel.setFont(careFont);
         careWaterLabel.setFont(careFont);
         careTempLabel.setFont(careFont);
+        careSeasonLabel.setFont(careFont);
+        careRegionLabel.setFont(careFont);
+        careRebloomLabel.setFont(careFont);
 
-        careSunLabel.setForeground(new Color(40, 75, 45));
-        careWaterLabel.setForeground(new Color(40, 75, 45));
-        careTempLabel.setForeground(new Color(40, 75, 45));
+        careSunLabel.setForeground(careColor);
+        careWaterLabel.setForeground(careColor);
+        careTempLabel.setForeground(careColor);
+        careSeasonLabel.setForeground(careColor);
+        careRegionLabel.setForeground(careColor);
+        careRebloomLabel.setForeground(careColor);
 
         careCard.add(careSunLabel);
         careCard.add(careWaterLabel);
         careCard.add(careTempLabel);
+        careCard.add(careSeasonLabel);
+        careCard.add(careRegionLabel);
+        careCard.add(careRebloomLabel);
 
         // Trivia Kartı Setup
         triviaCard.setLayout(new BorderLayout());
@@ -905,10 +919,17 @@ public class BitkiGUI extends JFrame {
         return row;
     }
 
-    private void updateCareTips(String sun, String water, String temp) {
+    private void updateCareTips(String sun, String water, String temp, String season, String region, String rebloom) {
         careSunLabel.setText("☀️ Güneş: " + sun);
         careWaterLabel.setText("💧 Sulama: " + water);
         careTempLabel.setText("🌡️ Sıcaklık: " + temp);
+        careSeasonLabel.setText("🗓️ Dönem: " + season);
+        careRegionLabel.setText("🗺️ Bölge: " + region);
+        careRebloomLabel.setText("🔄 Yeniden Açma: " + rebloom);
+    }
+
+    private void updateCareTips(String sun, String water, String temp) {
+        updateCareTips(sun, water, temp, "-", "-", "-");
     }
 
     private String getBotanicalName(String plantName) {
@@ -1341,15 +1362,48 @@ public class BitkiGUI extends JFrame {
                         }
 
                         String nameLower = sonuc.baslik().toLowerCase(Locale.forLanguageTag("tr-TR"));
-                        if (nameLower.contains("kaktüs") || nameLower.contains("sukulent")) {
-                            updateCareTips("Bol Doğrudan Güneş", "2-3 Haftada Bir", "15°C - 30°C");
+                        String sun = "Parlak Dolaylı Işık", water = "Haftada 1-2 Kez", temp = "18°C - 24°C";
+                        String season = "İlkbahar - Yaz", region = "Türkiye Geneli & Ilıman Bölgeler", rebloom = "Evet (Çok yıllıktır, solan çiçekler budandığında tekrar açar)";
+
+                        if (nameLower.contains("lavanta")) {
+                            sun = "Bol Güneşli"; water = "Toprak Kurudukça (Az)"; temp = "15°C - 30°C";
+                            season = "Yaz Başı (Haziran - Ağustos)"; region = "Akdeniz Havzası & Ege (Isparta)";
+                            rebloom = "Evet (Çok yıllık çalıdır, her yaz mor çiçeklerini tekrar açar)";
+                        } else if (nameLower.contains("gül")) {
+                            sun = "Tam Güneş (Günde 6 Saat)"; water = "Haftada 2-3 Kez"; temp = "15°C - 26°C";
+                            season = "İlkbahar - Sonbahar (Mayıs - Ekim)"; region = "Ilıman Bölgeler, Anadolu & Akdeniz";
+                            rebloom = "Evet (Solan çiçek başları budandıkça sezon boyunca tekrar tekrar açar)";
                         } else if (nameLower.contains("orkide")) {
-                            updateCareTips("Yarı Gölge / Parlak", "Haftada 1 Kez", "18°C - 25°C");
-                        } else if (nameLower.contains("lavanta") || nameLower.contains("nane") || nameLower.contains("biberiye") || nameLower.contains("fesleğen")) {
-                            updateCareTips("Bol Güneşli", "Toprak Kurudukça", "15°C - 28°C");
-                        } else {
-                            updateCareTips("Parlak Dolaylı Işık", "Haftada 1-2 Kez", "18°C - 24°C");
+                            sun = "Filtrelenmiş Parlak Işık"; water = "Haftada 1 Kez (Daldırma)"; temp = "18°C - 25°C";
+                            season = "Sonbahar - İlkbahar (Yılda 1-2 Kez)"; region = "Tropikal & Yarı Tropikal Yağmur Ormanları";
+                            rebloom = "Evet (Çiçek sapı 3. boğumdan budanıp nem sağlandığında tekrar açar)";
+                        } else if (nameLower.contains("papatya")) {
+                            sun = "Bol Doğrudan Güneş"; water = "Haftada 1-2 Kez"; temp = "12°C - 25°C";
+                            season = "İlkbahar - Yaz (Nisan - Temmuz)"; region = "Tüm Türkiye Çayırları & Ilıman Avrupa";
+                            rebloom = "Evet (Sezon içinde solanlar budanırsa yeni tomurcuk verir)";
+                        } else if (nameLower.contains("kaktüs") || nameLower.contains("sukulent")) {
+                            sun = "Bol Doğrudan Güneş"; water = "2-3 Haftada Bir (İyice Kuruyunca)"; temp = "15°C - 35°C";
+                            season = "İlkbahar - Yaz Ortası (Nadir Çiçeklenme)"; region = "Çöl & Kurak İklim Bölgeleri (Meksika/Afrika)";
+                            rebloom = "Evet (Güneş ve kış dinlenmesi sağlandığında her yıl tekrar çiçeklenir)";
+                        } else if (nameLower.contains("lale")) {
+                            sun = "Güneşli / Yarı Gölge"; water = "Haftada 1 Kez"; temp = "10°C - 20°C";
+                            season = "Erken İlkbahar (Mart - Mayıs)"; region = "Orta Asya, Anadolu & Hollanda";
+                            rebloom = "Evet (Soğanı toprakta kaldığı sürece her ilkbaharda tekrar açar)";
+                        } else if (nameLower.contains("begonvil")) {
+                            sun = "Tam Güneşli"; water = "Haftada 2 Kez"; temp = "20°C - 35°C";
+                            season = "Yaz - Sonbahar (Mayıs - Kasım)"; region = "Akdeniz & Ege Kıyı Şeridi (Bodrum/Marmaris)";
+                            rebloom = "Evet (Sıcak iklimde soldukça tüm yaz boyunca sarmaşık şeklinde coşkuyla açar)";
+                        } else if (nameLower.contains("nane") || nameLower.contains("biberiye") || nameLower.contains("fesleğen")) {
+                            sun = "Bol Güneşli"; water = "Nemli Toprak (Düzenli)"; temp = "15°C - 28°C";
+                            season = "İlkbahar - Sonbahar (Tüm Sezon)"; region = "Akdeniz Havzası & Tüm Ilıman Bölgeler";
+                            rebloom = "Evet (Yaprak ve çiçekleri budandıkça sürekli daha gür yeniden büyür)";
+                        } else if (nameLower.contains("limon") || nameLower.contains("zeytin")) {
+                            sun = "Tam Güneş"; water = "Haftada 1-2 Kez"; temp = "15°C - 32°C";
+                            season = "İlkbahar (Çiçek) / Sonbahar (Meyve)"; region = "Akdeniz & Ege Kıyı Bölgesi";
+                            rebloom = "Evet (Çok yıllık ağaçtır, her yıl baharda kokulu çiçekler açar)";
                         }
+
+                        updateCareTips(sun, water, temp, season, region, rebloom);
 
                         triviaLabel.setText(getPlantTrivia(sonuc.baslik()));
 
