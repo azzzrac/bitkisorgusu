@@ -24,9 +24,55 @@ const db = new sqlite3.Database('./kullanicilar.db', (err) => {
             email TEXT UNIQUE,
             password TEXT
         )`);
+        db.run(`CREATE TABLE IF NOT EXISTS gemini_requests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            model_name TEXT,
+            endpoint TEXT,
+            timestamp INTEGER
+        )`);
         console.log("🛡️ Güvenli veritabanı bağlandı.");
     }
 });
+
+// 📊 GEMİNI AI İSTEK KAYIT FONKSİYONU
+function logGeminiRequest(modelName, endpoint) {
+    const now = Date.now();
+    db.run(`INSERT INTO gemini_requests (model_name, endpoint, timestamp) VALUES (?, ?, ?)`,
+        [modelName || 'gemini-3.5-flash-lite', endpoint || 'general', now], (err) => {
+            if (err) console.error("Gemini istek kaydı hatası:", err.message);
+        });
+}
+
+// 📊 SON 24 SAATLİK GEMİNİ AI İSTEK SAYACI ENDPOINT'İ
+app.get('/api/gemini-usage-stats', (req, res) => {
+    const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
+
+    db.all(`SELECT model_name, endpoint, timestamp FROM gemini_requests WHERE timestamp >= ?`, [twentyFourHoursAgo], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: 'Veritabanı hatası' });
+        }
+
+        const count24h = rows ? rows.length : 0;
+        const modelBreakdown = {};
+
+        if (rows) {
+            rows.forEach(r => {
+                const m = r.model_name || 'gemini-3.5-flash-lite';
+                modelBreakdown[m] = (modelBreakdown[m] || 0) + 1;
+            });
+        }
+
+        db.get(`SELECT COUNT(*) as total FROM gemini_requests`, (err2, totalRow) => {
+            res.json({
+                success: true,
+                count24h: count24h,
+                totalAllTime: totalRow ? totalRow.total : count24h,
+                modelBreakdown: modelBreakdown
+            });
+        });
+    });
+});
+
 
 // 🔑 GÜVENLİ KAYIT OL ENDPOINT (BCrypt Şifreleme)
 app.post('/api/register', async (req, res) => {
@@ -298,8 +344,10 @@ Yanıtını SADECE aşağıdaki JSON formatında ver, başka hiçbir açıklama 
 
                     if (responseText) {
                         const parsed = JSON.parse(responseText);
+                        logGeminiRequest(modelName, '/api/diagnose-plant-disease');
                         return res.json({ success: true, isLiveApi: true, modelUsed: modelName, data: parsed });
                     }
+
                 } catch (mErr) {
                     console.log(`Gemini model ${modelName} denemesi başarsız:`, mErr.message);
                 }
@@ -376,6 +424,7 @@ Yanıt SADECE aşağıdaki JSON formatında olmalı, hiçbir markdown çiti veya
 
             if (responseText) {
                 const parsed = JSON.parse(responseText);
+                logGeminiRequest('gemini-3.5-flash-lite', '/api/plant-info');
                 return res.json({ 
                     success: true, 
                     isLiveApi: true, 
@@ -383,6 +432,7 @@ Yanıt SADECE aşağıdaki JSON formatında olmalı, hiçbir markdown çiti veya
                     data: parsed 
                 });
             }
+
         } catch (err) {
             console.error("Gemini Metin Sorgu API hatası (Fallback devrede):", err.message);
             return res.json({

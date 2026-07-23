@@ -36,10 +36,12 @@
                 <p class="brand-subtitle">Bitkileri isimleriyle arayın, özelliklerini ve görsellerini inceleyin.</p>
             </div>
             <div class="header-actions">
+                <button class="btn btn-teal api-quota-btn" id="btnOpenUsage" title="Son 24 saatteki canlı Gemini AI istek sayısı">🤖 Gemini 24s: <b id="headerUsageCount">0 İstek</b></button>
                 <button class="btn btn-doctor" id="btnOpenDoctor">🩺 Bitki Doktoru (AI Teşhis)</button>
                 <button class="btn btn-profile" id="btnProfile">👤 Giriş Yap / Kayıt Ol</button>
                 <button class="btn btn-icon" id="btnThemeToggle" title="Temayı Değiştir">🌙</button>
             </div>
+
 
         </header>
 
@@ -406,8 +408,44 @@
         </div>
     </div>
 
-    <script src="app.js?v=6"></script>
+    <!-- 📊 Son 24 Saatlik Gemini AI İstek Sayacı Modalı -->
+    <div class="modal-overlay" id="usageModal">
+        <div class="modal-card" style="max-width: 560px; width: 92%;">
+            <div class="modal-header">
+                <h3>📊 24 Saatlik Gemini AI İstek İstatistikleri</h3>
+                <button class="modal-close" id="btnCloseUsage">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-subtitle">Son 24 saat içinde model fark etmeksizin Google Gemini AI'a atılan canlı istek sayıları aşağıdadır:</p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 16px 0;">
+                    <div style="background: rgba(46, 125, 50, 0.08); border: 1px solid var(--primary-green); padding: 16px; border-radius: 12px; text-align: center;">
+                        <span style="font-size: 11px; font-weight: 700; color: var(--text-subtitle); text-transform: uppercase;">⏱️ Son 24 Saat İstek</span>
+                        <h2 id="stat24hCount" style="font-size: 28px; font-weight: 900; color: var(--primary-green); margin-top: 4px;">0</h2>
+                    </div>
+                    <div style="background: rgba(33, 150, 243, 0.08); border: 1px solid var(--accent-blue); padding: 16px; border-radius: 12px; text-align: center;">
+                        <span style="font-size: 11px; font-weight: 700; color: var(--text-subtitle); text-transform: uppercase;">♾️ Tüm Zamanlar İstek</span>
+                        <h2 id="statTotalCount" style="font-size: 28px; font-weight: 900; color: var(--accent-blue); margin-top: 4px;">0</h2>
+                    </div>
+                </div>
+
+                <div style="background: var(--card-bg); border: 1px solid var(--card-border); padding: 14px; border-radius: 12px;">
+                    <b style="font-size: 13px; color: var(--text-title);">🤖 Model Dağılımı (Son 24 Saat):</b>
+                    <ul id="usageBreakdownList" style="margin-top: 8px; font-size: 13px; color: var(--text-body); list-style: none; padding: 0; display: flex; flex-direction: column; gap: 6px;">
+                        <li>Henüz canlı istek atılmadı.</li>
+                    </ul>
+                </div>
+
+                <div style="background: #e8f5e9; border: 1px solid #a5d6a7; padding: 10px 14px; border-radius: 8px; margin-top: 14px; font-size: 12px; color: #1b5e20;">
+                    💡 <b>Bilgi:</b> Ücretsiz Google Gemini API günlük 1500 isteğe kadar destek sunar. Sayacınız her 24 saatlik pencerede otomatik olarak dinamik hesaplanır.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js?v=7"></script>
 </body>
+
 
 
 

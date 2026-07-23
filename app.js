@@ -834,6 +834,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnFullscreen.disabled = !sonuc.resimUrl;
                 if (btnExportPdf) btnExportPdf.disabled = false;
 
+                if (typeof fetchGeminiUsageStats === 'function') fetchGeminiUsageStats();
+
+
 
 
 
@@ -1700,7 +1703,63 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
+
+    // 📊 GEMİNI AI 24 SAATLİK İSTEK SAYACI & MODALI
+    const usageModal = document.getElementById('usageModal');
+    const btnOpenUsage = document.getElementById('btnOpenUsage');
+    const btnCloseUsage = document.getElementById('btnCloseUsage');
+    const headerUsageCount = document.getElementById('headerUsageCount');
+
+    async function fetchGeminiUsageStats() {
+        try {
+            const API_BASE = 'http://localhost:3000/api';
+            const res = await fetch(`${API_BASE}/gemini-usage-stats`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.success) {
+                    if (headerUsageCount) headerUsageCount.textContent = `${data.count24h} İstek`;
+                    const el24h = document.getElementById('stat24hCount');
+                    const elTot = document.getElementById('statTotalCount');
+                    if (el24h) el24h.textContent = data.count24h;
+                    if (elTot) elTot.textContent = data.totalAllTime;
+
+                    const breakdownList = document.getElementById('usageBreakdownList');
+                    if (breakdownList) {
+                        const keys = Object.keys(data.modelBreakdown || {});
+                        if (keys.length === 0) {
+                            breakdownList.innerHTML = '<li style="font-style: italic; color: var(--text-subtitle);">Son 24 saat içinde henüz canlı istek atılmadı.</li>';
+                        } else {
+                            breakdownList.innerHTML = keys.map(k => `
+                                <li style="display: flex; justify-content: space-between; padding: 6px 10px; background: rgba(0,0,0,0.03); border-radius: 6px;">
+                                    <span>🤖 <b>${k}</b></span>
+                                    <span style="font-weight: 700; color: var(--primary-green);">${data.modelBreakdown[k]} İstek</span>
+                                </li>
+                            `).join('');
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            console.error("Gemini istek istatistikleri alınamadı:", e);
+        }
+    }
+
+    if (btnOpenUsage) {
+        btnOpenUsage.addEventListener('click', () => {
+            fetchGeminiUsageStats();
+            usageModal.style.display = 'flex';
+        });
+    }
+
+    if (btnCloseUsage) {
+        btnCloseUsage.addEventListener('click', () => usageModal.style.display = 'none');
+    }
+
+    // İlk yüklemede ve pencere açıldığında sayacı güncelle
+    fetchGeminiUsageStats();
+    window.fetchGeminiUsageStats = fetchGeminiUsageStats;
 });
+
 
 
 
