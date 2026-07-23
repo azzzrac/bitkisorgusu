@@ -163,47 +163,117 @@ body {
     cursor: not-allowed;
 }
 
-.btn-primary { background-color: #2e7d32; }
-.btn-primary:hover { background-color: #388e3c; }
+.btn-primary {
+    background-color: #2e7d32;
+}
 
-.btn-success { background-color: #2e7d32; }
-.btn-success:hover { background-color: #43a047; }
+.btn-primary:hover {
+    background-color: #388e3c;
+}
 
-.btn-teal { background-color: #00897b; }
-.btn-teal:hover { background-color: #00a191; }
+.btn-success {
+    background-color: #2e7d32;
+}
 
-.btn-secondary { background-color: #757575; }
-.btn-secondary:hover { background-color: #9e9e9e; }
+.btn-success:hover {
+    background-color: #43a047;
+}
 
-.btn-profile { background-color: #2874a6; }
-.btn-profile:hover { background-color: #3498db; }
+.btn-teal {
+    background-color: #00897b;
+}
 
-.btn-orange { background-color: #f57c00; }
-.btn-orange:hover { background-color: #fb8c00; }
+.btn-teal:hover {
+    background-color: #00a191;
+}
 
-.btn-brown { background-color: #4e342e; }
-.btn-brown:hover { background-color: #6d4c41; }
+.btn-secondary {
+    background-color: #757575;
+}
 
-.btn-purple { background-color: #7b1fa2; }
-.btn-purple:hover { background-color: #9c27b0; }
+.btn-secondary:hover {
+    background-color: #9e9e9e;
+}
 
-.btn-blue { background-color: #0288d1; }
-.btn-blue:hover { background-color: #03a9f4; }
+.btn-profile {
+    background-color: #2874a6;
+}
 
-.btn-danger { background-color: #c62828; }
-.btn-danger:hover { background-color: #e53935; }
+.btn-profile:hover {
+    background-color: #3498db;
+}
 
-.btn-badge { background-color: #d84315; }
-.btn-badge:hover { background-color: #f4511e; }
+.btn-orange {
+    background-color: #f57c00;
+}
 
-.btn-quiz { background-color: #8e24aa; }
-.btn-quiz:hover { background-color: #ab47bc; }
+.btn-orange:hover {
+    background-color: #fb8c00;
+}
 
-.btn-rem { background-color: #00796b; }
-.btn-rem:hover { background-color: #009688; }
+.btn-brown {
+    background-color: #4e342e;
+}
 
-.btn-fav { background-color: #e65100; }
-.btn-fav:hover { background-color: #f57c00; }
+.btn-brown:hover {
+    background-color: #6d4c41;
+}
+
+.btn-purple {
+    background-color: #7b1fa2;
+}
+
+.btn-purple:hover {
+    background-color: #9c27b0;
+}
+
+.btn-blue {
+    background-color: #0288d1;
+}
+
+.btn-blue:hover {
+    background-color: #03a9f4;
+}
+
+.btn-danger {
+    background-color: #c62828;
+}
+
+.btn-danger:hover {
+    background-color: #e53935;
+}
+
+.btn-badge {
+    background-color: #d84315;
+}
+
+.btn-badge:hover {
+    background-color: #f4511e;
+}
+
+.btn-quiz {
+    background-color: #8e24aa;
+}
+
+.btn-quiz:hover {
+    background-color: #ab47bc;
+}
+
+.btn-rem {
+    background-color: #00796b;
+}
+
+.btn-rem:hover {
+    background-color: #009688;
+}
+
+.btn-fav {
+    background-color: #e65100;
+}
+
+.btn-fav:hover {
+    background-color: #f57c00;
+}
 
 .btn-icon {
     background-color: #37474f;
@@ -284,7 +354,7 @@ body {
     background-color: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 10px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     z-index: 100;
     display: none;
     overflow: hidden;
@@ -519,8 +589,15 @@ body {
 }
 
 @keyframes modalPop {
-    from { opacity: 0; transform: scale(0.92); }
-    to { opacity: 1; transform: scale(1); }
+    from {
+        opacity: 0;
+        transform: scale(0.92);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .modal-header {
@@ -694,14 +771,18 @@ body {
 }
 
 /* Home Plants List */
-.watering-list, .favs-list, .badges-list {
+.watering-list,
+.favs-list,
+.badges-list {
     list-style: none;
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.watering-item, .fav-item, .badge-row {
+.watering-item,
+.fav-item,
+.badge-row {
     background-color: rgba(46, 125, 50, 0.05);
     border: 1px solid var(--card-border);
     border-radius: 10px;
@@ -715,7 +796,7 @@ body {
 
 .badge-row.locked {
     opacity: 0.5;
-    background-color: rgba(0,0,0,0.03);
+    background-color: rgba(0, 0, 0, 0.03);
 }
 
 .add-plant-form {
@@ -809,13 +890,13 @@ body {
     justify-content: center;
     gap: 12px;
     cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
     transition: background-color 0.2s, box-shadow 0.2s;
 }
 
 .btn-google:hover {
     background-color: #f8f9fa;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 [data-theme="dark"] .btn-google {
@@ -833,7 +914,8 @@ body {
     font-size: 12px;
 }
 
-.auth-divider::before, .auth-divider::after {
+.auth-divider::before,
+.auth-divider::after {
     content: '';
     flex: 1;
     border-bottom: 1px solid var(--card-border);
@@ -907,9 +989,205 @@ body {
     background-color: #d32f2f;
     color: #fff;
 }
+
 .btn-danger:hover {
     background-color: #b71c1c;
 }
+
+.btn-doctor {
+    background: linear-gradient(135deg, #e53935 0%, #c62828 100%);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(229, 57, 53, 0.25);
+    font-weight: 700;
+}
+
+.btn-doctor:hover {
+    background: linear-gradient(135deg, #c62828 0%, #b71c1c 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(229, 57, 53, 0.35);
+}
+
+/* GALERİ VE ALBÜM STİLLERİ */
+.gallery-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gallery-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.gallery-card img {
+    width: 100%;
+    height: 110px;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+.gallery-card-info {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.gallery-card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-title);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gallery-card-date {
+    font-size: 10px;
+    color: var(--text-subtitle);
+}
+
+.gallery-card-del {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(211, 47, 47, 0.88);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 11px;
+    transition: background 0.2s ease;
+}
+
+.gallery-card-del:hover {
+    background: #b71c1c;
+}
+
+/* 🩺 BİTKİ DOKTORU ADIM ADIM TEDAVİ KARTI YÜKSEK KONTRAST STİLLERİ */
+.treatment-box {
+    background-color: var(--card-bg);
+    border: 1.5px solid var(--primary-green);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 4px 14px rgba(46, 125, 50, 0.08);
+}
+
+.treatment-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--primary-green);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(46, 125, 50, 0.2);
+    padding-bottom: 8px;
+}
+
+.treatment-step-item {
+    background: rgba(46, 125, 50, 0.08);
+    border: 1px solid rgba(46, 125, 50, 0.2);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    transition: all 0.2s ease;
+}
+
+body[data-theme="dark"] .treatment-step-item {
+    background: rgba(46, 125, 50, 0.22);
+    border-color: rgba(129, 199, 132, 0.3);
+}
+
+.treatment-step-item:hover {
+    background: rgba(46, 125, 50, 0.16);
+    border-color: var(--primary-green);
+}
+
+.treatment-step-checkbox {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    accent-color: var(--primary-green);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.treatment-step-text {
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 600;
+    color: var(--text-title);
+    cursor: pointer;
+    flex: 1;
+}
+
+.treatment-step-text.checked {
+    text-decoration: line-through;
+    opacity: 0.55;
+}
+
+
+/* 📄 YAZDIRMA VE PDF KARTI STİLLERİ (@media print) */
+@media print {
+    body {
+        background: #ffffff !important;
+        color: #111111 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .top-potd-banner,
+    .header-card,
+    .input-card,
+    .result-action-bar,
+    .modal-header button,
+    #btnPrintDoctorReport,
+    #btnExportPdf {
+        display: none !important;
+    }
+
+    .card.result-card,
+    .doctor-report-card {
+        box-shadow: none !important;
+        border: 2px solid #2e7d32 !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 20px !important;
+        page-break-inside: avoid;
+    }
+
+    .modal-overlay#doctorModal {
+        position: static !important;
+        background: none !important;
+        display: block !important;
+    }
+
+    .modal-card.doctor-modal-card {
+        max-width: 100% !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+}
+
+
+
 
 .user-email-badge {
     font-size: 12px;
@@ -920,16 +1198,211 @@ body {
 
 /* RESPONSIVE LAYOUT FOR MOBILE PHONES */
 @media (max-width: 650px) {
-    body { padding: 8px; }
-    .header-card { flex-direction: column; align-items: flex-start; gap: 10px; }
-    .header-actions { width: 100%; justify-content: flex-end; }
-    .result-layout { flex-direction: column; }
-    .image-box-wrapper, .image-box { width: 100%; height: 240px; }
-    .button-row { width: 100%; justify-content: stretch; }
-    .button-row .btn { flex: 1; }
-    .result-action-bar { flex-direction: column; align-items: stretch; }
-    .action-left { flex-direction: column; }
-    .action-left .btn { width: 100%; }
-    .profile-tools-grid, .stats-grid, .quiz-options-grid { grid-template-columns: 1fr; }
-    .add-plant-form { flex-direction: column; }
+    body {
+        padding: 8px;
+    }
+
+    .header-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .result-layout {
+        flex-direction: column;
+    }
+
+    .image-box-wrapper,
+    .image-box {
+        width: 100%;
+        height: 240px;
+    }
+
+    .button-row {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .button-row .btn {
+        flex: 1;
+    }
+
+    .result-action-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .action-left {
+        flex-direction: column;
+    }
+
+    .action-left .btn {
+        width: 100%;
+    }
+
+    .profile-tools-grid,
+    .stats-grid,
+    .quiz-options-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .add-plant-form {
+        flex-direction: column;
+    }
 }
+
+/* BOTANİK YÜKLEME & GEÇİŞ ANİMASYONLARI */
+@keyframes spinLeaf {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+
+    50% {
+        transform: rotate(180deg) scale(1.18);
+    }
+
+    100% {
+        transform: rotate(360deg) scale(1);
+    }
+}
+
+@keyframes pulseGlow {
+    0% {
+        opacity: 0.6;
+        transform: scale(0.98);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.03);
+    }
+
+    100% {
+        opacity: 0.6;
+        transform: scale(0.98);
+    }
+}
+
+@keyframes slideDownFade {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+}
+
+@keyframes slideUpFade {
+    0% {
+        opacity: 0;
+        transform: translateY(35px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.botanical-loader {
+    display: flex;
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: center;
+    padding: 45px 24px;
+    text-align: center;
+    gap: 50px !important;
+}
+
+.botanical-spinner {
+    font-size: 38px;
+    display: inline-block;
+    animation: spinLeaf 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    filter: drop-shadow(0 4px 12px rgba(46, 125, 50, 0.3));
+    margin: 0 !important;
+    margin-right: 15px !important;
+}
+
+.botanical-loader-text {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary-green);
+    animation: pulseGlow 1.8s ease-in-out infinite;
+    letter-spacing: 0.3px;
+    margin: 0 !important;
+}
+
+
+
+.animate-slide-down {
+    animation: slideDownFade 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-slide-up {
+    animation: slideUpFade 0.45s cubic-bezier(0.0, 0, 0.2, 1) forwards;
+}
+
+/* KOMPLE KART YUTULMA VE AŞAMALI DALGA (STAGGERED CASCADE) ANİMASYONLARI */
+@keyframes fullCardFadeDown {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(35px) scale(0.95);
+    }
+}
+
+@keyframes cascadeSlideUp {
+    0% {
+        opacity: 0;
+        transform: translateY(35px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-full-fade-down {
+    animation: fullCardFadeDown 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-cascade-1 {
+    animation: cascadeSlideUp 0.45s cubic-bezier(0.0, 0, 0.2, 1) forwards;
+}
+
+.animate-cascade-2 {
+    animation: cascadeSlideUp 0.45s cubic-bezier(0.0, 0, 0.2, 1) 0.15s forwards;
+    opacity: 0;
+}
+
+.animate-cascade-3 {
+    animation: cascadeSlideUp 0.45s cubic-bezier(0.0, 0, 0.2, 1) 0.30s forwards;
+    opacity: 0;
+}
+
+/* HAM AI VERİ DİYALOG MODALI */
+#aiRawModal {
+    z-index: 10000 !important;
+}
+
+#aiRawContent {
+    background-color: #0f1710 !important;
+    color: #81c784 !important;
+    border: 1px solid #2e7d32 !important;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
+    font-family: 'Courier New', Consolas, monospace !important;
+    font-size: 13px !important;
+}

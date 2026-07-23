@@ -4,10 +4,14 @@
 # Log dosyaları
 *.log
 
-# Veritabanı ve Yerel Veri Dosyaları (GÜVENLİK)
+# Veritabanı, Gizli API Key ve Yerel Veri Dosyaları (GÜVENLİK)
+.env
+*.env
 *.db
 *.sqlite
 node_modules/
+kullanici_verileri.json
+
 
 # İsteğe bağlı derlenmiş paketler
 *.jar

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,9 +10,14 @@
     <title>🌱 Bitki Keşif Portalı | Mobil & Web</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=2">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css?v=7">
+
+
+
 </head>
+
 <body>
     <div class="app-container">
         <!-- Günün Bitkisi Banner -->
@@ -30,9 +36,11 @@
                 <p class="brand-subtitle">Bitkileri isimleriyle arayın, özelliklerini ve görsellerini inceleyin.</p>
             </div>
             <div class="header-actions">
+                <button class="btn btn-doctor" id="btnOpenDoctor">🩺 Bitki Doktoru (AI Teşhis)</button>
                 <button class="btn btn-profile" id="btnProfile">👤 Giriş Yap / Kayıt Ol</button>
                 <button class="btn btn-icon" id="btnThemeToggle" title="Temayı Değiştir">🌙</button>
             </div>
+
         </header>
 
         <!-- Arama Alanı -->
@@ -40,7 +48,8 @@
             <div class="input-group">
                 <label for="searchInput" class="input-label">Bitki Adı:</label>
                 <div class="search-box-wrapper">
-                    <input type="text" id="searchInput" placeholder="Örn: Gül, Papatya, Orkide, Lavanta..." autocomplete="off">
+                    <input type="text" id="searchInput" placeholder="Örn: Gül, Papatya, Orkide, Lavanta..."
+                        autocomplete="off">
                     <div id="autocompleteList" class="autocomplete-popup"></div>
                 </div>
                 <select id="historySelect" class="select-history">
@@ -49,6 +58,10 @@
             </div>
             <div class="button-row">
                 <button class="btn btn-success" id="btnSearch">🔍 Sorgula</button>
+                <button class="btn btn-purple" id="btnUploadPhoto"
+                    style="background: linear-gradient(135deg, #8e24aa, #ab47bc); color: white;">📷 Fotoğrafla
+                    Tanı</button>
+                <input type="file" id="btnUploadImageInput" accept="image/*" style="display: none;">
                 <button class="btn btn-teal" id="btnRandom">🎲 Rastgele</button>
                 <button class="btn btn-secondary" id="btnClear">🧹 Temizle</button>
             </div>
@@ -89,7 +102,8 @@
                             <span class="care-item" id="careRebloom">🔄 Yeniden Açma: -</span>
                         </div>
                         <div class="trivia-card" id="triviaCard">
-                            <span id="triviaText">💡 Biliyor muydunuz? Bitkiler dünyadaki oksijenin %99'unu üretir!</span>
+                            <span id="triviaText">💡 Biliyor muydunuz? Bitkiler dünyadaki oksijenin %99'unu
+                                üretir!</span>
                         </div>
                     </div>
                 </div>
@@ -102,11 +116,16 @@
                     <button class="btn btn-brown" id="btnSaveImg" disabled>💾 Resmi Kaydet</button>
                     <button class="btn btn-purple" id="btnWiki" disabled>🌐 Vikipedi'de Oku</button>
                     <button class="btn btn-blue" id="btnFullscreen" disabled>🖼️ Görseli Büyüt</button>
+                    <button class="btn btn-success" id="btnExportPdf" disabled>📄 Bakım Kartı (PDF)</button>
                 </div>
                 <div class="status-bar" id="statusBar">Hazır</div>
             </div>
+
         </section>
     </div>
+
+
+
 
     <!-- MODALLAR -->
 
@@ -127,20 +146,6 @@
                     </div>
 
                     <!-- Google Hızlı Giriş Butonu -->
-                    <button class="btn btn-google" id="btnGoogleLogin">
-                        <svg class="google-svg" viewBox="0 0 24 24" width="20" height="20">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                        </svg>
-                        <span>Google Hesabı İle Giriş Yap</span>
-                    </button>
-
-                    <div class="auth-divider">
-                        <span>veya E-posta İle</span>
-                    </div>
-
                     <!-- Giriş / Kayıt Tab Seçimi -->
                     <div class="auth-tabs">
                         <button class="auth-tab active" id="tabLogin">🔑 Giriş Yap</button>
@@ -176,13 +181,18 @@
                         <button class="btn btn-sm btn-outline" id="btnEditName">✏️ İsmi Düzenle</button>
                     </div>
 
-                    <!-- 4 Ana Araç -->
+                    <!-- 5 Ana Araç -->
                     <div class="profile-tools-grid">
-                        <button class="btn btn-badge" id="btnOpenBadges">🏆 Keşifler & Rozetler (<span id="countBadges">0</span>)</button>
+                        <button class="btn btn-badge" id="btnOpenBadges">🏆 Keşifler & Rozetler (<span
+                                id="countBadges">0</span>)</button>
                         <button class="btn btn-quiz" id="btnOpenQuiz">🎮 Bitki Quizi Oyna</button>
                         <button class="btn btn-rem" id="btnOpenWatering">⏰ Sulama Takvimim</button>
-                        <button class="btn btn-fav" id="btnOpenFavs">⭐ Favori Bitkilerim (<span id="countFavs">0</span>)</button>
+                        <button class="btn btn-fav" id="btnOpenFavs">⭐ Favori Bitkilerim (<span
+                                id="countFavs">0</span>)</button>
+                        <button class="btn btn-purple" id="btnOpenGallery">📸 Bitki Albümüm (<span
+                                id="countAlbum">0</span>)</button>
                     </div>
+
 
                     <!-- İstatistikler -->
                     <div class="stats-grid">
@@ -205,7 +215,8 @@
                     </div>
 
                     <!-- Oturumu Kapat Butonu -->
-                    <button class="btn btn-danger btn-block" id="btnLogoutUser" style="margin-top: 16px;">🚪 Oturumu Kapat / Çıkış Yap</button>
+                    <button class="btn btn-danger btn-block" id="btnLogoutUser" style="margin-top: 16px;">🚪 Oturumu
+                        Kapat / Çıkış Yap</button>
                 </div>
             </div>
         </div>
@@ -297,6 +308,109 @@
         </div>
     </div>
 
-    <script src="app.js?v=2"></script>
+    <!-- 🩺 Bitki Doktoru & Hastalık Teşhisi Modalı -->
+    <div class="modal-overlay" id="doctorModal">
+        <div class="modal-card doctor-modal-card" style="max-width: 680px; width: 92%;">
+            <div class="modal-header doctor-header">
+                <h3>🩺 Bitki Doktoru & Yapay Zeka Hastalık Teşhisi</h3>
+                <button class="modal-close" id="btnCloseDoctor">&times;</button>
+            </div>
+            <div class="modal-body doctor-body">
+                <p class="modal-subtitle">Sararmış, lekelenmiş veya hastalıklı bitki yaprağının fotoğrafını yükleyin; Gemini AI Doktoru teşhis etsin ve tedavi reçetesi hazırlasın.</p>
+                
+                <!-- Fotoğraf Yükleme Alanı -->
+                <div class="doctor-upload-box" id="doctorUploadBox" style="border: 2px dashed var(--primary-green); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; background: rgba(46, 125, 50, 0.03); transition: all 0.2s ease;">
+                    <input type="file" id="doctorFileInput" accept="image/*" style="display: none;">
+                    <div class="doctor-upload-content" id="doctorUploadContent">
+                        <div class="doctor-icon" style="font-size: 36px; margin-bottom: 6px;">📸</div>
+                        <b>Hastalıklı Yaprak Fotoğrafı Yüklemek İçin Tıklayın</b>
+                        <p style="font-size: 12px; color: var(--text-subtitle); margin-top: 4px;">PNG, JPG, WEBP formatları desteklenmektedir.</p>
+                    </div>
+                    <img id="doctorPreviewImage" src="" alt="Yüklenen Yaprak Fotoğrafı" style="display: none; max-height: 200px; border-radius: 10px; object-fit: contain; margin: 0 auto;">
+                </div>
+
+                <!-- Belirti Notları Input -->
+                <div class="form-group" style="margin-top: 10px;">
+                    <label style="font-weight: 700; font-size: 13px;">📝 Belirti veya Şikayet Notunuz (Opsiyonel):</label>
+                    <input type="text" id="doctorNotesInput" placeholder="Örn: Yaprak uçları sararıyor, alt yapraklar dökülüyor..." style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--card-border); font-size: 13px;">
+                </div>
+
+                <!-- Teşhis Et Butonu -->
+                <button class="btn btn-doctor btn-block" id="btnDiagnose" style="padding: 12px; font-size: 14px; font-weight: 700; margin-top: 10px;">🩺 AI Doktor ile Teşhis Et & Reçete Oluştur</button>
+
+                <!-- Yükleme Göstergesi -->
+                <div class="botanical-loader" id="doctorLoader" style="display: none; padding: 24px 10px; gap: 16px; flex-direction: row; align-items: center; justify-content: center;">
+                    <span class="botanical-spinner">🔬</span>
+                    <span class="botanical-loader-text">🩺 Doktor Gemini AI yaprak dokusunu mikroskopla inceliyor...</span>
+                </div>
+
+                <!-- Teşhis ve Reçete Rapor Kartı -->
+                <div class="doctor-report-card" id="doctorReportCard" style="display: none; margin-top: 14px; background: rgba(46, 125, 50, 0.05); border: 1px solid var(--primary-green); border-radius: 14px; padding: 18px;">
+                    <div class="doctor-report-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(46, 125, 50, 0.2); padding-bottom: 10px; margin-bottom: 12px;">
+                        <div>
+                            <span class="doctor-badge" id="reportSeverity" style="background: #e53935; color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;">Orta (Dikkat)</span>
+                            <h4 id="reportDiseaseName" style="font-size: 16px; font-weight: 800; color: var(--text-title); margin-top: 6px;">Teşhis Adı</h4>
+                        </div>
+                        <span id="reportPlantType" style="font-size: 12px; font-style: italic; color: var(--text-subtitle);">Tür: Ev Bitkisi</span>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
+                        <div>
+                            <b>🔍 Tespit Edilen Belirtiler:</b>
+                            <ul id="reportSymptomsList" style="margin-left: 18px; margin-top: 4px; color: var(--text-body);"></ul>
+                        </div>
+                        <div>
+                            <b>💡 Muhtemel Kök Neden:</b>
+                            <p id="reportCauses" style="color: var(--text-body); margin-top: 2px; line-height: 1.4;"></p>
+                        </div>
+                        <div class="treatment-box">
+                            <b class="treatment-title">📋 Adım Adım Tedavi Reçetesi:</b>
+                            <ul id="reportTreatmentList" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;"></ul>
+                        </div>
+
+                        <div style="background: #fff8e1; border: 1px solid #ffe082; padding: 10px 14px; border-radius: 8px; font-size: 12px; color: #5d4037;">
+                            <b>🛡️ Gelecek İçin Koruyucu Tavsiye:</b> <span id="reportPrevention"></span>
+                        </div>
+                        <button class="btn btn-success btn-block" id="btnPrintDoctorReport" style="margin-top: 10px; font-weight: 700; padding: 12px;">📄 Reçeteyi İndir / Yazdır (PDF)</button>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 📸 Fotoğraf Albümüm & Keşif Galerisi Modalı -->
+    <div class="modal-overlay" id="galleryModal">
+        <div class="modal-card" style="max-width: 720px; width: 92%;">
+            <div class="modal-header">
+                <h3>📸 Kişisel Bitki & Teşhis Albümüm</h3>
+                <button class="modal-close" id="btnCloseGallery">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-subtitle">Yüklediğiniz bitki ve teşhis fotoğraflarını saklayabilir, yeni anılar ekleyebilirsiniz.</p>
+
+                <!-- Manuel Fotoğraf Ekleme Alanı -->
+                <div class="note-input-row" style="background: rgba(46, 125, 50, 0.05); padding: 12px; border-radius: 10px; border: 1px solid var(--card-border); display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <input type="file" id="albumFileInput" accept="image/*" style="display: none;">
+                    <button class="btn btn-sm btn-outline" id="btnSelectAlbumFile">🖼️ Fotoğraf Seç</button>
+                    <input type="text" id="albumCaptionInput" placeholder="Bitki adı veya not yazın (Örn: Balkon Lavantam)" style="flex: 1; min-width: 160px;">
+                    <button class="btn btn-sm btn-success" id="btnAddAlbumPhoto">➕ Albüme Ekle</button>
+                </div>
+
+                <!-- Fotoğraf Galerisi Grid -->
+                <div class="gallery-grid" id="galleryGridContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 12px; margin-top: 14px; max-height: 400px; overflow-y: auto;">
+                    <!-- Fotoğraf Kartları JS ile Eklenecek -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js?v=6"></script>
 </body>
+
+
+
+
+
 </html>

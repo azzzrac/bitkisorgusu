@@ -1,5 +1,13 @@
-FROM python:3.11-alpine
+FROM node:20-alpine
 WORKDIR /app
-COPY . /app/
-EXPOSE 8080
-CMD ["python", "-m", "http.server", "8080"]
+
+# Bağımlılıkları yükle
+COPY package*.json ./
+RUN npm install --production
+
+# Tüm proje dosyalarını kopyala
+COPY . .
+
+# Port ve Çalıştırma Komutu
+EXPOSE 3000
+CMD ["node", "server.js"]

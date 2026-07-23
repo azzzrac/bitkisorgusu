@@ -1,22 +1,13 @@
 version: '3.8'
 
 services:
-  # Güvenli Backend Servisi (BCrypt + SQLite API)
-  api:
+  bitkisorgu_app:
     build:
       context: .
-      dockerfile: Dockerfile.api
+      dockerfile: dockerfile
+    container_name: bitkisorgusu_container
     ports:
       - "3000:3000"
-    restart: always
-
-  # Web Ön Yüz Servisi
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    depends_on:
-      - api
+    env_file:
+      - .env
     restart: always
