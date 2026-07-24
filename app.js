@@ -2291,17 +2291,42 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
     const directionBtns = document.querySelectorAll('.btn-direction');
     let selectedDirection = 'south';
 
+    function resetLightCalcForm() {
+        selectedDirection = 'south';
+        directionBtns.forEach(b => {
+            b.classList.remove('active');
+            b.style.background = 'rgba(46, 125, 50, 0.08)';
+            b.style.border = '1px solid var(--card-border)';
+        });
+        const defaultSouthBtn = document.querySelector('.btn-direction[data-dir="south"]');
+        if (defaultSouthBtn) {
+            defaultSouthBtn.classList.add('active');
+            defaultSouthBtn.style.background = 'rgba(245, 124, 0, 0.15)';
+            defaultSouthBtn.style.border = '2px solid var(--accent-orange)';
+        }
+
+        const distanceSelect = document.getElementById('selectLightDistance');
+        if (distanceSelect) distanceSelect.value = 'window_near';
+
+        if (lightCalcResults) lightCalcResults.style.display = 'none';
+        const recommendedPlantsGrid = document.getElementById('recommendedPlantsGrid');
+        if (recommendedPlantsGrid) recommendedPlantsGrid.innerHTML = '';
+    }
+
     if (btnOpenLightCalc) {
         btnOpenLightCalc.addEventListener('click', () => {
+            resetLightCalcForm();
             if (lightCalcModal) lightCalcModal.style.display = 'flex';
         });
     }
 
     if (btnCloseLightCalc) {
         btnCloseLightCalc.addEventListener('click', () => {
+            resetLightCalcForm();
             if (lightCalcModal) lightCalcModal.style.display = 'none';
         });
     }
+
 
     directionBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -2383,6 +2408,7 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
     }
 
     window.sorgulaVeModalKapat = function(bitkiAdi) {
+        resetLightCalcForm();
         if (lightCalcModal) lightCalcModal.style.display = 'none';
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
@@ -2390,6 +2416,7 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
             if (typeof sorgula === 'function') sorgula();
         }
     };
+
 
     window.toggleTreatmentStep = function (idx) {
         const chk = document.getElementById(`trStep_${idx}`);
