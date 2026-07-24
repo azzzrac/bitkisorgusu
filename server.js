@@ -14,6 +14,19 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// 🔥 FIREBASE VERTEX AI (AI LOGIC) VE GOOGLE GEMINI BAĞLANTISI (API KEY GEREKTİRMEYEN KİMLİK DOĞRULAMA)
+const { VertexAI } = require('@google-cloud/vertexai');
+let firebaseVertexAI = null;
+
+try {
+    const projectId = process.env.FIREBASE_PROJECT_ID || process.env.GCP_PROJECT_ID || 'bitkisorgusu';
+    firebaseVertexAI = new VertexAI({ project: projectId, location: 'us-central1' });
+    console.log("🔥 Firebase Vertex AI (AI Logic) altyapısı başarıyla bağlandı.");
+} catch (fErr) {
+    console.log("Firebase Vertex AI başlatma bilgisi:", fErr.message);
+}
+
+
 
 // Güvenli Veritabanı Bağlantısı (SQLite)
 const db = new sqlite3.Database('./kullanicilar.db', (err) => {
