@@ -42,10 +42,12 @@
                 <p class="brand-subtitle">Bitkileri isimleriyle arayın, özelliklerini ve görsellerini inceleyin.</p>
             </div>
             <div class="header-actions">
+                <button class="btn btn-orange" id="btnOpenLightCalc" style="background: var(--accent-orange);">☀️ Işık & Konum Hesaplayıcı</button>
                 <button class="btn btn-doctor" id="btnOpenDoctor">🩺 Bitki Doktoru (AI Teşhis)</button>
                 <button class="btn btn-profile" id="btnProfile">👤 Giriş Yap / Kayıt Ol</button>
                 <button class="btn btn-icon" id="btnThemeToggle" title="Temayı Değiştir">🌙</button>
             </div>
+
 
 
         </header>
@@ -428,12 +430,81 @@
         </div>
     </div>
 
+    <!-- ☀️ Evinize Göre Işık ve Konum Hesaplama Motoru Modalı -->
+    <div class="modal-overlay" id="lightCalcModal">
+        <div class="modal-card" style="max-width: 680px; width: 94%;">
+            <div class="modal-header">
+                <h3>☀️ Evinize Göre Işık & Konum Hesaplayıcı</h3>
+                <button class="modal-close" id="btnCloseLightCalc">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-subtitle">Pencerenizin baktığı yönü ve mesafeyi seçin; evinizin ortamına en uygun %100 ideal bitkileri hesaplayalım.</p>
+
+                <!-- Step 1: Direction Selection -->
+                <div style="margin-top: 14px;">
+                    <label style="font-weight: 700; font-size: 14px; color: var(--text-title); display: block; margin-bottom: 8px;">1. Pencerenizin Baktığı Yönü Seçin: 🧭</label>
+                    <div class="direction-selector-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px;">
+                        <button class="btn btn-direction active" data-dir="south" style="background: rgba(245, 124, 0, 0.15); border: 2px solid var(--accent-orange); color: var(--text-title); flex-direction: column; padding: 12px 8px; text-align: center;">
+                            <span style="font-size: 22px;">☀️</span>
+                            <b>Güney (South)</b>
+                            <small style="font-size: 11px; opacity: 0.8;">Yoğun Öğle Güneşi</small>
+                        </button>
+                        <button class="btn btn-direction" data-dir="east" style="background: rgba(46, 125, 50, 0.08); border: 1px solid var(--card-border); color: var(--text-title); flex-direction: column; padding: 12px 8px; text-align: center;">
+                            <span style="font-size: 22px;">🌅</span>
+                            <b>Doğu (East)</b>
+                            <small style="font-size: 11px; opacity: 0.8;">Yumuşak Sabah Güneşi</small>
+                        </button>
+                        <button class="btn btn-direction" data-dir="west" style="background: rgba(46, 125, 50, 0.08); border: 1px solid var(--card-border); color: var(--text-title); flex-direction: column; padding: 12px 8px; text-align: center;">
+                            <span style="font-size: 22px;">🌇</span>
+                            <b>Batı (West)</b>
+                            <small style="font-size: 11px; opacity: 0.8;">Sıcak Akşamüstü Işığı</small>
+                        </button>
+                        <button class="btn btn-direction" data-dir="north" style="background: rgba(46, 125, 50, 0.08); border: 1px solid var(--card-border); color: var(--text-title); flex-direction: column; padding: 12px 8px; text-align: center;">
+                            <span style="font-size: 22px;">🏔️</span>
+                            <b>Kuzey (North)</b>
+                            <small style="font-size: 11px; opacity: 0.8;">Yumuşak / Gölge Işık</small>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Distance Selection -->
+                <div style="margin-top: 16px;">
+                    <label style="font-weight: 700; font-size: 14px; color: var(--text-title); display: block; margin-bottom: 8px;">2. Bitkinin Pencereye Olan Mesafesi: 🪟</label>
+                    <select id="selectLightDistance" style="width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid var(--card-border); background: var(--card-bg); color: var(--text-body); font-weight: 600; font-size: 14px;">
+                        <option value="window_front">Tam Pencere Önü (0 - 0.5 Metre) - Doğrudan Güneş / Parlak Işık</option>
+                        <option value="window_near" selected>Pencereye Yakın Masa/Sehpa (1 - 2 Metre) - Filtrelenmiş / Tül Arkası Işık</option>
+                        <option value="room_depth">Oda Derinliği / Köşe (3+ Metre) - Düşük / Az Işık</option>
+                    </select>
+                </div>
+
+                <!-- Calculate Button -->
+                <button class="btn btn-orange btn-block" id="btnCalculateLight" style="margin-top: 18px; padding: 14px; font-size: 15px; font-weight: 800; background: var(--accent-orange); color: white; width: 100%; border-radius: 12px; cursor: pointer;">
+                    ☀️ İdeal Bitkilerimi Hesapla & Göster 🚀
+                </button>
+
+                <!-- Calculation Result Container -->
+                <div id="lightCalcResults" style="margin-top: 20px; display: none;">
+                    <div id="lightSummaryHeader" style="background: rgba(245, 124, 0, 0.1); border: 1px solid var(--accent-orange); padding: 12px 16px; border-radius: 12px; margin-bottom: 14px;">
+                        <b style="color: var(--accent-orange); font-size: 14px;" id="lightSummaryTitle">Ortam İklim Özeti</b>
+                        <p style="font-size: 13px; color: var(--text-body); margin-top: 4px;" id="lightSummaryDesc">Hesaplanan ortam özellikleri yükleniyor...</p>
+                    </div>
+
+                    <h4 style="font-size: 15px; font-weight: 800; color: var(--text-title); margin-bottom: 10px;">✨ Evinizin Bu Konumuna %100 Uyumlu Bitkiler:</h4>
+                    <div id="recommendedPlantsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+                        <!-- JS ile Dinamik Öneri Kartları Eklenecek -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDK (Compat Version) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="firebase-config.js?v=9"></script>
-    <script src="app.js?v=9"></script>
+    <script src="firebase-config.js?v=10"></script>
+    <script src="app.js?v=10"></script>
 </body>
+
 
 
 

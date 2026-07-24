@@ -2282,6 +2282,115 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
         });
     }
 
+    // ☀️ EVİNİZE GÖRE IŞIK & KONUM HESAPLAMA MOTORU HESAPLAMA MANTIĞI
+    const lightCalcModal = document.getElementById('lightCalcModal');
+    const btnOpenLightCalc = document.getElementById('btnOpenLightCalc');
+    const btnCloseLightCalc = document.getElementById('btnCloseLightCalc');
+    const btnCalculateLight = document.getElementById('btnCalculateLight');
+    const lightCalcResults = document.getElementById('lightCalcResults');
+    const directionBtns = document.querySelectorAll('.btn-direction');
+    let selectedDirection = 'south';
+
+    if (btnOpenLightCalc) {
+        btnOpenLightCalc.addEventListener('click', () => {
+            if (lightCalcModal) lightCalcModal.style.display = 'flex';
+        });
+    }
+
+    if (btnCloseLightCalc) {
+        btnCloseLightCalc.addEventListener('click', () => {
+            if (lightCalcModal) lightCalcModal.style.display = 'none';
+        });
+    }
+
+    directionBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            directionBtns.forEach(b => {
+                b.classList.remove('active');
+                b.style.background = 'rgba(46, 125, 50, 0.08)';
+                b.style.border = '1px solid var(--card-border)';
+            });
+            btn.classList.add('active');
+            btn.style.background = 'rgba(245, 124, 0, 0.15)';
+            btn.style.border = '2px solid var(--accent-orange)';
+            selectedDirection = btn.getAttribute('data-dir');
+        });
+    });
+
+    const plantDatabaseForLight = {
+        south_window_front: [
+            { name: "Kaktüs", desc: "Doğrudan yakıcı güneşe %100 dayanıklı.", icon: "🌵", match: "%98 İdeal", water: "15 günde 1" },
+            { name: "Sukulent", desc: "Bol ışıkta yaprakları canlı renkler alır.", icon: "🪴", match: "%96 İdeal", water: "10 günde 1" },
+            { name: "Aloe Vera", desc: "Güney penceresinde etli yaprakları hızla büyür.", icon: "🌿", match: "%95 İdeal", water: "12 günde 1" },
+            { name: "Begonvil", desc: "Öğle güneşinde bol çiçek açar.", icon: "🌺", match: "%92 İdeal", water: "4 günde 1" },
+            { name: "Zeytin", desc: "Güneş banyosunu en çok seven Akdeniz türü.", icon: "🫒", match: "%90 İdeal", water: "7 günde 1" }
+        ],
+        south_window_near: [
+            { name: "Monstera (Deve Tabanı)", desc: "Tül arkası dolaylı ışıkta delikli yaprakları büyür.", icon: "🌿", match: "%97 İdeal", water: "5 günde 1" },
+            { name: "Ficus Elastica (Kauçuk)", desc: "Parlak dolaylı ışıkta parlak koyu yapraklar üretir.", icon: "🪴", match: "%95 İdeal", water: "6 günde 1" },
+            { name: "Paşa Kılıcı (Sansevieria)", desc: "Hemen her ışığa uyumlu, parlak ortamda hızlı büyür.", icon: "🗡️", match: "%94 İdeal", water: "14 günde 1" },
+            { name: "Strelitzia (Cennet Kuşu)", desc: "Aydınlık tül arkasında dev yapraklar açar.", icon: "🦚", match: "%92 İdeal", water: "5 günde 1" }
+        ],
+        east_window_near: [
+            { name: "Orkide", desc: "Yumuşak sabah güneşini ve yüksek nemi çok sever.", icon: "🌸", match: "%99 İdeal", water: "7 günde 1" },
+            { name: "Barış Çiçeği (Spatifilyum)", desc: "Sabah ışığında beyaz yelken çiçekleri açar.", icon: "🕊️", match: "%96 İdeal", water: "4 günde 1" },
+            { name: "Pothos (Sarmaşık)", desc: "Aydınlık sabah ışığında yaprakları sarı desenlenir.", icon: "🍃", match: "%95 İdeal", water: "5 günde 1" },
+            { name: "Zamioculcas (ZZ Bitkisi)", desc: "Doğu penceresinde parlak parlak sürgünler verir.", icon: "🌱", match: "%94 İdeal", water: "12 günde 1" }
+        ],
+        north_room_depth: [
+            { name: "Zamioculcas (ZZ)", desc: "Karanlık ve düşük ışık köşelerine %100 dayanıklı.", icon: "🌱", match: "%99 İdeal", water: "18 günde 1" },
+            { name: "Paşa Kılıcı", desc: "Hiç ışık almayan köşelerde bile yaşamını sürdürür.", icon: "🗡️", match: "%97 İdeal", water: "20 günde 1" },
+            { name: "Kurdele Çiçeği", desc: "Düşük ışıkta bile havayı temizlemeye devam eder.", icon: "🎗️", match: "%92 İdeal", water: "6 günde 1" },
+            { name: "Eğrelti Otu (Aşk Merdiveni)", desc: "Gölge ve nemli ortamların kraliçesi.", icon: "🌿", match: "%90 İdeal", water: "3 günde 1" }
+        ]
+    };
+
+    if (btnCalculateLight) {
+        btnCalculateLight.addEventListener('click', () => {
+            const distanceSelect = document.getElementById('selectLightDistance');
+            const dist = distanceSelect ? distanceSelect.value : 'window_near';
+            const key = `${selectedDirection}_${dist}`;
+
+            const lightSummaryTitle = document.getElementById('lightSummaryTitle');
+            const lightSummaryDesc = document.getElementById('lightSummaryDesc');
+            const recommendedPlantsGrid = document.getElementById('recommendedPlantsGrid');
+
+            let dirText = selectedDirection === 'south' ? 'Güney (Yoğun Güneş)' : selectedDirection === 'east' ? 'Doğu (Sabah Işığı)' : selectedDirection === 'west' ? 'Batı (Sıcak İklim)' : 'Kuzey (Yumuşak Gölge)';
+            let distText = dist === 'window_front' ? 'Tam Pencere Önü (Doğrudan Işık)' : dist === 'window_near' ? '1-2 Metre Mesafe (Filtrelenmiş Tül Arkası)' : 'Oda Derinliği / Köşe (Low Light / Düşük Işık)';
+
+            if (lightSummaryTitle) lightSummaryTitle.textContent = `🧭 ${dirText} | 🪟 ${distText}`;
+            if (lightSummaryDesc) lightSummaryDesc.textContent = `Bu konum günlük ortalama ışık seviyesi ve nem oranına göre değerlendirilmiştir. Aşırı doğrudan güneş alan yaprakları tül ile korumanız önerilir.`;
+
+            const plantsList = plantDatabaseForLight[key] || plantDatabaseForLight['east_window_near'];
+
+            if (recommendedPlantsGrid) {
+                recommendedPlantsGrid.innerHTML = plantsList.map(p => `
+                    <div style="background: var(--card-bg); border: 1px solid var(--card-border); padding: 14px; border-radius: 12px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.04);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 28px;">${p.icon}</span>
+                            <span style="background: rgba(46, 125, 50, 0.12); color: var(--primary-green); font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 12px;">${p.match}</span>
+                        </div>
+                        <h4 style="font-size: 15px; font-weight: 800; color: var(--text-title); margin-top: 4px;">${p.name}</h4>
+                        <p style="font-size: 12px; color: var(--text-body); line-height: 1.3;">${p.desc}</p>
+                        <div style="font-size: 11px; font-weight: 700; color: var(--accent-orange); margin-top: 4px;">💧 Sulama: ${p.water}</div>
+                        <button class="btn btn-sm btn-outline" onclick="sorgulaVeModalKapat('${p.name}')" style="margin-top: 8px; width: 100%; justify-content: center; font-size: 12px;">🔍 Detayını Keşfet</button>
+                    </div>
+                `).join('');
+            }
+
+            if (lightCalcResults) lightCalcResults.style.display = 'block';
+        });
+    }
+
+    window.sorgulaVeModalKapat = function(bitkiAdi) {
+        if (lightCalcModal) lightCalcModal.style.display = 'none';
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.value = bitkiAdi;
+            if (typeof sorgula === 'function') sorgula();
+        }
+    };
+
     window.toggleTreatmentStep = function (idx) {
         const chk = document.getElementById(`trStep_${idx}`);
         const txt = document.getElementById(`trStepText_${idx}`);
@@ -2293,6 +2402,7 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
             }
         }
     };
+
 
 });
 
