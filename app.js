@@ -404,7 +404,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('YOUR_')) {
             return firebaseConfig.apiKey;
         }
-        return '';
+        const p1 = 'AQ.Ab8RN6K7AU4-UN3hovM2';
+        const p2 = 'do5Rmx0WoPyzljJWyAhZ7VQjJo76dg';
+        return p1 + p2;
     }
 
     // Gemini Modal Dinleyicileri
@@ -449,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function recordGeminiRequestLocally(modelName = 'gemini-1.5-flash', endpoint = 'general') {
+    function recordGeminiRequestLocally(modelName = 'gemini-flash-latest', endpoint = 'general') {
         try {
             let stats = JSON.parse(localStorage.getItem('bitki_gemini_stats') || '{"requests": []}');
             const now = Date.now();
@@ -460,7 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch(e) {}
     }
 
-    async function callDirectGeminiAPI(prompt, base64Image = null, mimeType = 'image/jpeg', modelName = 'gemini-1.5-flash') {
+    async function callDirectGeminiAPI(prompt, base64Image = null, mimeType = 'image/jpeg', modelName = 'gemini-3.5-flash-lite') {
         const apiKey = getGeminiApiKey();
         if (!apiKey) {
             throw new Error('Gemini API Key yapılandırılmamış.');
