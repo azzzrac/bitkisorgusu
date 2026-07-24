@@ -1420,6 +1420,41 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
                     triviaText.textContent = getPlantTrivia(baslik);
                 }
 
+                // Evcil Hayvan Güvenlik Kartını Güncelle (Kedi/Köpek Zehirlilik Kontrolü)
+                const petSafetyCard = document.getElementById('petSafetyCard');
+                const petSafetyText = document.getElementById('petSafetyText');
+                const petSafetyIcon = document.getElementById('petSafetyIcon');
+
+                const toxicPlantsList = ["Monstera", "Deve Tabanı", "Paşa Kılıcı", "Sansevieria", "Aloe Vera", "Ficus", "Kauçuk", "Zamioculcas", "ZZ", "Açelya", "Lale", "Zambak", "Begonvil", "Sarmaşık", "Nergis", "Fil Kulağı", "Kalanşo", "Difenbahya"];
+
+                let isToxic = false;
+                toxicPlantsList.forEach(tp => {
+                    if (baslik.toLowerCase().includes(tp.toLowerCase())) isToxic = true;
+                });
+
+                if (geminiRes && geminiRes._rawPayload && geminiRes._rawPayload.data && geminiRes._rawPayload.data.petSafety) {
+                    const ps = geminiRes._rawPayload.data.petSafety;
+                    if (ps.isSafe === false || (ps.status && ps.status.toLowerCase().includes('zehir'))) {
+                        isToxic = true;
+                    }
+                }
+
+                if (petSafetyCard && petSafetyText && petSafetyIcon) {
+                    if (isToxic) {
+                        petSafetyCard.style.background = 'rgba(198, 40, 40, 0.08)';
+                        petSafetyCard.style.borderColor = 'var(--accent-red)';
+                        petSafetyIcon.textContent = '⚠️';
+                        petSafetyText.innerHTML = `<b style="color: var(--accent-red);">⚠️ DİKKAT: Kedi ve Köpekler İçin Zehirlidir!</b> Evcil hayvanların erişemeyeceği yüksek yerlerde konumlandırın.`;
+                    } else {
+                        petSafetyCard.style.background = 'rgba(46, 125, 50, 0.08)';
+                        petSafetyCard.style.borderColor = 'var(--primary-green)';
+                        petSafetyIcon.textContent = '🐾';
+                        petSafetyText.innerHTML = `<b style="color: var(--primary-green);">🐾 Evcil Hayvan Dostu (Kedi/Köpek İçin Güvenli)</b> Yutulması durumunda toksik etki göstermez.`;
+                    }
+                    petSafetyCard.style.display = 'flex';
+                }
+
+
                 // Aşamalı Dalga Animasyonlarını Uygula (Önce Resim/Başlık, Sonra Bakım Kartı, Sonra Trivia)
                 if (imageBoxWrapper) imageBoxWrapper.classList.add('animate-cascade-1');
                 if (resultContent) resultContent.classList.add('animate-cascade-1');

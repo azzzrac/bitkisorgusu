@@ -425,10 +425,13 @@ Yanıt SADECE aşağıdaki JSON formatında olmalı, hiçbir markdown çiti veya
     "temp": "İdeal sıcaklık aralığı (Örn: 15°C - 25°C)",
     "season": "Çiçeklenme/gelişim dönemi",
     "region": "Yetiştiği bölge veya coğrafya",
-    "rebloom": "Solduktan sonra tekrar açar mı?"
+  "petSafety": {
+    "isSafe": true,
+    "status": "🐾 Evcil Hayvan Dostu (Kedi/Köpek İçin Zehirsiz ve Güvenli)"
   },
   "trivia": "Bitki hakkında 1 cümlelik dikkat çekici 'Biliyor muydunuz?' bilgisi (💡 Biliyor muydunuz? ile başlasın)."
 }`;
+
 
             const result = await model.generateContent(prompt);
             let responseText = result.response.text().trim();
