@@ -404,10 +404,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('YOUR_')) {
             return firebaseConfig.apiKey;
         }
-        const p1 = 'AQ.Ab8RN6K7AU4-UN3hovM2';
-        const p2 = 'do5Rmx0WoPyzljJWyAhZ7VQjJo76dg';
-        return p1 + p2;
+        return '';
     }
+
 
     // Gemini Modal Dinleyicileri
     const btnOpenGeminiKey = document.getElementById('btnOpenGeminiKey');
