@@ -1393,18 +1393,25 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
                 plantDescription.textContent = ozet;
                 resultContent.style.display = 'block';
 
-                // Görsel Yükle
-                if (sonuc.resimUrl) {
-                    plantImage.src = sonuc.resimUrl;
+                // Görsel Yükle (Wikipedia -> En-Wiki -> High Resolution Botanical Unsplash Fallback)
+                let finalImgUrl = sonuc.resimUrl;
+                if (!finalImgUrl) {
+                    finalImgUrl = await fetchFallbackPlantImage(baslik, botName);
+                }
+
+                if (finalImgUrl) {
+                    plantImage.src = finalImgUrl;
                     plantImage.style.display = 'block';
                     imagePlaceholderText.style.display = 'none';
                     zoomHint.style.display = 'inline-block';
+                    if (currentSonuc) currentSonuc.resimUrl = finalImgUrl;
                 } else {
                     plantImage.style.display = 'none';
                     imagePlaceholderText.style.display = 'block';
                     imagePlaceholderText.textContent = 'Resim bulunamadı.';
                     zoomHint.style.display = 'none';
                 }
+
 
                 // Bakım İpuçları & Trivia Güncelle
                 if (geminiRes && geminiRes.care) {
@@ -1551,13 +1558,54 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
         return !yasaklar.includes(kelime);
     }
 
+    async function fetchFallbackPlantImage(plantName, botanicalName) {
+        let query = (botanicalName || plantName || "").replace(/\s*\(.*?\)\s*/g, ' ').replace(/🌿|🧬|🌱|🪴|🌵|🌸|🕊️|🍃|🦚|🌺|🫒/g, '').trim();
+        let firstWord = query.split(' ')[0];
+
+        try {
+            const enUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
+            const res = await fetch(enUrl);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.thumbnail && data.thumbnail.source) return data.thumbnail.source;
+            }
+        } catch (e) {}
+
+        try {
+            const enUrl2 = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(firstWord)}`;
+            const res2 = await fetch(enUrl2);
+            if (res2.ok) {
+                const data2 = await res2.json();
+                if (data2.thumbnail && data2.thumbnail.source) return data2.thumbnail.source;
+            }
+        } catch (e) {}
+
+        const qLower = (plantName + " " + (botanicalName || "")).toLowerCase('tr-TR');
+        if (qLower.includes('monstera') || qLower.includes('deve tabani')) return 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=600&auto=format&fit=crop';
+        if (qLower.includes('kaktus') || qLower.includes('cactus')) return 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=600&auto=format&fit=crop';
+        if (qLower.includes('sukulent') || qLower.includes('succulent')) return 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=600&auto=format&fit=crop';
+        if (qLower.includes('orkide') || qLower.includes('orchid')) return 'https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?w=600&auto=format&fit=crop';
+        if (qLower.includes('aloe')) return 'https://images.unsplash.com/photo-1596547609652-9cf5d8d76921?w=600&auto=format&fit=crop';
+        if (qLower.includes('pasa kilici') || qLower.includes('sansevieria')) return 'https://images.unsplash.com/photo-1593482892290-f54927ae1bf6?w=600&auto=format&fit=crop';
+        if (qLower.includes('baris cicegi') || qLower.includes('spatifilyum') || qLower.includes('peace lily')) return 'https://images.unsplash.com/photo-1593691509543-c55fb32e7355?w=600&auto=format&fit=crop';
+        if (qLower.includes('zamioculcas') || qLower.includes('zz')) return 'https://images.unsplash.com/photo-1637967886160-fd78dc3eb3f5?w=600&auto=format&fit=crop';
+        if (qLower.includes('ficus') || qLower.includes('kaucuk')) return 'https://images.unsplash.com/photo-1617173944883-6ffbd35d584d?w=600&auto=format&fit=crop';
+        if (qLower.includes('zeytin')) return 'https://images.unsplash.com/photo-1541447271487-09612b3f49f7?w=600&auto=format&fit=crop';
+        if (qLower.includes('lavanta')) return 'https://images.unsplash.com/photo-1528183429752-a97d0bf99b5a?w=600&auto=format&fit=crop';
+        if (qLower.includes('begonvil')) return 'https://images.unsplash.com/photo-1588614959060-4d144f28b207?w=600&auto=format&fit=crop';
+        if (qLower.includes('gul') || qLower.includes('rose')) return 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop';
+        if (qLower.includes('sardunya')) return 'https://images.unsplash.com/photo-1597848212624-a19eb35e2651?w=600&auto=format&fit=crop';
+
+        return 'https://images.unsplash.com/photo-1463936575829-25148e1db1b8?w=600&auto=format&fit=crop';
+    }
+
     async function wikipediaOzetiGetir(sorgu) {
         if (!sorgu) return null;
-        let cleanQuery = sorgu.trim();
-        // Bütün harfleri büyük gelen favori başlıklarını "Aloe Vera" gibi Title Case formatına dönüştür
+        let cleanQuery = sorgu.replace(/\s*\(.*?\)\s*/g, ' ').trim();
         let titleCaseQuery = cleanQuery.toLowerCase('tr-TR').replace(/(^|\s)\S/g, l => l.toUpperCase());
 
         let encoded = encodeURIComponent(titleCaseQuery);
+
         let summaryUrl = `https://tr.wikipedia.org/api/rest_v1/page/summary/${encoded}`;
         let fullWikiUrl = `https://tr.wikipedia.org/wiki/${encoded}`;
 
