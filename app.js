@@ -2327,6 +2327,19 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
         });
     }
 
+    // 🪟 TÜM MODALLAR İÇİN BOŞLUĞA / ARKA PLANA TIKLAYINCA KAPATMA VE SIFIRLAMA
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.style.display = 'none';
+                if (overlay.id === 'lightCalcModal' && typeof resetLightCalcForm === 'function') {
+                    resetLightCalcForm();
+                }
+            }
+        });
+    });
+
+
 
     directionBtns.forEach(btn => {
         btn.addEventListener('click', () => {
