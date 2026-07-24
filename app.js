@@ -397,10 +397,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 🤖 FIREBASE / GOOGLE GEMINI DEVELOPER API İSTEMCİ YAPISI (100% SUNUCUSUZ 7/24)
     function getGeminiApiKey() {
+        const customKey = localStorage.getItem('user_gemini_key');
+        if (customKey && customKey.trim().length > 10) {
+            return customKey.trim();
+        }
         if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('YOUR_')) {
             return firebaseConfig.apiKey;
         }
         return '';
+    }
+
+    // Gemini Modal Dinleyicileri
+    const btnOpenGeminiKey = document.getElementById('btnOpenGeminiKey');
+    const btnCloseGeminiKey = document.getElementById('btnCloseGeminiKey');
+    const btnSaveGeminiKey = document.getElementById('btnSaveGeminiKey');
+    const btnClearGeminiKey = document.getElementById('btnClearGeminiKey');
+    const geminiKeyModal = document.getElementById('geminiKeyModal');
+    const inputGeminiApiKey = document.getElementById('inputGeminiApiKey');
+
+    if (btnOpenGeminiKey) {
+        btnOpenGeminiKey.addEventListener('click', () => {
+            if (inputGeminiApiKey) inputGeminiApiKey.value = localStorage.getItem('user_gemini_key') || '';
+            if (geminiKeyModal) geminiKeyModal.style.display = 'flex';
+        });
+    }
+
+    if (btnCloseGeminiKey) {
+        btnCloseGeminiKey.addEventListener('click', () => {
+            if (geminiKeyModal) geminiKeyModal.style.display = 'none';
+        });
+    }
+
+    if (btnSaveGeminiKey) {
+        btnSaveGeminiKey.addEventListener('click', () => {
+            const val = inputGeminiApiKey ? inputGeminiApiKey.value.trim() : '';
+            if (!val) {
+                alert('⚠️ Lütfen geçerli bir Gemini API Key girin.');
+                return;
+            }
+            localStorage.setItem('user_gemini_key', val);
+            if (geminiKeyModal) geminiKeyModal.style.display = 'none';
+            alert('✅ Canlı Google Gemini AI Key kaydedildi! Artık yapay zekaya doğrudan istek atılacak.');
+        });
+    }
+
+    if (btnClearGeminiKey) {
+        btnClearGeminiKey.addEventListener('click', () => {
+            localStorage.removeItem('user_gemini_key');
+            if (inputGeminiApiKey) inputGeminiApiKey.value = '';
+            alert('🗑️ İstemci API Key temizlendi.');
+        });
     }
 
     function recordGeminiRequestLocally(modelName = 'gemini-1.5-flash', endpoint = 'general') {

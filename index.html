@@ -42,6 +42,7 @@
                 <p class="brand-subtitle">Bitkileri isimleriyle arayın, özelliklerini ve görsellerini inceleyin.</p>
             </div>
             <div class="header-actions">
+                <button class="btn btn-warning" id="btnOpenGeminiKey" style="background: linear-gradient(135deg, #f57c00, #ff9800); color: white; border: none; font-weight: 700;">🤖 Gemini AI Key</button>
                 <button class="btn btn-doctor" id="btnOpenDoctor">🩺 Bitki Doktoru (AI Teşhis)</button>
                 <button class="btn btn-profile" id="btnProfile">👤 Giriş Yap / Kayıt Ol</button>
                 <button class="btn btn-icon" id="btnThemeToggle" title="Temayı Değiştir">🌙</button>
@@ -423,6 +424,33 @@
                 <div class="gallery-grid" id="galleryGridContainer"
                     style="display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 12px; margin-top: 14px; max-height: 400px; overflow-y: auto;">
                     <!-- Fotoğraf Kartları JS ile Eklenecek -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gemini AI API Key Ayar Modalı -->
+    <div class="modal-overlay" id="geminiKeyModal" style="display: none;">
+        <div class="modal-card" style="max-width: 480px; width: 90%;">
+            <div class="modal-header">
+                <h3>🤖 Canlı Google Gemini AI Ayarları</h3>
+                <button class="btn-close" id="btnCloseGeminiKey">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 16px;">
+                <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;">
+                    Bitki Doktoru ve Sorgulama sisteminin <b>canlı Google Gemini AI yapay zekası</b> ile %100 doğrudan çalışması için Gemini API anahtarınızı girebilirsiniz.
+                </p>
+                <div style="margin-bottom: 14px;">
+                    <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 6px;">Google Gemini API Key:</label>
+                    <input type="password" id="inputGeminiApiKey" placeholder="Örn: AIzaSy..." style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); font-family: monospace;">
+                </div>
+                <div style="background: rgba(33, 150, 243, 0.08); border-left: 4px solid #2196f3; padding: 10px; border-radius: 4px; font-size: 12px; margin-bottom: 16px;">
+                    💡 <b>Ücretsiz Gemini API Key Nasıl Alınır?</b><br>
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #1976d2; font-weight: 700; text-decoration: underline;">Google AI Studio (aistudio.google.com)</a> adresinden 1 saniyede ücretsiz API anahtarı oluşturup buraya yapıştırabilirsiniz.
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button class="btn btn-secondary" id="btnClearGeminiKey">Temizle</button>
+                    <button class="btn btn-primary" id="btnSaveGeminiKey">💾 Key'i Kaydet</button>
                 </div>
             </div>
         </div>
