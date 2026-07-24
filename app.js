@@ -250,9 +250,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnProfile = document.getElementById('btnProfile');
     const btnThemeToggle = document.getElementById('btnThemeToggle');
 
-    // MODALS
     const profileModal = document.getElementById('profileModal');
     const btnCloseProfile = document.getElementById('btnCloseProfile');
+    const btnLogoutUser = document.getElementById('btnLogoutUser');
+
+    if (btnLogoutUser) {
+        btnLogoutUser.addEventListener('click', () => {
+            if (confirm('Oturumunuz kapatılacak ve Giriş Ekranı\'na yönlendirileceksiniz. Emin misiniz?')) {
+                localStorage.removeItem('bitki_user');
+                if (typeof firebase !== 'undefined' && firebase.auth) {
+                    firebase.auth().signOut().catch(() => {});
+                }
+                window.location.href = 'login.html';
+            }
+        });
+    }
+
 
     const badgesModal = document.getElementById('badgesModal');
     const btnCloseBadges = document.getElementById('btnCloseBadges');
