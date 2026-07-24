@@ -2391,30 +2391,77 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
     });
 
     const plantDatabaseForLight = {
+        // ☀️ 1. SÜREKLİ GÜNEŞLİ (SOUTH)
         south_window_front: [
-            { name: "Kaktüs", desc: "Doğrudan yakıcı güneşe %100 dayanıklı.", icon: "🌵", match: "%98 İdeal", water: "15 günde 1" },
-            { name: "Sukulent", desc: "Bol ışıkta yaprakları canlı renkler alır.", icon: "🪴", match: "%96 İdeal", water: "10 günde 1" },
-            { name: "Aloe Vera", desc: "Güney penceresinde etli yaprakları hızla büyür.", icon: "🌿", match: "%95 İdeal", water: "12 günde 1" },
-            { name: "Begonvil", desc: "Öğle güneşinde bol çiçek açar.", icon: "🌺", match: "%92 İdeal", water: "4 günde 1" },
-            { name: "Zeytin", desc: "Güneş banyosunu en çok seven Akdeniz türü.", icon: "🫒", match: "%90 İdeal", water: "7 günde 1" }
+            { name: "Kaktüs", desc: "Doğrudan yakıcı güneşe %100 dayanıklı, yüksek ışık tutkunu.", icon: "🌵", match: "%99 İdeal", water: "15 günde 1" },
+            { name: "Sukulent", desc: "Bol ve sürekli güneş ışığında yaprakları canlı renkler alır.", icon: "🪴", match: "%97 İdeal", water: "10 günde 1" },
+            { name: "Aloe Vera", desc: "Sürekli güneş gören pencere önünde etli yaprakları hızla büyür.", icon: "🌿", match: "%95 İdeal", water: "12 günde 1" },
+            { name: "Begonvil", desc: "Yoğun güneş banyosu aldığında büyüleyici çiçekler açar.", icon: "🌺", match: "%93 İdeal", water: "4 günde 1" },
+            { name: "Zeytin Ağacı", desc: "Güneşi en çok seven Akdeniz türü, pencere önünde coşar.", icon: "🫒", match: "%91 İdeal", water: "7 günde 1" }
         ],
         south_window_near: [
-            { name: "Monstera (Deve Tabanı)", desc: "Tül arkası dolaylı ışıkta delikli yaprakları büyür.", icon: "🌿", match: "%97 İdeal", water: "5 günde 1" },
-            { name: "Ficus Elastica (Kauçuk)", desc: "Parlak dolaylı ışıkta parlak koyu yapraklar üretir.", icon: "🪴", match: "%95 İdeal", water: "6 günde 1" },
-            { name: "Paşa Kılıcı (Sansevieria)", desc: "Hemen her ışığa uyumlu, parlak ortamda hızlı büyür.", icon: "🗡️", match: "%94 İdeal", water: "14 günde 1" },
-            { name: "Strelitzia (Cennet Kuşu)", desc: "Aydınlık tül arkasında dev yapraklar açar.", icon: "🦚", match: "%92 İdeal", water: "5 günde 1" }
+            { name: "Monstera (Deve Tabanı)", desc: "Sürekli güneşli odada 1-2m mesafede dev delikli yapraklar açar.", icon: "🌿", match: "%98 İdeal", water: "5 günde 1" },
+            { name: "Ficus Elastica (Kauçuk)", desc: "Filtrelenmiş parlak ışıkta koyu renkli yapraklarını parlatır.", icon: "🪴", match: "%96 İdeal", water: "6 günde 1" },
+            { name: "Strelitzia (Cennet Kuşu)", desc: "Aydınlık tül arkasında dev palmiye tarzı yapraklar büyütür.", icon: "🦚", match: "%94 İdeal", water: "5 günde 1" },
+            { name: "Paşa Kılıcı", desc: "Bol ışıklı odada son derece hızlı filiz verir.", icon: "🗡️", match: "%92 İdeal", water: "14 günde 1" }
+        ],
+        south_room_depth: [
+            { name: "Paşa Kılıcı (Sansevieria)", desc: "Oda derinliğinde aydınlık ortamda bile yaşamını sürdürür.", icon: "🗡️", match: "%95 İdeal", water: "15 günde 1" },
+            { name: "Zamioculcas (ZZ)", desc: "Güneşli odanın köşesinde parlak yeşil kalmaya devam eder.", icon: "🌱", match: "%93 İdeal", water: "18 günde 1" },
+            { name: "Kurdele Çiçeği", desc: "Güneşli odanın gölge tarafında kök sürgünleri verir.", icon: "🎗️", match: "%90 İdeal", water: "7 günde 1" }
+        ],
+
+        // 🌅 2. SADECE SABAH GÜNEŞİ (EAST)
+        east_window_front: [
+            { name: "Orkide", desc: "Taze ve yumuşak sabah güneşini en çok seven prenses.", icon: "🌸", match: "%99 İdeal", water: "7 günde 1" },
+            { name: "Barış Çiçeği (Spatifilyum)", desc: "Sabah ışığında bembeyaz zarif yelken çiçekleri açar.", icon: "🕊️", match: "%97 İdeal", water: "4 günde 1" },
+            { name: "Pothos Sarmaşığı", desc: "Sabah güneşinde yapraklarındaki sarı-yeşil desenler belirginleşir.", icon: "🍃", match: "%95 İdeal", water: "5 günde 1" },
+            { name: "Begonya", desc: "Yumuşak sabah ışığında renkli yapraklarını sergiler.", icon: "🌺", match: "%93 İdeal", water: "5 günde 1" }
         ],
         east_window_near: [
-            { name: "Orkide", desc: "Yumuşak sabah güneşini ve yüksek nemi çok sever.", icon: "🌸", match: "%99 İdeal", water: "7 günde 1" },
-            { name: "Barış Çiçeği (Spatifilyum)", desc: "Sabah ışığında beyaz yelken çiçekleri açar.", icon: "🕊️", match: "%96 İdeal", water: "4 günde 1" },
-            { name: "Pothos (Sarmaşık)", desc: "Aydınlık sabah ışığında yaprakları sarı desenlenir.", icon: "🍃", match: "%95 İdeal", water: "5 günde 1" },
-            { name: "Zamioculcas (ZZ Bitkisi)", desc: "Doğu penceresinde parlak parlak sürgünler verir.", icon: "🌱", match: "%94 İdeal", water: "12 günde 1" }
+            { name: "Calathea (Dua Çiçeği)", desc: "Doğrudan yakmayan sabah ışığında yaprak desenlerini korur.", icon: "🪴", match: "%97 İdeal", water: "4 günde 1" },
+            { name: "Monstera", desc: "Sabah ışığı alan aydınlık masada ideal gelişim gösterir.", icon: "🌿", match: "%95 İdeal", water: "6 günde 1" },
+            { name: "Fittonia (Sinir Otu)", desc: "Yüksek nem ve taze ışıkta pembe/beyaz damarları parlar.", icon: "🌱", match: "%92 İdeal", water: "3 günde 1" }
+        ],
+        east_room_depth: [
+            { name: "Zamioculcas (ZZ)", desc: "Sabah ışığı alan odanın derinliğinde az suyla yaşar.", icon: "🌱", match: "%96 İdeal", water: "15 günde 1" },
+            { name: "Kurdele Çiçeği", desc: "Orta ışıklı odada havayı toksinlerden temizler.", icon: "🎗️", match: "%92 İdeal", water: "7 günde 1" }
+        ],
+
+        // 🌇 3. SADECE AKŞAM GÜNEŞİ (WEST)
+        west_window_front: [
+            { name: "Sardunya", desc: "Sıcak akşamüstü güneşiyle coşup bol renkli çiçek açar.", icon: "🌸", match: "%98 İdeal", water: "4 günde 1" },
+            { name: "Aloe Vera", desc: "Akşamüstü sıcaklığında gövdesinde jeli depolar.", icon: "🌿", match: "%96 İdeal", water: "10 günde 1" },
+            { name: "Biberiye", desc: "Sıcak batı ışığında aromatik kokusunu ortama yayar.", icon: "🌿", match: "%94 İdeal", water: "6 günde 1" },
+            { name: "Begonvil", desc: "Sıcak akşamüstü ışığını severek yapraklarını renklendirir.", icon: "🌺", match: "%92 İdeal", water: "5 günde 1" }
+        ],
+        west_window_near: [
+            { name: "Ficus Benjamina", desc: "Sıcak aydınlık ortamda dökülmeden yaprak açar.", icon: "🌳", match: "%96 İdeal", water: "6 günde 1" },
+            { name: "Dracena (Tropikal)", desc: "Akşam güneşi alan odada 1-2m mesafede uzun yaprak verir.", icon: "🌴", match: "%94 İdeal", water: "7 günde 1" },
+            { name: "Yucca (Masa Palmiyesi)", desc: "Sıcak ışık alan tül arkasında odunsu gövdesi güçlenir.", icon: "🪵", match: "%92 İdeal", water: "10 günde 1" }
+        ],
+        west_room_depth: [
+            { name: "Paşa Kılıcı", desc: "Akşam güneşi alan odanın köşesinde son derece dayanıklıdır.", icon: "🗡️", match: "%95 İdeal", water: "16 günde 1" },
+            { name: "Aglaonema (Çin Herdemyeşili)", desc: "Derin köşelerde bile renkli yapraklarını korur.", icon: "🪴", match: "%92 İdeal", water: "8 günde 1" }
+        ],
+
+        // 🏔️ 4. HİÇ GÜNEŞ GÖRMEYEN (NORTH / GÖLGE)
+        north_window_front: [
+            { name: "Barış Çiçeği (Spatifilyum)", desc: "Doğrudan güneş almayan pencere önünde %100 mutlu yaşar.", icon: "🕊️", match: "%99 İdeal", water: "4 günde 1" },
+            { name: "Aşk Merdiveni (Eğrelti Otu)", desc: "Gölge pencere önlerinde yemyeşil yaprak dizilimi sunar.", icon: "🌿", match: "%97 İdeal", water: "3 günde 1" },
+            { name: "Aglaonema", desc: "Güneşsiz aydınlık alanlarda desenli şık yapraklar verir.", icon: "🪴", match: "%95 İdeal", water: "7 günde 1" },
+            { name: "Philodendron", desc: "Kuzey ışığında sarkan yapraklarıyla harika görünür.", icon: "🍃", match: "%93 İdeal", water: "6 günde 1" }
+        ],
+        north_window_near: [
+            { name: "Zamioculcas (ZZ Bitkisi)", desc: "Gölge ortamda dahi parlak balmumu yapraklarını korur.", icon: "🌱", match: "%98 İdeal", water: "18 günde 1" },
+            { name: "Paşa Kılıcı (Sansevieria)", desc: "Doğrudan ışık almayan masalarda dimdik büyür.", icon: "🗡️", match: "%96 İdeal", water: "20 günde 1" },
+            { name: "Kurdele Çiçeği", desc: "Düşük ışıklı odalarda nem oranını dengeler.", icon: "🎗️", match: "%94 İdeal", water: "7 günde 1" }
         ],
         north_room_depth: [
-            { name: "Zamioculcas (ZZ)", desc: "Karanlık ve düşük ışık köşelerine %100 dayanıklı.", icon: "🌱", match: "%99 İdeal", water: "18 günde 1" },
-            { name: "Paşa Kılıcı", desc: "Hiç ışık almayan köşelerde bile yaşamını sürdürür.", icon: "🗡️", match: "%97 İdeal", water: "20 günde 1" },
-            { name: "Kurdele Çiçeği", desc: "Düşük ışıkta bile havayı temizlemeye devam eder.", icon: "🎗️", match: "%92 İdeal", water: "6 günde 1" },
-            { name: "Eğrelti Otu (Aşk Merdiveni)", desc: "Gölge ve nemli ortamların kraliçesi.", icon: "🌿", match: "%90 İdeal", water: "3 günde 1" }
+            { name: "Zamioculcas (ZZ)", desc: "Karanlık ve düşük ışıklı oda köşelerine %100 dayanıklı kahraman.", icon: "🌱", match: "%99 İdeal", water: "20 günde 1" },
+            { name: "Paşa Kılıcı", desc: "Hiç güneş girmeyen koridor ve köşelerde bile canlı kalır.", icon: "🗡️", match: "%98 İdeal", water: "25 günde 1" },
+            { name: "Aspidistra (Salon Yaprağı)", desc: "Karanlık ortama en dayanıklı 'Demir Bitki' lakaplı tür.", icon: "🌿", match: "%95 İdeal", water: "15 günde 1" },
+            { name: "Aşk Merdiveni", desc: "Gölge ve kuytu köşelerin en sevilen eğrelti türü.", icon: "🌿", match: "%92 İdeal", water: "4 günde 1" }
         ]
     };
 
@@ -2428,14 +2475,14 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
             const lightSummaryDesc = document.getElementById('lightSummaryDesc');
             const recommendedPlantsGrid = document.getElementById('recommendedPlantsGrid');
 
-            let dirText = selectedDirection === 'south' ? 'Sürekli Güneşli (Bol Öğle Güneşi)' : selectedDirection === 'east' ? 'Sadece Sabah Güneşi' : selectedDirection === 'west' ? 'Sadece Akşam Güneşi' : 'Hiç Güneş Görmeyen (Gölge / Yumuşak Ortam)';
+            let dirText = selectedDirection === 'south' ? 'Sürekli Güneşli' : selectedDirection === 'east' ? 'Sadece Sabah Güneşi' : selectedDirection === 'west' ? 'Sadece Akşam Güneşi' : 'Hiç Güneş Görmeyen';
 
-            let distText = dist === 'window_front' ? 'Tam Pencere Önü (Doğrudan Işık)' : dist === 'window_near' ? '1-2 Metre Mesafe (Filtrelenmiş Tül Arkası)' : 'Oda Derinliği / Köşe (Low Light / Düşük Işık)';
+            let distText = dist === 'window_front' ? 'Tam Pencere Önü' : dist === 'window_near' ? '1-2 Metre Mesafe' : 'Oda Derinliği / Köşe';
 
             if (lightSummaryTitle) lightSummaryTitle.textContent = `🧭 ${dirText} | 🪟 ${distText}`;
-            if (lightSummaryDesc) lightSummaryDesc.textContent = `Bu konum günlük ortalama ışık seviyesi ve nem oranına göre değerlendirilmiştir. Aşırı doğrudan güneş alan yaprakları tül ile korumanız önerilir.`;
+            if (lightSummaryDesc) lightSummaryDesc.textContent = `Bu konum doğrudan güneş ışığı şiddetine ve ortalama nem değerine göre hesaplanmıştır. Kendi ortamınıza en uygun türler listelenmiştir.`;
 
-            const plantsList = plantDatabaseForLight[key] || plantDatabaseForLight['east_window_near'];
+            const plantsList = plantDatabaseForLight[key] || plantDatabaseForLight['north_room_depth'];
 
             if (recommendedPlantsGrid) {
                 recommendedPlantsGrid.innerHTML = plantsList.map(p => `
@@ -2455,6 +2502,7 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
             if (lightCalcResults) lightCalcResults.style.display = 'block';
         });
     }
+
 
     window.sorgulaVeModalKapat = function(bitkiAdi) {
         resetLightCalcForm();
