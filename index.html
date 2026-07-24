@@ -12,7 +12,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=7">
+    <link rel="stylesheet" href="styles.css?v=10">
+    <script>
+        // Oturum açılmamışsa doğrudan Giriş Ekranına (login.html) yönlendir
+        if (!localStorage.getItem('bitki_user')) {
+            window.location.href = 'login.html';
+        }
+    </script>
 
 
 
@@ -32,11 +38,10 @@
         <!-- Header -->
         <header class="header-card">
             <div class="brand">
-                <h1 class="brand-title">🌱 Bitki Keşif Portalı</h1>
+                <h1 class="brand-title">🌱 Bitki Keşif Portalı <span class="version-badge" style="background: rgba(46, 125, 50, 0.15); color: var(--primary-green); font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; margin-left: 8px; border: 1px solid rgba(46, 125, 50, 0.3); vertical-align: middle;">v2.0.0</span></h1>
                 <p class="brand-subtitle">Bitkileri isimleriyle arayın, özelliklerini ve görsellerini inceleyin.</p>
             </div>
             <div class="header-actions">
-                <button class="btn btn-teal api-quota-btn" id="btnOpenUsage" title="Son 24 saatteki canlı Gemini AI istek sayısı">🤖 Gemini 24s: <b id="headerUsageCount">0 İstek</b></button>
                 <button class="btn btn-doctor" id="btnOpenDoctor">🩺 Bitki Doktoru (AI Teşhis)</button>
                 <button class="btn btn-profile" id="btnProfile">👤 Giriş Yap / Kayıt Ol</button>
                 <button class="btn btn-icon" id="btnThemeToggle" title="Temayı Değiştir">🌙</button>
@@ -66,6 +71,14 @@
                 <input type="file" id="btnUploadImageInput" accept="image/*" style="display: none;">
                 <button class="btn btn-teal" id="btnRandom">🎲 Rastgele</button>
                 <button class="btn btn-secondary" id="btnClear">🧹 Temizle</button>
+            </div>
+            <!-- Bunu mu demek istediniz? Rozet Kutusu -->
+            <div id="didYouMeanBox" class="did-you-mean-banner" style="display: none;">
+                <span class="did-you-mean-icon">💡</span>
+                <span class="did-you-mean-text">Bunu mu demek istediniz?</span>
+                <button type="button" id="didYouMeanBtn" class="did-you-mean-chip">
+                    🌿 <span id="didYouMeanWord">Lavanta</span>
+                </button>
             </div>
         </section>
 
@@ -140,35 +153,11 @@
             </div>
             <div class="modal-body">
                 <!-- 1. GİRİŞ YAP / KAYIT OL FORMU (Giriş Yapılmadığında Görünür) -->
-                <div class="auth-container" id="authContainer">
-                    <div class="auth-welcome">
-                        <div class="auth-icon">🌱</div>
-                        <h4>Bitki Keşif Portalı'na Hoş Geldiniz!</h4>
-                        <p>Keşiflerinizi, rozetlerinizi ve kişisel bitki listenizi kaydetmek için giriş yapın.</p>
-                    </div>
-
-                    <!-- Google Hızlı Giriş Butonu -->
-                    <!-- Giriş / Kayıt Tab Seçimi -->
-                    <div class="auth-tabs">
-                        <button class="auth-tab active" id="tabLogin">🔑 Giriş Yap</button>
-                        <button class="auth-tab" id="tabRegister">📝 Hesap Oluştur</button>
-                    </div>
-
-                    <form id="authForm" onsubmit="return false;">
-                        <div class="form-group" id="nameInputGroup" style="display: none;">
-                            <label>Adınız Soyadınız</label>
-                            <input type="text" id="authNameInput" placeholder="Örn: Ahmet Yılmaz">
-                        </div>
-                        <div class="form-group">
-                            <label>E-posta Adresi</label>
-                            <input type="email" id="authEmailInput" placeholder="ornek@gmail.com" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Şifre</label>
-                            <input type="password" id="authPassInput" placeholder="••••••••" required>
-                        </div>
-                        <button type="submit" class="btn btn-success btn-block" id="btnSubmitAuth">🔑 Giriş Yap</button>
-                    </form>
+                <div class="auth-container" id="authContainer" style="text-align: center; padding: 20px 10px;">
+                    <div class="auth-icon" style="font-size: 44px; margin-bottom: 12px;">🌱</div>
+                    <h4 style="font-size: 18px; font-weight: 800; color: var(--text-title); margin-bottom: 8px;">Bitki Keşif Portalı'na Hoş Geldiniz!</h4>
+                    <p style="font-size: 14px; color: var(--text-subtitle); margin-bottom: 20px;">Keşiflerinizi, rozetlerinizi ve kişisel bitki listenizi kaydetmek için lütfen oturum açın.</p>
+                    <a href="login.html" class="btn btn-success btn-block" style="display: block; text-decoration: none; padding: 12px; font-size: 15px; font-weight: 700; border-radius: 10px; background: var(--primary-green); color: white;">🔑 Giriş Yap / Kayıt Ol Sayfasına Git 🚀</a>
                 </div>
 
                 <!-- 2. KULLANICI PROFİL ALANI (Giriş Yapıldığında Görünür) -->
@@ -318,62 +307,88 @@
                 <button class="modal-close" id="btnCloseDoctor">&times;</button>
             </div>
             <div class="modal-body doctor-body">
-                <p class="modal-subtitle">Sararmış, lekelenmiş veya hastalıklı bitki yaprağının fotoğrafını yükleyin; Gemini AI Doktoru teşhis etsin ve tedavi reçetesi hazırlasın.</p>
-                
+                <p class="modal-subtitle">Sararmış, lekelenmiş veya hastalıklı bitki yaprağının fotoğrafını yükleyin;
+                    Gemini AI Doktoru teşhis etsin ve tedavi reçetesi hazırlasın.</p>
+
                 <!-- Fotoğraf Yükleme Alanı -->
-                <div class="doctor-upload-box" id="doctorUploadBox" style="border: 2px dashed var(--primary-green); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; background: rgba(46, 125, 50, 0.03); transition: all 0.2s ease;">
+                <div class="doctor-upload-box" id="doctorUploadBox"
+                    style="border: 2px dashed var(--primary-green); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; background: rgba(46, 125, 50, 0.03); transition: all 0.2s ease;">
                     <input type="file" id="doctorFileInput" accept="image/*" style="display: none;">
                     <div class="doctor-upload-content" id="doctorUploadContent">
                         <div class="doctor-icon" style="font-size: 36px; margin-bottom: 6px;">📸</div>
                         <b>Hastalıklı Yaprak Fotoğrafı Yüklemek İçin Tıklayın</b>
-                        <p style="font-size: 12px; color: var(--text-subtitle); margin-top: 4px;">PNG, JPG, WEBP formatları desteklenmektedir.</p>
+                        <p style="font-size: 12px; color: var(--text-subtitle); margin-top: 4px;">PNG, JPG, WEBP
+                            formatları desteklenmektedir.</p>
                     </div>
-                    <img id="doctorPreviewImage" src="" alt="Yüklenen Yaprak Fotoğrafı" style="display: none; max-height: 200px; border-radius: 10px; object-fit: contain; margin: 0 auto;">
+                    <img id="doctorPreviewImage" src="" alt="Yüklenen Yaprak Fotoğrafı"
+                        style="display: none; max-height: 200px; border-radius: 10px; object-fit: contain; margin: 0 auto;">
                 </div>
 
                 <!-- Belirti Notları Input -->
                 <div class="form-group" style="margin-top: 10px;">
-                    <label style="font-weight: 700; font-size: 13px;">📝 Belirti veya Şikayet Notunuz (Opsiyonel):</label>
-                    <input type="text" id="doctorNotesInput" placeholder="Örn: Yaprak uçları sararıyor, alt yapraklar dökülüyor..." style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--card-border); font-size: 13px;">
+                    <label style="font-weight: 700; font-size: 13px;">📝 Belirti veya Şikayet Notunuz
+                        (Opsiyonel):</label>
+                    <input type="text" id="doctorNotesInput"
+                        placeholder="Örn: Yaprak uçları sararıyor, alt yapraklar dökülüyor..."
+                        style="padding: 10px 14px; border-radius: 8px; border: 1px solid var(--card-border); font-size: 13px;">
                 </div>
 
                 <!-- Teşhis Et Butonu -->
-                <button class="btn btn-doctor btn-block" id="btnDiagnose" style="padding: 12px; font-size: 14px; font-weight: 700; margin-top: 10px;">🩺 AI Doktor ile Teşhis Et & Reçete Oluştur</button>
+                <button class="btn btn-doctor btn-block" id="btnDiagnose"
+                    style="padding: 12px; font-size: 14px; font-weight: 700; margin-top: 10px;">🩺 AI Doktor ile Teşhis
+                    Et & Reçete Oluştur</button>
 
                 <!-- Yükleme Göstergesi -->
-                <div class="botanical-loader" id="doctorLoader" style="display: none; padding: 24px 10px; gap: 16px; flex-direction: row; align-items: center; justify-content: center;">
+                <div class="botanical-loader" id="doctorLoader"
+                    style="display: none; padding: 24px 10px; gap: 16px; flex-direction: row; align-items: center; justify-content: center;">
                     <span class="botanical-spinner">🔬</span>
-                    <span class="botanical-loader-text">🩺 Doktor Gemini AI yaprak dokusunu mikroskopla inceliyor...</span>
+                    <span class="botanical-loader-text">🩺 Doktor Gemini AI yaprak dokusunu mikroskopla
+                        inceliyor...</span>
                 </div>
 
                 <!-- Teşhis ve Reçete Rapor Kartı -->
-                <div class="doctor-report-card" id="doctorReportCard" style="display: none; margin-top: 14px; background: rgba(46, 125, 50, 0.05); border: 1px solid var(--primary-green); border-radius: 14px; padding: 18px;">
-                    <div class="doctor-report-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(46, 125, 50, 0.2); padding-bottom: 10px; margin-bottom: 12px;">
+                <div class="doctor-report-card" id="doctorReportCard"
+                    style="display: none; margin-top: 14px; background: rgba(46, 125, 50, 0.05); border: 1px solid var(--primary-green); border-radius: 14px; padding: 18px;">
+                    <div class="doctor-report-header"
+                        style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(46, 125, 50, 0.2); padding-bottom: 10px; margin-bottom: 12px;">
                         <div>
-                            <span class="doctor-badge" id="reportSeverity" style="background: #e53935; color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;">Orta (Dikkat)</span>
-                            <h4 id="reportDiseaseName" style="font-size: 16px; font-weight: 800; color: var(--text-title); margin-top: 6px;">Teşhis Adı</h4>
+                            <span class="doctor-badge" id="reportSeverity"
+                                style="background: #e53935; color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700;">Orta
+                                (Dikkat)</span>
+                            <h4 id="reportDiseaseName"
+                                style="font-size: 16px; font-weight: 800; color: var(--text-title); margin-top: 6px;">
+                                Teşhis Adı</h4>
                         </div>
-                        <span id="reportPlantType" style="font-size: 12px; font-style: italic; color: var(--text-subtitle);">Tür: Ev Bitkisi</span>
+                        <span id="reportPlantType"
+                            style="font-size: 12px; font-style: italic; color: var(--text-subtitle);">Tür: Ev
+                            Bitkisi</span>
                     </div>
 
                     <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
                         <div>
                             <b>🔍 Tespit Edilen Belirtiler:</b>
-                            <ul id="reportSymptomsList" style="margin-left: 18px; margin-top: 4px; color: var(--text-body);"></ul>
+                            <ul id="reportSymptomsList"
+                                style="margin-left: 18px; margin-top: 4px; color: var(--text-body);"></ul>
                         </div>
                         <div>
                             <b>💡 Muhtemel Kök Neden:</b>
-                            <p id="reportCauses" style="color: var(--text-body); margin-top: 2px; line-height: 1.4;"></p>
+                            <p id="reportCauses" style="color: var(--text-body); margin-top: 2px; line-height: 1.4;">
+                            </p>
                         </div>
                         <div class="treatment-box">
                             <b class="treatment-title">📋 Adım Adım Tedavi Reçetesi:</b>
-                            <ul id="reportTreatmentList" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;"></ul>
+                            <ul id="reportTreatmentList"
+                                style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;">
+                            </ul>
                         </div>
 
-                        <div style="background: #fff8e1; border: 1px solid #ffe082; padding: 10px 14px; border-radius: 8px; font-size: 12px; color: #5d4037;">
+                        <div
+                            style="background: #fff8e1; border: 1px solid #ffe082; padding: 10px 14px; border-radius: 8px; font-size: 12px; color: #5d4037;">
                             <b>🛡️ Gelecek İçin Koruyucu Tavsiye:</b> <span id="reportPrevention"></span>
                         </div>
-                        <button class="btn btn-success btn-block" id="btnPrintDoctorReport" style="margin-top: 10px; font-weight: 700; padding: 12px;">📄 Reçeteyi İndir / Yazdır (PDF)</button>
+                        <button class="btn btn-success btn-block" id="btnPrintDoctorReport"
+                            style="margin-top: 10px; font-weight: 700; padding: 12px;">📄 Reçeteyi İndir / Yazdır
+                            (PDF)</button>
                     </div>
                 </div>
 
@@ -390,60 +405,34 @@
                 <button class="modal-close" id="btnCloseGallery">&times;</button>
             </div>
             <div class="modal-body">
-                <p class="modal-subtitle">Yüklediğiniz bitki ve teşhis fotoğraflarını saklayabilir, yeni anılar ekleyebilirsiniz.</p>
+                <p class="modal-subtitle">Yüklediğiniz bitki ve teşhis fotoğraflarını saklayabilir, yeni anılar
+                    ekleyebilirsiniz.</p>
 
                 <!-- Manuel Fotoğraf Ekleme Alanı -->
-                <div class="note-input-row" style="background: rgba(46, 125, 50, 0.05); padding: 12px; border-radius: 10px; border: 1px solid var(--card-border); display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <div class="note-input-row"
+                    style="background: rgba(46, 125, 50, 0.05); padding: 12px; border-radius: 10px; border: 1px solid var(--card-border); display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
                     <input type="file" id="albumFileInput" accept="image/*" style="display: none;">
                     <button class="btn btn-sm btn-outline" id="btnSelectAlbumFile">🖼️ Fotoğraf Seç</button>
-                    <input type="text" id="albumCaptionInput" placeholder="Bitki adı veya not yazın (Örn: Balkon Lavantam)" style="flex: 1; min-width: 160px;">
+                    <input type="text" id="albumCaptionInput"
+                        placeholder="Bitki adı veya not yazın (Örn: Balkon Lavantam)"
+                        style="flex: 1; min-width: 160px;">
                     <button class="btn btn-sm btn-success" id="btnAddAlbumPhoto">➕ Albüme Ekle</button>
                 </div>
 
                 <!-- Fotoğraf Galerisi Grid -->
-                <div class="gallery-grid" id="galleryGridContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 12px; margin-top: 14px; max-height: 400px; overflow-y: auto;">
+                <div class="gallery-grid" id="galleryGridContainer"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)); gap: 12px; margin-top: 14px; max-height: 400px; overflow-y: auto;">
                     <!-- Fotoğraf Kartları JS ile Eklenecek -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 📊 Son 24 Saatlik Gemini AI İstek Sayacı Modalı -->
-    <div class="modal-overlay" id="usageModal">
-        <div class="modal-card" style="max-width: 560px; width: 92%;">
-            <div class="modal-header">
-                <h3>📊 24 Saatlik Gemini AI İstek İstatistikleri</h3>
-                <button class="modal-close" id="btnCloseUsage">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p class="modal-subtitle">Son 24 saat içinde model fark etmeksizin Google Gemini AI'a atılan canlı istek sayıları aşağıdadır:</p>
-
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 16px 0;">
-                    <div style="background: rgba(46, 125, 50, 0.08); border: 1px solid var(--primary-green); padding: 16px; border-radius: 12px; text-align: center;">
-                        <span style="font-size: 11px; font-weight: 700; color: var(--text-subtitle); text-transform: uppercase;">⏱️ Son 24 Saat İstek</span>
-                        <h2 id="stat24hCount" style="font-size: 28px; font-weight: 900; color: var(--primary-green); margin-top: 4px;">0</h2>
-                    </div>
-                    <div style="background: rgba(33, 150, 243, 0.08); border: 1px solid var(--accent-blue); padding: 16px; border-radius: 12px; text-align: center;">
-                        <span style="font-size: 11px; font-weight: 700; color: var(--text-subtitle); text-transform: uppercase;">♾️ Tüm Zamanlar İstek</span>
-                        <h2 id="statTotalCount" style="font-size: 28px; font-weight: 900; color: var(--accent-blue); margin-top: 4px;">0</h2>
-                    </div>
-                </div>
-
-                <div style="background: var(--card-bg); border: 1px solid var(--card-border); padding: 14px; border-radius: 12px;">
-                    <b style="font-size: 13px; color: var(--text-title);">🤖 Model Dağılımı (Son 24 Saat):</b>
-                    <ul id="usageBreakdownList" style="margin-top: 8px; font-size: 13px; color: var(--text-body); list-style: none; padding: 0; display: flex; flex-direction: column; gap: 6px;">
-                        <li>Henüz canlı istek atılmadı.</li>
-                    </ul>
-                </div>
-
-                <div style="background: #e8f5e9; border: 1px solid #a5d6a7; padding: 10px 14px; border-radius: 8px; margin-top: 14px; font-size: 12px; color: #1b5e20;">
-                    💡 <b>Bilgi:</b> Ücretsiz Google Gemini API günlük 1500 isteğe kadar destek sunar. Sayacınız her 24 saatlik pencerede otomatik olarak dinamik hesaplanır.
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="app.js?v=7"></script>
+    <!-- Firebase SDK (Compat Version) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js?v=9"></script>
+    <script src="app.js?v=9"></script>
 </body>
 
 

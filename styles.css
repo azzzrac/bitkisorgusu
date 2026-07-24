@@ -379,6 +379,103 @@ body {
     flex-wrap: wrap;
 }
 
+/* Did You Mean / Bunu mu demek istediniz Banner & Chips */
+.did-you-mean-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, rgba(255, 248, 225, 0.95), rgba(255, 236, 179, 0.85));
+    border: 1.5px solid #ffe082;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(255, 179, 0, 0.15);
+    animation: fadeInDidYouMean 0.35s ease-out;
+}
+
+[data-theme="dark"] .did-you-mean-banner {
+    background: linear-gradient(135deg, rgba(45, 38, 18, 0.9), rgba(65, 52, 20, 0.8));
+    border-color: #f57f17;
+    color: #fff8e1;
+}
+
+@keyframes fadeInDidYouMean {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.did-you-mean-icon {
+    font-size: 1.2rem;
+    animation: pulseIcon 2s infinite ease-in-out;
+}
+
+@keyframes pulseIcon {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.18); }
+}
+
+.did-you-mean-text {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #795548;
+}
+
+[data-theme="dark"] .did-you-mean-text {
+    color: #ffe082;
+}
+
+.did-you-mean-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: linear-gradient(135deg, #2e7d32, #43a047);
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(46, 125, 50, 0.3);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.did-you-mean-chip:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(46, 125, 50, 0.45);
+    background: linear-gradient(135deg, #1b5e20, #2e7d32);
+}
+
+.did-you-mean-chip:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.did-you-mean-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 8px 14px;
+    background: rgba(255, 236, 179, 0.4);
+    border-radius: 10px;
+}
+
+.autocomplete-item.suggestion-item {
+    background-color: rgba(255, 236, 179, 0.25);
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+.autocomplete-item.suggestion-item:hover {
+    background-color: rgba(255, 236, 179, 0.55);
+}
+
 /* Result Section */
 .result-card {
     display: flex;
@@ -1196,53 +1293,228 @@ body[data-theme="dark"] .treatment-step-item {
     margin-top: 2px;
 }
 
-/* RESPONSIVE LAYOUT FOR MOBILE PHONES */
-@media (max-width: 650px) {
+/* ULTRA-RESPONSIVE MODERN MOBILE STYLES (Mobil Uyum & Düzgün Hizalama) */
+@media (max-width: 768px) {
     body {
-        padding: 8px;
+        padding: 10px 8px;
     }
 
-    .header-card {
-        flex-direction: column;
-        align-items: flex-start;
+    .app-container {
         gap: 10px;
     }
 
+    /* 1. Günün Bitkisi Banner */
+    .banner-card {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+        padding: 12px 14px;
+        gap: 8px;
+    }
+
+    .banner-content {
+        justify-content: center;
+        text-align: center;
+    }
+
+    #btnPotdExplore {
+        width: 100%;
+    }
+
+    /* 2. Header Card & Brand Title */
+    .header-card {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 14px 16px;
+        gap: 12px;
+    }
+
+    .brand {
+        text-align: center;
+    }
+
+    .brand-title {
+        font-size: 19px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .brand-subtitle {
+        font-size: 12px;
+    }
+
+    /* Header Actions: Clean 2-Column Grid on Mobile */
     .header-actions {
         width: 100%;
-        justify-content: flex-end;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .header-actions .btn {
+        width: 100%;
+        padding: 8px 10px;
+        font-size: 12px;
+        justify-content: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    #btnThemeToggle {
+        grid-column: span 2;
+        width: 100%;
+    }
+
+    /* 3. Arama Alanı (Input Card) */
+    .input-card {
+        padding: 14px 16px;
+    }
+
+    .input-group {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .input-label {
+        font-size: 13px;
+    }
+
+    .search-box-wrapper {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    #searchInput {
+        padding: 12px 14px;
+        font-size: 14px;
+    }
+
+    .select-history {
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+
+    /* Button Row: Neat 2x2 Grid */
+    .button-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .button-row .btn {
+        width: 100%;
+        padding: 11px 10px;
+        font-size: 13px;
+        justify-content: center;
+    }
+
+    /* Did You Mean Banner on Mobile */
+    .did-you-mean-banner {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+        padding: 12px;
+    }
+
+    .did-you-mean-chip {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* 4. Sonuç Alanı (Result Card & Layout) */
+    .result-card {
+        padding: 14px 16px;
     }
 
     .result-layout {
         flex-direction: column;
+        gap: 14px;
     }
 
     .image-box-wrapper,
     .image-box {
         width: 100%;
-        height: 240px;
+        height: 250px;
     }
 
-    .button-row {
-        width: 100%;
-        justify-content: stretch;
+    .plant-title {
+        font-size: 20px;
+        text-align: center;
     }
 
-    .button-row .btn {
-        flex: 1;
+    .botanical-name {
+        font-size: 13px;
+        text-align: center;
     }
 
+    /* Care Card Grid on Mobile */
+    .care-card {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        padding: 12px;
+    }
+
+    .care-item {
+        font-size: 12px;
+        padding: 6px 8px;
+        background: rgba(46, 125, 50, 0.06);
+        border-radius: 8px;
+    }
+
+    .trivia-card {
+        padding: 12px;
+        font-size: 12px;
+        text-align: center;
+    }
+
+    /* Result Action Bar on Mobile */
     .result-action-bar {
         flex-direction: column;
         align-items: stretch;
+        gap: 10px;
+        margin-top: 14px;
     }
 
     .action-left {
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        width: 100%;
     }
 
     .action-left .btn {
         width: 100%;
+        padding: 10px 8px;
+        font-size: 12px;
+        justify-content: center;
+    }
+
+    #btnExportPdf {
+        grid-column: span 2;
+    }
+
+    .status-bar {
+        text-align: center;
+        font-size: 12px;
+    }
+
+    /* Modallar (Profile, Doctor, AI Raw) */
+    .modal-card,
+    .doctor-modal-card {
+        width: 95% !important;
+        max-width: 95% !important;
+        padding: 16px !important;
+        max-height: 90vh;
+        overflow-y: auto;
     }
 
     .profile-tools-grid,
@@ -1253,6 +1525,11 @@ body[data-theme="dark"] .treatment-step-item {
 
     .add-plant-form {
         flex-direction: column;
+        gap: 8px;
+    }
+
+    .add-plant-form input {
+        width: 100%;
     }
 }
 
@@ -1405,4 +1682,4 @@ body[data-theme="dark"] .treatment-step-item {
     box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
     font-family: 'Courier New', Consolas, monospace !important;
     font-size: 13px !important;
-}
+}

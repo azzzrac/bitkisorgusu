@@ -135,6 +135,80 @@ document.addEventListener('DOMContentLoaded', () => {
             .trim();
     }
 
+    function trNormalizeClean(str) {
+        if (!str) return "";
+        return trNormalize(str).replace(/[^a-z0-9]/g, '');
+    }
+
+    // LEVENSHTEIN DISTANCE (Harf Hataları Algılama Motoru)
+    function levenshteinDistance(a, b) {
+        if (!a) return b ? b.length : 0;
+        if (!b) return a ? a.length : 0;
+
+        const matrix = [];
+        for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+        for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+        for (let i = 1; i <= b.length; i++) {
+            for (let j = 1; j <= a.length; j++) {
+                const cost = b.charAt(i - 1) === a.charAt(j - 1) ? 0 : 1;
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j] + 1,       // silme
+                    matrix[i][j - 1] + 1,       // ekleme
+                    matrix[i - 1][j - 1] + cost  // değiştirme
+                );
+            }
+        }
+        return matrix[b.length][a.length];
+    }
+
+    // AKILLI BİTKİ ÖNERİ MOTORU (Bunu mu demek istediniz?)
+    function bulEnYakinBitkiOnerisi(sorgu) {
+        if (!sorgu || sorgu.trim().length < 2) return null;
+        const sorguNorm = trNormalizeClean(sorgu);
+        if (!sorguNorm) return null;
+
+        let enYakinBitki = null;
+        let minMesafe = Infinity;
+
+        dictionary.forEach(plant => {
+            const plantNorm = trNormalizeClean(plant);
+            if (!plantNorm) return;
+
+            // Tam eşleşme kontrolü
+            if (sorguNorm === plantNorm) {
+                minMesafe = 0;
+                enYakinBitki = plant;
+                return;
+            }
+
+            const dist = levenshteinDistance(sorguNorm, plantNorm);
+            
+            // Tolerans hesabı: Kısa kelimelerde (<=4) 1 harf, orta (5-8) 2 harf, uzun (>8) 3 harf hatası tolere edilir
+            let maxTol = 1;
+            if (sorguNorm.length >= 5 && sorguNorm.length <= 8) maxTol = 2;
+            else if (sorguNorm.length > 8) maxTol = 3;
+
+            // Önek ya da kapsama kontrolü (Örn: "lavand" vs "lavanta")
+            const isPrefix = plantNorm.startsWith(sorguNorm) || sorguNorm.startsWith(plantNorm);
+            const effectiveDist = isPrefix ? Math.min(dist, 1) : dist;
+
+            if (effectiveDist <= maxTol && effectiveDist < minMesafe) {
+                minMesafe = effectiveDist;
+                enYakinBitki = plant;
+            }
+        });
+
+        if (enYakinBitki) {
+            return {
+                bitki: enYakinBitki,
+                mesafe: minMesafe,
+                isExact: minMesafe === 0
+            };
+        }
+        return null;
+    }
+
     // DOM ELEMENTS
     const searchInput = document.getElementById('searchInput');
     const autocompleteList = document.getElementById('autocompleteList');
@@ -143,6 +217,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnRandom = document.getElementById('btnRandom');
     const btnClear = document.getElementById('btnClear');
     const btnPotdExplore = document.getElementById('btnPotdExplore');
+
+    const didYouMeanBox = document.getElementById('didYouMeanBox');
+    const didYouMeanBtn = document.getElementById('didYouMeanBtn');
+    const didYouMeanWord = document.getElementById('didYouMeanWord');
 
     const imageBox = document.getElementById('imageBox');
     const plantImage = document.getElementById('plantImage');
@@ -180,39 +258,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCloseBadges = document.getElementById('btnCloseBadges');
     const btnOpenBadges = document.getElementById('btnOpenBadges');
 
-    // 📊 GEMİNI AI 24 SAATLİK İSTEK SAYACI GÜNCELLEME
-    async function fetchGeminiUsageStats() {
+    // 📊 GEMİNI AI 24 SAATLİK İSTEK SAYACI GÜNCELLEME (SUNUCUSUZ LOCALSTORAGE SÜRÜMÜ)
+    function fetchGeminiUsageStats() {
         try {
-            const API_BASE = 'http://localhost:3000/api';
-            const res = await fetch(`${API_BASE}/gemini-usage-stats`);
-            if (res.ok) {
-                const data = await res.json();
-                if (data && data.success) {
-                    const headerUsageCount = document.getElementById('headerUsageCount');
-                    if (headerUsageCount) headerUsageCount.textContent = `${data.count24h} İstek`;
-                    const el24h = document.getElementById('stat24hCount');
-                    const elTot = document.getElementById('statTotalCount');
-                    if (el24h) el24h.textContent = data.count24h;
-                    if (elTot) elTot.textContent = data.totalAllTime;
+            const stats = JSON.parse(localStorage.getItem('bitki_gemini_stats') || '{"requests": []}');
+            const now = Date.now();
+            const twentyFourHoursAgo = now - (24 * 60 * 60 * 1000);
+            
+            const valid24h = stats.requests.filter(r => r.timestamp >= twentyFourHoursAgo);
+            const count24h = valid24h.length;
+            const totalAllTime = stats.requests.length;
 
-                    const breakdownList = document.getElementById('usageBreakdownList');
-                    if (breakdownList) {
-                        const keys = Object.keys(data.modelBreakdown || {});
-                        if (keys.length === 0) {
-                            breakdownList.innerHTML = '<li style="font-style: italic; color: var(--text-subtitle);">Son 24 saat içinde henüz canlı istek atılmadı.</li>';
-                        } else {
-                            breakdownList.innerHTML = keys.map(k => `
-                                <li style="display: flex; justify-content: space-between; padding: 6px 10px; background: rgba(0,0,0,0.03); border-radius: 6px;">
-                                    <span>🤖 <b>${k}</b></span>
-                                    <span style="font-weight: 700; color: var(--primary-green);">${data.modelBreakdown[k]} İstek</span>
-                                </li>
-                            `).join('');
-                        }
-                    }
+            const modelBreakdown = {};
+            valid24h.forEach(r => {
+                const m = r.model || 'gemini-1.5-flash';
+                modelBreakdown[m] = (modelBreakdown[m] || 0) + 1;
+            });
+
+            const headerUsageCount = document.getElementById('headerUsageCount');
+            if (headerUsageCount) headerUsageCount.textContent = `${count24h} İstek`;
+            const el24h = document.getElementById('stat24hCount');
+            const elTot = document.getElementById('statTotalCount');
+            if (el24h) el24h.textContent = count24h;
+            if (elTot) elTot.textContent = totalAllTime;
+
+            const breakdownList = document.getElementById('usageBreakdownList');
+            if (breakdownList) {
+                const keys = Object.keys(modelBreakdown);
+                if (keys.length === 0) {
+                    breakdownList.innerHTML = '<li style="font-style: italic; color: var(--text-subtitle);">Son 24 saat içinde henüz canlı istek atılmadı.</li>';
+                } else {
+                    breakdownList.innerHTML = keys.map(k => `
+                        <li style="display: flex; justify-content: space-between; padding: 6px 10px; background: rgba(0,0,0,0.03); border-radius: 6px;">
+                            <span>🤖 <b>${k}</b></span>
+                            <span style="font-weight: 700; color: var(--primary-green);">${modelBreakdown[k]} İstek</span>
+                        </li>
+                    `).join('');
                 }
             }
         } catch (e) {
-            console.error("Gemini istek istatistikleri alınamadı:", e);
+            console.error("Gemini istek istatistikleri hesaplanamadı:", e);
         }
     }
     window.fetchGeminiUsageStats = fetchGeminiUsageStats;
@@ -270,8 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnOpenDoctor.addEventListener('click', () => {
             if (!currentUser) {
                 alert("⚠️ Bitki Keşif Portalı'nı kullanabilmek için lütfen öncelikle kayıt olun veya oturum açın.");
-                if (typeof showRegisterTab === 'function') showRegisterTab();
-                profileModal.style.display = 'flex';
+                window.location.href = 'login.html';
                 return;
             }
             resetDoctorModal();
@@ -311,6 +395,68 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // 🤖 FIREBASE / GOOGLE GEMINI DEVELOPER API İSTEMCİ YAPISI (100% SUNUCUSUZ 7/24)
+    function getGeminiApiKey() {
+        if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey && !firebaseConfig.apiKey.includes('YOUR_')) {
+            return firebaseConfig.apiKey;
+        }
+        return '';
+    }
+
+    function recordGeminiRequestLocally(modelName = 'gemini-1.5-flash', endpoint = 'general') {
+        try {
+            let stats = JSON.parse(localStorage.getItem('bitki_gemini_stats') || '{"requests": []}');
+            const now = Date.now();
+            stats.requests.push({ timestamp: now, model: modelName, endpoint: endpoint });
+            if (stats.requests.length > 1000) stats.requests = stats.requests.slice(-1000);
+            localStorage.setItem('bitki_gemini_stats', JSON.stringify(stats));
+            fetchGeminiUsageStats();
+        } catch(e) {}
+    }
+
+    async function callDirectGeminiAPI(prompt, base64Image = null, mimeType = 'image/jpeg', modelName = 'gemini-1.5-flash') {
+        const apiKey = getGeminiApiKey();
+        if (!apiKey) {
+            throw new Error('Gemini API Key yapılandırılmamış.');
+        }
+
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+        
+        let parts = [{ text: prompt }];
+        if (base64Image) {
+            const cleanBase64 = base64Image.includes(',') ? base64Image.split(',')[1] : base64Image;
+            parts.push({
+                inlineData: {
+                    mimeType: mimeType || 'image/jpeg',
+                    data: cleanBase64
+                }
+            });
+        }
+
+        const payload = {
+            contents: [{ parts: parts }]
+        };
+
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            const errText = await res.text();
+            throw new Error(`Gemini API Hatası (${res.status}): ${errText}`);
+        }
+
+        const data = await res.json();
+        recordGeminiRequestLocally(modelName);
+
+        if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+            return data.candidates[0].content.parts[0].text;
+        }
+        throw new Error('Gemini API geçerli bir yanıt dönmedi.');
+    }
+
     if (btnDiagnose) {
         btnDiagnose.addEventListener('click', async () => {
             if (!doctorSelectedBase64) {
@@ -323,25 +469,29 @@ document.addEventListener('DOMContentLoaded', () => {
             doctorReportCard.style.display = 'none';
 
             try {
-                const API_BASE = 'http://localhost:3000/api';
                 const userNotes = doctorNotesInput ? doctorNotesInput.value.trim() : '';
-                const res = await fetch(`${API_BASE}/diagnose-plant-disease`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        imageBase64: doctorSelectedBase64,
-                        mimeType: doctorSelectedMime,
-                        userNotes: userNotes
-                    })
-                });
+                const prompt = `Sen uzman bir botanik doktorusun. Yüklenen hastalıklı bitki görselini ve kullanıcı notunu ("${userNotes}") incele.
+Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (başında veya sonunda markdown açıklaması yazma):
+{
+  "healthStatus": "Hasta",
+  "diseaseName": "Hastalık Adı (Türkçe)",
+  "severity": "Yüksek (Kritik)",
+  "plantType": "Bitki Türü",
+  "symptoms": ["Belirti 1", "Belirti 2"],
+  "causes": ["Neden 1", "Neden 2"],
+  "treatment": ["Reçete 1", "Reçete 2"],
+  "prevention": ["Önlem 1", "Önlem 2"]
+}`;
 
-                const data = await res.json();
+                const responseText = await callDirectGeminiAPI(prompt, doctorSelectedBase64, doctorSelectedMime, 'gemini-1.5-flash');
+                const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+                const d = JSON.parse(jsonMatch ? jsonMatch[0] : responseText);
+
                 btnDiagnose.disabled = false;
                 doctorLoader.style.display = 'none';
 
-                if (data && data.success && data.data) {
-                    const d = data.data;
-                    
+                if (d) {
+
                     // Şiddet Rozeti Rengi
                     const severityEl = document.getElementById('reportSeverity');
                     severityEl.textContent = d.severity || 'Orta (Dikkat)';
@@ -409,11 +559,42 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // OTOMATİK TAMAMLAMA
+    // BUNU MU DEMEK İSTEDİNİZ? ROZET BİLDİRİMİ İŞLEYİCİLERİ
+    function gosterBunuMuDemekIstediniz(onerilenKelime) {
+        if (!didYouMeanBox || !didYouMeanWord || !onerilenKelime) return;
+        didYouMeanWord.textContent = onerilenKelime;
+        didYouMeanBox.style.display = 'flex';
+    }
+
+    function gizleBunuMuDemekIstediniz() {
+        if (didYouMeanBox) didYouMeanBox.style.display = 'none';
+    }
+
+    if (didYouMeanBtn) {
+        didYouMeanBtn.addEventListener('click', () => {
+            const word = didYouMeanWord ? didYouMeanWord.textContent.trim() : '';
+            if (word) {
+                searchInput.value = word;
+                gizleBunuMuDemekIstediniz();
+                sorgula();
+            }
+        });
+    }
+
+    window.sorgulaArama = function(bitki) {
+        if (!bitki) return;
+        searchInput.value = bitki;
+        gizleBunuMuDemekIstediniz();
+        sorgula();
+    };
+
+    // OTOMATİK TAMAMLAMA & AKILLI HARF HATASI ÖNERİSİ
     searchInput.addEventListener('input', () => {
-        const queryNorm = trNormalize(searchInput.value);
+        const rawValue = searchInput.value;
+        const queryNorm = trNormalize(rawValue);
         if (queryNorm.length < 1) {
             autocompleteList.style.display = 'none';
+            gizleBunuMuDemekIstediniz();
             return;
         }
 
@@ -440,7 +621,14 @@ document.addEventListener('DOMContentLoaded', () => {
             autocompleteList.innerHTML = matches.map(m => `<div class="autocomplete-item" data-value="${m}">🌿 ${m}</div>`).join('');
             autocompleteList.style.display = 'block';
         } else {
-            autocompleteList.style.display = 'none';
+            // Ön ek eşleşmesi bulunamadığında Levenshtein mesafe motoru ile öneri bul
+            const oneri = bulEnYakinBitkiOnerisi(rawValue);
+            if (oneri && oneri.bitki && rawValue.length >= 3) {
+                autocompleteList.innerHTML = `<div class="autocomplete-item suggestion-item" data-value="${oneri.bitki}">💡 <i>Bunu mu demek istediniz?</i> <b>${oneri.bitki}</b></div>`;
+                autocompleteList.style.display = 'block';
+            } else {
+                autocompleteList.style.display = 'none';
+            }
         }
     });
 
@@ -449,6 +637,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (item) {
             searchInput.value = item.getAttribute('data-value');
             autocompleteList.style.display = 'none';
+            gizleBunuMuDemekIstediniz();
             sorgula();
         }
     });
@@ -473,7 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnUploadPhoto.addEventListener('click', () => {
             if (!currentUser) {
                 alert("⚠️ Bitki Keşif Portalı'nı kullanabilmek için lütfen öncelikle oturum açınız veya kayıt olunuz.");
-                profileModal.style.display = 'flex';
+                window.location.href = 'login.html';
                 return;
             }
             btnUploadImageInput.click();
@@ -496,15 +685,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusBar.textContent = "🤖 Google Gemini AI fotoğraftaki bitki türünü analiz ediyor...";
 
                 try {
-                    const API_BASE = 'http://localhost:3000/api';
-                    const res = await fetch(`${API_BASE}/identify-plant`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ imageBase64: imgDataUrl, mimeType: file.type || 'image/jpeg' })
-                    });
-                    const data = await res.json();
+                    const prompt = `Fotoğraftaki bitkinin Türkçe popüler adını tespit et. Sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver:
+{ "plantName": "Bitki Adı" }`;
+                    const responseText = await callDirectGeminiAPI(prompt, imgDataUrl, file.type || 'image/jpeg', 'gemini-1.5-flash');
+                    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+                    const data = JSON.parse(jsonMatch ? jsonMatch[0] : responseText);
 
-                    if (res.ok && data.plantName) {
+                    if (data && data.plantName) {
                         searchInput.value = data.plantName;
                         sorgula();
                         statusBar.textContent = `🤖 Gemini Yapay Zekası fotoğraftaki bitkiyi buldu: ${data.plantName}`;
@@ -669,35 +856,121 @@ document.addEventListener('DOMContentLoaded', () => {
 
     });
 
-    async function getPlantInfoFromGemini(bitkiAdi) {
-        try {
-            const API_BASE = 'http://localhost:3000/api';
-            const res = await fetch(`${API_BASE}/plant-info`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ plantName: bitkiAdi })
-            });
-            if (res.ok) {
-                const data = await res.json();
-                if (data && data.success && data.data) {
-                    return { ...data.data, _rawPayload: data };
-                }
-            }
-        } catch (err) {
-            console.error("Gemini plant-info isteği başarısız:", err);
+    function buildBotanicalKnowledge(bitkiAdi) {
+        const p = trNormalize(bitkiAdi);
+        let baslik = bitkiAdi.toUpperCase();
+        let botanicalName = getBotanicalName(bitkiAdi);
+        let description = `${bitkiAdi}, botanik dünyasında estetik görünümü, iklim adaptasyonu ve kendine has yaprak/çiçek yapısıyla öne çıkan değerli bir flora türüdür. Doğal yaşam ortamında topraktan aldığı besin maddeleri, uygun güneş ışığı ve düzenli nem dengesi ile sağlıklı bir gelişim gösterir.`;
+        let sun = "Bol Güneşli / Parlak Dolaylı Işık";
+        let water = "Toprak Kurudukça (Haftada 1-2 Kez)";
+        let temp = "18°C - 26°C";
+        let season = "İlkbahar - Yaz Dönemi";
+        let region = "Ilıman & Tropikal Bölgeler";
+        let rebloom = "Evet (Düzenli bakımla tekrar çiçek açar)";
+        let trivia = getPlantTrivia(bitkiAdi);
+
+        if (p.includes('lavanta')) {
+            description = "Lavanta, Ballıbabagiller familyasından Akdeniz kökenli, mor renkli mis kokulu çiçekleriyle bilinen çok yıllık bir çalı bitkisidir. Yapraklarındaki gümüşümsü tüyler ve çiçeklerindeki uçucu lavanta yağı, aromaterapiden kozmetiğe, sağlıktan süs bitkiciliğine kadar geniş bir kullanım alanına sahiptir. Kuraklığa ve güneşe oldukça dayanıklıdır.";
+            sun = "Bol Güneşli (Günde 6+ Saat)"; water = "Toprak Kurudukça (Az Su)"; temp = "15°C - 30°C"; season = "Yaz Başı (Haziran - Ağustos)"; region = "Akdeniz Havzası & Ege (Isparta)"; rebloom = "Evet (Çok yıllık çalıdır, her yaz mor çiçeklerini tekrar açar)";
+        } else if (p.includes('gul')) {
+            description = "Gül, Gülgiller familyasından dünyadaki en popüler ve köklü süs bitkilerindendir. Dikensiz veya dikenli sapları, katmerli renkli çiçekleri ve büyüleyici kokusuyla zarafetin simgesidir. Türkiye'de özellikle Isparta yöresi gül yetiştiriciliğiyle meşhurdur.";
+            sun = "Tam Güneş (Günde 6 Saat)"; water = "Haftada 2-3 Kez"; temp = "15°C - 26°C"; season = "İlkbahar - Sonbahar (Mayıs - Ekim)"; region = "Ilıman Bölgeler, Anadolu & Akdeniz"; rebloom = "Evet (Solan çiçek başları budandıkça sezon boyunca tekrar tekrar açar)";
+        } else if (p.includes('orkide')) {
+            description = "Orkide, dünyadaki en geniş ve en estetik bitki familyalarından biridir. Narin yapısı, geometrik çiçek formu ve köklerinin havadan nem alabilme özelliğiyle evlerde en çok tercih edilen estetik salon bitkilerindendir.";
+            sun = "Filtrelenmiş Parlak Işık"; water = "Haftada 1 Kez (Daldırma Yöntemi)"; temp = "18°C - 25°C"; season = "Sonbahar - İlkbahar (Yılda 1-2 Kez)"; region = "Tropikal & Yarı Tropikal Ormanlar"; rebloom = "Evet (Çiçek sapı 3. boğumdan budanıp nem sağlandığında tekrar açar)";
+        } else if (p.includes('papatya')) {
+            description = "Papatya, Papatyagiller familyasından beyaz taç yaprakları ve sarı göbeğiyle doğanın masumiyetini temsil eden kır bitkisidir. Çay olarak tüketildiğinde sakinleştirici, mideyi rahatlatıcı ve iltihap giderici etkileri vardır.";
+            sun = "Bol Güneşli & Yarı Gölge"; water = "Haftada 1-2 Kez"; temp = "12°C - 24°C"; season = "İlkbahar - Yaz (Nisan - Temmuz)"; region = "Türkiye Geneli & Ilıman Kırlar"; rebloom = "Evet (Tohum dökerek her bahar kendiliğinden tekrar biter)";
+        } else if (p.includes('kaktus')) {
+            description = "Kaktüs, gövdesinde yüksek miktarda su depolayabilen, yaprakları diken şeklini almış kurakçıl bir sukulent familyasıdır. Çöl iklimlerine adapte olmuş yapısıyla evlerde bakımı en kolay bitkilerdendir.";
+            sun = "Tam Güneş (Doğrudan Işık)"; water = "Ayda 1-2 Kez (Toprak Tamamen Kuruyunca)"; temp = "15°C - 35°C"; season = "Yaz Dönemi (Seyrek Çiçek Çıkarır)"; region = "Çöl & Kurak İklim Alanları"; rebloom = "Evet (Yeterli güneş alıp kış dinlenmesine girerse çiçek açar)";
+        } else if (p.includes('aloe')) {
+            description = "Aloe Vera, etli ve berrak jel dolu yapraklarıyla bilinen tıbbi bir sukulent türüdür. Cilt yenileme, yanık tedavisi ve nemlendirme konularında doğal bir mucizedir.";
+            sun = "Parlak Dolaylı Işık"; water = "2 Haftada 1 Kez"; temp = "16°C - 28°C"; season = "İlkbahar - Yaz"; region = "Afrika & Akdeniz Havzası"; rebloom = "Evet (Olgunlaşan köklerden yeni yavru aloe'lar verir)";
+        } else if (p.includes('monstera') || p.includes('deve tabani')) {
+            description = "Monstera Deliciosa (Deve Tabanı), devasa delikli ve yırtmaçlı yapraklarıyla modern iç mekan dekorasyonunun en popüler tropikal bitkisidir. Yağmur ormanı kökenlidir.";
+            sun = "Parlak Dolaylı Işık (Direkt Güneş Yakabilir)"; water = "Haftada 1 Kez (Toprak Üstü Kuruyunca)"; temp = "18°C - 27°C"; season = "Yıl Boyu Yaprak Gelişimi"; region = "Meksika & Orta Amerika Tropik Ormanları"; rebloom = "Yaprak Bitkisidir (Yeni dev yapraklar çıkarır)";
+        } else if (p.includes('begonvil')) {
+            description = "Begonvil, Akdeniz ve Ege mimarisinin simgesi olan sarmaşık formunda rengarenk bir çalı bitkisidir. Pembe, mor, kırmızı ve beyaz renkte büyüleyici brakte yapraklar açar.";
+            sun = "Bol Güneşli (Günde En Az 6 Saat)"; water = "Toprak Kurudukça (Suyu Az Sever)"; temp = "18°C - 35°C"; season = "Yaz - Sonbahar Başı"; region = "Akdeniz & Ege Kıyıları (Bodrum)"; rebloom = "Evet (Güneş gördükçe tüm yaz tekrar tekrar çiçeklenir)";
+        } else if (p.includes('pasa kilici') || p.includes('sansevieria')) {
+            description = "Paşa Kılıcı, dik ve kılıç şeklindeki alacalı yapraklarıyla bilinen, bakımı neredeyse imkansız derecede kolay bir hava temizleyici salon bitkisidir.";
+            sun = "Düşük Işıktan Parlak Işığa Toleranslı"; water = "2-3 Haftada 1 Kez (Kuraklığa Dayanıklı)"; temp = "15°C - 30°C"; season = "Büyüme Dönemi Yaz"; region = "Batı Afrika Tropikleri"; rebloom = "Yaprak Bitkisidir (Nadir çiçek açar)";
+        } else if (p.includes('feslegen') || p.includes('reyhan')) {
+            description = "Fesleğen, İtalyan ve Akdeniz mutfağının vazgeçilmezi aromatik bir baharat bitkisidir. Yapraklarına dokunulduğunda ortama ferahlatıcı keskin bir koku yayar.";
+            sun = "Bol Güneşli (Günde 4-6 Saat)"; water = "Gün Aşırı (Toprağı Nemli Tutulmalı)"; temp = "18°C - 28°C"; season = "Yaz Dönemi"; region = "Akdeniz & Asya"; rebloom = "Çiçekleri Budandıkça Taze Yaprak Verir";
+        } else if (p.includes('limon')) {
+            description = "Limon (Citrus × limon), Turunçgiller familyasından C vitamini deposu şifalı ve mis kokulu meyveleri olan küçük bir ağaç türüdür. Hem yaprakları hem çiçekleri aromatik koku salgılar.";
+            sun = "Tam Güneşli (Günde 6-8 Saat)"; water = "Toprak Üstü Kurudukça Derinlemesine"; temp = "15°C - 30°C"; season = "İlkbahar Çiçeklenme - Kış Meyve"; region = "Akdeniz & Ege Kıyıları (Mersin, Antalya)"; rebloom = "Evet (Her yıl düzenli çiçek açıp limon meyvesi verir)";
+        } else if (p.includes('nane')) {
+            description = "Nane (Mentha), Ballıbabagiller familyasından tazeleyici mentol kokusuyla bilinen çok yıllık aromatik bir otsu bitkidir. Mutfaklarda ve çay yapımında yaygın olarak kullanılır.";
+            sun = "Yarı Gölge / Parlak Işık"; water = "Düzenli Nemli Toprak"; temp = "15°C - 25°C"; season = "İlkbahar - Sonbahar"; region = "Türkiye Geneli & Ilıman İklimler"; rebloom = "Evet (Budandıkça hızla taze sürgünler verir)";
+        } else if (p.includes('zeytin')) {
+            description = "Zeytin (Olea europaea), Akdeniz ikliminin simgesi olan, binlerce yıl yaşayabilen efsanevi bir ağaç türüdür. Gümüşi yeşil yaprakları ve şifalı zeytinyağı üreten meyveleriyle bilinir.";
+            sun = "Bol Güneşli"; water = "Kuraklığa Dayanıklı (Az Su)"; temp = "15°C - 35°C"; season = "İlkbahar Çiçek - Sonbahar Hasat"; region = "Ege, Akdeniz & Marmara"; rebloom = "Evet (Çok yıllık kadim ağaçtır)";
         }
-        return null;
+
+        return {
+            baslik: baslik,
+            botanicalName: botanicalName,
+            ozet: description,
+            care: {
+                sun: sun,
+                water: water,
+                temp: temp,
+                season: season,
+                region: region,
+                rebloom: rebloom
+            },
+            trivia: trivia
+        };
     }
 
+    async function getPlantInfoFromGemini(bitkiAdi) {
+        try {
+            const prompt = `Sen profesyonel bir botanik uzmanısın. '${bitkiAdi}' isimli bitki için aşağıdaki detaylı bilgileri içeren geçerli bir JSON yanıtı ver (sadece ve sadece JSON ver, başında veya sonunda markdown açıklaması yazma):
+{
+  "plantName": "${bitkiAdi}",
+  "botanicalName": "Latince Botanik Adı",
+  "description": "Bitkinin kökeni, yapısı ve özellikleri hakkında detaylı açıklama...",
+  "care": {
+    "sun": "Işık ihtiyacı (Örn: Bol Güneşli)",
+    "water": "Sulama sıklığı (Örn: Haftada 1-2 Kez)",
+    "temp": "Uygun sıcaklık aralığı (Örn: 18°C - 25°C)",
+    "season": "Çiçeklenme/Büyüme dönemi",
+    "region": "Yetiştiği coğrafi bölge",
+    "rebloom": "Solarsa tekrar açar mı bilgisi"
+  },
+  "trivia": "💡 Biliyor muydunuz? '${bitkiAdi}' bitkisi hakkında şaşırtıcı ve ilgi çekici tarihi/botanik bir bilgi..."
+}`;
+
+            const responseText = await callDirectGeminiAPI(prompt, null, null, 'gemini-1.5-flash');
+            const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+            const data = JSON.parse(jsonMatch ? jsonMatch[0] : responseText);
+            if (data && (data.plantName || data.baslik || data.description)) {
+                return {
+                    baslik: (data.plantName || data.baslik || bitkiAdi).toUpperCase(),
+                    botanicalName: data.botanicalName || "Latince Botanik Adı",
+                    ozet: data.description || data.ozet || "Detaylı açıklama bulunamadı.",
+                    care: data.care || null,
+                    trivia: data.trivia || null,
+                    _rawPayload: { data: data }
+                };
+            }
+        } catch (err) {
+            console.error("Gemini plant-info isteği başarısız (Akıllı Botanik Motoru Devrede):", err);
+        }
+        return buildBotanicalKnowledge(bitkiAdi);
+    }
 
     async function sorgula() {
         if (!currentUser) {
             alert("⚠️ Bitki Keşif Portalı'nı kullanabilmek için lütfen öncelikle kayıt olun veya oturum açın.");
-            if (typeof showRegisterTab === 'function') showRegisterTab();
-            profileModal.style.display = 'flex';
+            window.location.href = 'login.html';
             return;
         }
 
+        gizleBunuMuDemekIstediniz();
         const bitkiAdi = searchInput.value.trim();
         if (!bitkiAdi) {
             infoPlaceholder.style.display = 'block';
@@ -708,9 +981,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (!bitkiAdiDogrula(bitkiAdi)) {
-            infoPlaceholder.style.display = 'block';
-            infoPlaceholder.textContent = '⚠️ Böyle bir bitki bulunmuyor, tekrar deneyiniz.';
-            infoPlaceholder.style.color = '#c62828';
+            showErrorState(bitkiAdi);
             statusBar.textContent = 'Uyarı: Böyle bir bitki bulunmuyor.';
             return;
         }
@@ -720,6 +991,12 @@ document.addEventListener('DOMContentLoaded', () => {
         totalSearchCount++;
         btnSearch.disabled = true;
         statusBar.textContent = `🤖 Google Gemini AI '${bitkiAdi}' bilgilerini hazırlıyor...`;
+
+        // Harf hatası kontrolü: Kullanıcı girdisine en yakın öneri var mı?
+        const oneri = bulEnYakinBitkiOnerisi(bitkiAdi);
+        if (oneri && !oneri.isExact) {
+            gosterBunuMuDemekIstediniz(oneri.bitki);
+        }
 
         const resultLayout = document.querySelector('.result-layout');
         const imageBoxWrapper = document.querySelector('.image-box-wrapper');
@@ -770,8 +1047,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (geminiRes || (wikiRes && wikiRes.baslik)) {
                 const baslik = geminiRes ? geminiRes.baslik.toUpperCase() : wikiRes.baslik;
 
-
-
+                // Wikipedia farklı başlık düzelttiyse öneri rozetini güncelle
+                if (wikiRes && wikiRes.baslik && trNormalizeClean(bitkiAdi) !== trNormalizeClean(wikiRes.baslik)) {
+                    gosterBunuMuDemekIstediniz(wikiRes.baslik);
+                }
 
                 const ozet = geminiRes ? geminiRes.ozet : wikiRes.ozet;
                 const botName = (geminiRes && geminiRes.botanicalName) ? geminiRes.botanicalName : getBotanicalName(baslik);
@@ -808,6 +1087,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 plantTitle.textContent = `🌿 ${baslik}`;
                 botanicalName.textContent = `🧬 Botanik Adı: ${botName}`;
+                plantDescription.textContent = ozet;
                 resultContent.style.display = 'block';
 
                 // Görsel Yükle
@@ -882,18 +1162,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
             } else {
-                showErrorState();
+                showErrorState(bitkiAdi);
             }
         } catch (err) {
             btnSearch.disabled = false;
-            showErrorState();
+            showErrorState(bitkiAdi);
         }
     }
 
-    function showErrorState() {
+    function showErrorState(sorgulananKelime) {
         infoPlaceholder.style.display = 'block';
-        infoPlaceholder.textContent = '⚠️ Böyle bir bitki bulunmuyor, tekrar deneyiniz.';
         infoPlaceholder.style.color = '#c62828';
+        infoPlaceholder.className = 'info-placeholder';
+
+        const oneri = sorgulananKelime ? bulEnYakinBitkiOnerisi(sorgulananKelime) : null;
+        if (oneri && oneri.bitki) {
+            infoPlaceholder.innerHTML = `⚠️ '<b>${sorgulananKelime}</b>' adında tam bir sonuç bulunamadı.<br><div class="did-you-mean-inline">💡 <span>Bunu mu demek istediniz?</span> <button type="button" class="did-you-mean-chip" onclick="sorgulaArama('${oneri.bitki}')">🌿 ${oneri.bitki}</button></div>`;
+            gosterBunuMuDemekIstediniz(oneri.bitki);
+        } else {
+            infoPlaceholder.textContent = '⚠️ Böyle bir bitki bulunmuyor, tekrar deneyiniz.';
+        }
+
         resultContent.style.display = 'none';
 
         plantImage.style.display = 'none';
@@ -1018,13 +1307,68 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getPlantTrivia(name) {
-        const p = name.toLowerCase();
-        if (p.includes('lavanta')) return '💡 Biliyor muydunuz? Lavanta kokusunun stresi azaltıp uyku kalitesini %20 artırdığı kanıtlanmıştır.';
-        if (p.includes('gül')) return '💡 Biliyor muydunuz? Dünyanın en eski yaşayan gülü Almanya\'daki Hildesheim Katedrali\'ndedir ve 1000 yaşındadır!';
-        if (p.includes('orkide')) return '💡 Biliyor muydunuz? Orkideler dünyadaki en geniş bitki türlerindendir (28.000\'den fazla türü vardır)!';
-        if (p.includes('papatya')) return '💡 Biliyor muydunuz? Papatyalar Antarktika hariç dünyadaki tüm kıtalarda doğal olarak yetişebilir!';
-        if (p.includes('kaktüs')) return '💡 Biliyor muydunuz? Bazı dev kaktüs türleri bünyesinde 3000 litreden fazla su depolayabilir!';
-        return '💡 Biliyor muydunuz? Bitkiler dünyadaki oksijenin %99\'unu üreterek yaşamın devamlılığını sağlar!';
+        if (!name) return '💡 Biliyor muydunuz? Bitkiler dünyadaki oksijenin %99\'unu üreterek yaşamın devamlılığını sağlar!';
+        const p = trNormalize(name);
+
+        if (p.includes('lavanta')) return '💡 Biliyor muydunuz? Lavanta kokusunun stresi azaltıp uyku kalitesini %20 artırdığı ve beyin dalgalarını sakinleştirdiği kanıtlanmıştır.';
+        if (p.includes('gul')) return '💡 Biliyor muydunuz? Dünyanın en eski yaşayan gülü Almanya\'daki Hildesheim Katedrali\'ndedir ve 1000 yaşından büyüktür!';
+        if (p.includes('orkide')) return '💡 Biliyor muydunuz? Orkideler dünyadaki en geniş bitki familyalarındandır (28.000\'den fazla türü vardır) ve bazı türleri 100 yıla kadar yaşayabilir!';
+        if (p.includes('papatya')) return '💡 Biliyor muydunuz? Papatyalar Antarktika hariç dünyadaki tüm kıtalarda doğal olarak yetişebilir ve bir papatya çiçeği aslında yüzlerce minik çiçekçikten oluşur!';
+        if (p.includes('kaktus')) return '💡 Biliyor muydunuz? Bazı dev kaktüs türleri bünyesinde 3.000 litreden fazla su depolayabilir ve 200 yıldan fazla yaşayabilir!';
+        if (p.includes('aloe')) return '💡 Biliyor muydunuz? Eski Mısırlılar Aloe Vera bitkisine "Ölümsüzlük Bitkisi" derdi ve Kleopatra cilt bakımı için Aloe jelini kullanırdı!';
+        if (p.includes('monstera') || p.includes('deve tabani')) return '💡 Biliyor muydunuz? Monstera yapraklarındaki delikler, doğal yaşam alanı olan yağmur ormanlarında şiddetli rüzgarların ve yağmurun yaprağı yırtmasını önlemek için evrimleşmiştir!';
+        if (p.includes('pasa kilici') || p.includes('sansevieria')) return '💡 Biliyor muydunuz? Paşa Kılıcı çoğu bitkinin aksine gece boyunca karbondioksiti emip ortama bol miktarda saf oksijen salgılar!';
+        if (p.includes('begonvil')) return '💡 Biliyor muydunuz? Begonvilin rengarenk görünen kısımları aslında taç yaprak değil "bract" denilen koruyucu yapraklardır; gerçek çiçekleri ortadaki minik beyaz kısımdır!';
+        if (p.includes('bonsai')) return '💡 Biliyor muydunuz? "Bonsai" kelimesi Japonca "saksıdaki ağaç" anlamına gelir ve doğru bakılan bazı Bonsai ağaçları 800 yıldan fazla yaşayabilir!';
+        if (p.includes('feslegen') || p.includes('reyhan')) return '💡 Biliyor muydunuz? Fesleğen yapraklarındaki doğal uçucu yağlar sivrisinekleri ve zararlı böcekleri uzak tutan harika bir doğal kovucudur!';
+        if (p.includes('bambu')) return '💡 Biliyor muydunuz? Bazı bambu türleri günde 90 santimetreye kadar büyüyerek dünyadaki en hızlı büyüyen odunsu bitki unvanına sahiptir!';
+        if (p.includes('nane')) return '💡 Biliyor muydunuz? Nane yapraklarındaki mentol maddesi, beynimizdeki soğukluk algılayıcı reseptörleri uyararak ferahlık ve serinlik hissi yaratır!';
+        if (p.includes('limon')) return '💡 Biliyor muydunuz? Tek bir yetişkin limon ağacı yılda ortalama 1.500 ila 3.000 adet şifalı limon üretebilir!';
+        if (p.includes('zeytin')) return '💡 Biliyor muydunuz? Akdeniz havzasındaki bazı zeytin ağaçları 2.000 yıldan uzun süredir kesintisiz olarak zeytin meyvesi vermeye devam etmektedir!';
+        if (p.includes('ihlamur')) return '💡 Biliyor muydunuz? Ihlamur ağacının mis kokulu çiçekleri arılar için muazzam bir nektar kaynağıdır ve ıhlamur çayı doğal bir rahatlatıcıdır!';
+        if (p.includes('defne')) return '💡 Biliyor muydunuz? Antik Yunan ve Roma döneminde defne yapraklarından yapılan taçlar bilgeliğin, zaferin ve başarının en yüce simgesiydi!';
+        if (p.includes('yasemin')) return '💡 Biliyor muydunuz? Yasemin çiçekleri en yoğun ve büyüleyici kokularını gece karanlığında, havanın serinlemesiyle birlikte salgılar!';
+        if (p.includes('lale')) return '💡 Biliyor muydunuz? 17. yüzyılda Hollanda\'da yaşanan "Lale Çılgınlığı" döneminde tek bir lale soğanı lüks bir ev fiyatına satılıyordu!';
+        if (p.includes('sumbul')) return '💡 Biliyor muydunuz? Sümbül çiçeklerinin yoğun tatlı kokusu, doğada tozlaşmayı sağlayan arıları ve kelebekleri kilometrelerce öteden çeker!';
+        if (p.includes('sardunya')) return '💡 Biliyor muydunuz? Sardunyalar yapraklarına dokunulduğunda hücrelerindeki koku keseciklerini kırarak etrafa aromatik hoş bir koku yayar!';
+        if (p.includes('kardelen')) return '💡 Biliyor muydunuz? Kardelen bitkisi karların arasından fışkırırken kendi ürettiği doğal ısı sayesinde etrafındaki karları eriterek açar!';
+        if (p.includes('manolya')) return '💡 Biliyor muydunuz? Manolyalar dünyada arılardan bile önce (yaklaşık 95 milyon yıl önce) evrimleştiği için tozlaşmalarını kınkanatlı böceklerle yaparlar!';
+        if (p.includes('sakayik')) return '💡 Biliyor muydunuz? Çin kültüründe "Çiçeklerin Kralı" olarak bilinen Şakayık bitkisi zenginliğin, zarafetin ve iyi şansın simgesidir!';
+        if (p.includes('biberiye')) return '💡 Biliyor muydunuz? Biberiye kokusunun hafızayı ve konsantrasyonu %75 oranında artırdığı nörolojik araştırmalarla kanıtlanmıştır!';
+        if (p.includes('kekik')) return '💡 Biliyor muydunuz? Kekik yağı içerisindeki "Timol" bileşeni, güçlü doğal bir antiseptiktir ve mikroplarla savaşmada etkilidir!';
+        if (p.includes('safran')) return '💡 Biliyor muydunuz? Dünyanın en pahalı baharatı olan safranın sadece 1 gramını elde etmek için yaklaşık 150 adet safran çiçeği elle toplanır!';
+        if (p.includes('sukulent')) return '💡 Biliyor muydunuz? Sukulentler etli yapraklarında su depo ederek çöl ve kurak iklim koşullarında aylarca susuz yaşayabilir!';
+        if (p.includes('zencefil')) return '💡 Biliyor muydunuz? Zencefil bitkisinin kök gövdesi (rizom) binlerce yıldır doğal bir bulantı önleyici ve bağışıklık güçlendirici olarak kullanılır!';
+        if (p.includes('zerdecal')) return '💡 Biliyor muydunuz? Zerdeçalın içindeki aktif bileşen olan Curcumin, güçlü bir antioksidan ve doğal bir iltihap sökücüdür!';
+        if (p.includes('nergis')) return '💡 Biliyor muydunuz? Mitolojide Nergis (Narcissus) çiçeği, suda kendi yansımasına aşık olan Narkissos\'tan adını almıştır!';
+        if (p.includes('incir')) return '💡 Biliyor muydunuz? İncir meyvesi botanik olarak ters dönmüş bir çiçek salkımıdır ve doğada incir arıları tarafından tozlaştırılır!';
+        if (p.includes('cilek')) return '💡 Biliyor muydunuz? Çilek, tohumları (çekirdekleri) meyvesinin etli dış yüzeyinde yer alan dünyadaki tek meyvedir!';
+        if (p.includes('badem')) return '💡 Biliyor muydunuz? Badem aslında bir kuruyemiş değil, şeftaligiller familyasından etli bir meyvenin çekirdeğidir!';
+        if (p.includes('karanfil')) return '💡 Biliyor muydunuz? Karanfil çiçeğinin kokusu beynimizdeki koku reseptörlerini uyararak doğal zihinsel odaklanma ve rahatlama sağlar!';
+        if (p.includes('sarmasik')) return '💡 Biliyor muydunuz? Duvar sarmaşıkları binaların dış yüzeyindeki nemi emerek binalarda doğal bir ısı ve nem yalıtımı sağlar!';
+        if (p.includes('sogut')) return '💡 Biliyor muydunuz? Söğüt ağacı kabuğundaki Salisin maddesi, modern tıpta kullanılan Aspirin ilacının ilk ham maddesidir!';
+        if (p.includes('akasya')) return '💡 Biliyor muydunuz? Bazı Akasya ağaçları zürafalar yapraklarını yemeye başladığında diğer ağaçları uyarmak için havaya etilen gazı salgılar!';
+
+        if (p.includes('cilek') || p.includes('ahududu') || p.includes('bogurtlen')) {
+            return `💡 Biliyor muydunuz? ${name} gibi meyveli bitkilerin çekirdekleri dış yüzeyinde yer alan nadir botanik türlerindendir!`;
+        }
+        if (p.includes('cam') || p.includes('cinar') || p.includes('koknar') || p.includes('ladin') || p.includes('mese')) {
+            return `💡 Biliyor muydunuz? ${name} gibi ulu ağaçlar gövdelerinde yüzlerce yıllık iklim ve atmosfer verilerini halkalar halinde saklar!`;
+        }
+        if (p.includes('kasimpati') || p.includes('fusya') || p.includes('husnuyusuf') || p.includes('acelya')) {
+            return `💡 Biliyor muydunuz? ${name} çiçekleri tarihte saray bahçelerinin baş tacı olarak yetiştirilmiş ve özel anlamlar yüklenmiştir!`;
+        }
+        if (p.includes('diken') || p.includes('kalanse') || p.includes('yuka') || p.includes('dracena') || p.includes('kraton')) {
+            return `💡 Biliyor muydunuz? ${name} bitkisi yaprak dokusunda depoladığı özel hücresel özsu sayesinde en zorlu ortam şartlarına adapte olur!`;
+        }
+        if (p.includes('aronya') || p.includes('seftali') || p.includes('kavun') || p.includes('ispanak')) {
+            return `💡 Biliyor muydunuz? ${name} bitkisi yüksek antioksidan ve mineral yapısıyla doğanın insanoğluna sunduğu en şifalı besin kaynaklarındandır!`;
+        }
+        if (p.includes('adacay') || p.includes('kantaron') || p.includes('civanpercemi') || p.includes('melisa')) {
+            return `💡 Biliyor muydunuz? ${name} bitkisinin kurutulmuş yaprak ve çiçekleri antik çağlardan bu yana geleneksel şifa reçetelerinin baş tacıdır!`;
+        }
+
+        return `💡 Biliyor muydunuz? ${name} bitkisi bulunduğu ortamdaki zararlı uçucu kimyasalları süzerek havanın oksijen kalitesini belirgin şekilde artırır!`;
     }
 
     function updateCareTips(sun, water, temp, season = '-', region = '-', rebloom = '-') {
@@ -1181,170 +1525,73 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('modalTitleText').textContent = '👤 Hesabım & Profil Merkezi';
             btnCloseProfile.style.display = 'inline-block';
         } else {
-            btnProfile.textContent = '👤 Giriş Yap / Kayıt Ol';
+            btnProfile.textContent = '🔑 Giriş Yap / Kayıt Ol';
             document.getElementById('authContainer').style.display = 'flex';
             document.getElementById('userProfileContainer').style.display = 'none';
-            document.getElementById('modalTitleText').textContent = '📝 Bitki Keşif Portalı - Kayıt Ol';
-            btnCloseProfile.style.display = 'none';
+            document.getElementById('modalTitleText').textContent = '📝 Bitki Keşif Portalı - Oturum Aç';
+            btnCloseProfile.style.display = 'inline-block';
         }
     }
 
-    // Oturum Kontrolü (Açılışta Kayıt Ol ekranı otomatik çıkar ve kapanamaz)
-    loadUserData();
-    refreshAuthUI();
-    if (!currentUser) {
-        showRegisterTab();
-        profileModal.style.display = 'flex';
-    }
-
-    btnProfile.addEventListener('click', () => {
-        refreshAuthUI();
-        if (currentUser) {
-            updateProfileModal();
-        } else {
-            showRegisterTab();
-        }
-        profileModal.style.display = 'flex';
-    });
-
-    btnCloseProfile.addEventListener('click', () => {
-        if (!currentUser) {
-            alert("⚠️ Bitki Keşif Portalı'nı kullanabilmek için lütfen öncelikle kayıt olun veya oturum açın.");
-            return;
-        }
-        profileModal.style.display = 'none';
-    });
-
-    tabLogin.addEventListener('click', () => showLoginTab());
-    tabRegister.addEventListener('click', () => showRegisterTab());
-
-
-    // E-POSTA İLE GİRİŞ YAP / KAYIT OL FORM SUBMIT (Docker Backend API http://localhost:3000 + LocalStorage Fallback)
-    document.getElementById('authForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('authEmailInput').value.trim();
-        const pass = document.getElementById('authPassInput').value.trim();
-        const name = document.getElementById('authNameInput').value.trim();
-
-        if (!email || !pass) {
-            alert('Lütfen e-posta ve şifre alanlarını doldurun.');
-            return;
-        }
-
-        const API_BASE = 'http://localhost:3000/api';
-
-        if (isRegisterMode) {
-            if (!name) {
-                alert('Lütfen adınızı ve soyadınızı giriniz.');
-                return;
-            }
-
-            try {
-                const res = await fetch(`${API_BASE}/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, password: pass })
-                });
-                const data = await res.json();
-                if (!res.ok || data.error) {
-                    alert(`⚠️ HATA: ${data.error || 'Kayıt gerçekleştirilemedi!'}`);
-                    return;
-                }
-
-                currentUser = { name: name, email: email, avatar: "🌿", isGoogle: false };
-                localStorage.setItem('bitki_user', JSON.stringify(currentUser));
-                userName = currentUser.name;
-                userEmail = currentUser.email;
-                loadUserData();
-                refreshAuthUI();
-                profileModal.style.display = 'none';
-                alert(`🎉 ${data.message || 'Hesabınız başarıyla oluşturuldu! Hoş geldiniz, ' + userName}.`);
-            } catch (err) {
-                // Sunucuya erişilemezse LocalStorage Fallback
-                let registeredUsers = JSON.parse(localStorage.getItem('bitki_users_db')) || [];
-                const existingUser = registeredUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
-                if (existingUser) {
-                    alert(`⚠️ HATA: "${email}" e-posta adresi ile zaten kayıt yapılmış!\nLütfen '🔑 Giriş Yap' sekmesini kullanarak oturum açın.`);
-                    return;
-                }
-
-                const newUser = { name: name, email: email, pass: pass, avatar: "🌿", isGoogle: false };
-                registeredUsers.push(newUser);
-                localStorage.setItem('bitki_users_db', JSON.stringify(registeredUsers));
-                currentUser = newUser;
-                localStorage.setItem('bitki_user', JSON.stringify(currentUser));
-                userName = currentUser.name;
-                userEmail = currentUser.email;
-                loadUserData();
-                refreshAuthUI();
-                profileModal.style.display = 'none';
-                alert(`🎉 Hesabınız başarıyla oluşturuldu! Hoş geldiniz, ${userName}.`);
-            }
-        } else {
-            try {
-                const res = await fetch(`${API_BASE}/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password: pass })
-                });
-                const data = await res.json();
-                if (!res.ok || data.error) {
-                    alert(`⚠️ HATA: ${data.error || 'Bu e-posta adresi ile kayıtlı bir hesap bulunamadı veya şifre hatalı!'}`);
-                    return;
-                }
-
+    // FIREBASE AUTH DİNLEYİCİSİ (Oturum durumunu canlı takip eder)
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+        firebase.auth().onAuthStateChanged((firebaseUser) => {
+            if (firebaseUser) {
                 currentUser = {
-                    name: data.user ? data.user.name : (email.split('@')[0] || "Botanikçi"),
-                    email: data.user ? data.user.email : email,
+                    name: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : "Botanikçi"),
+                    email: firebaseUser.email || "",
                     avatar: "🌿",
-                    isGoogle: false
+                    uid: firebaseUser.uid
                 };
                 localStorage.setItem('bitki_user', JSON.stringify(currentUser));
                 userName = currentUser.name;
                 userEmail = currentUser.email;
-                loadUserData();
-                refreshAuthUI();
-                profileModal.style.display = 'none';
-                alert(`🎉 Başarıyla giriş yapıldı! Hoş geldiniz, ${userName}.`);
-            } catch (err) {
-                // Sunucuya erişilemezse LocalStorage Fallback
-                let registeredUsers = JSON.parse(localStorage.getItem('bitki_users_db')) || [];
-                const userInDb = registeredUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
-
-                if (!userInDb) {
-                    alert(`⚠️ HATA: "${email}" e-posta adresi ile kayıtlı bir hesap bulunamadı!\nLütfen önce '📝 Hesap Oluştur' sekmesinden kayıt olun.`);
-                    return;
-                }
-
-                if (userInDb.pass !== pass) {
-                    alert('⚠️ HATA: Şifreniz hatalı! Lütfen kontrol edip tekrar deneyin.');
-                    return;
-                }
-
-                currentUser = { name: userInDb.name, email: userInDb.email, avatar: "🌿", isGoogle: false };
-                localStorage.setItem('bitki_user', JSON.stringify(currentUser));
-                userName = currentUser.name;
-                userEmail = currentUser.email;
-                loadUserData();
-                refreshAuthUI();
-                profileModal.style.display = 'none';
-                alert(`🎉 Başarıyla giriş yapıldı! Hoş geldiniz, ${userName}.`);
+            } else if (!localStorage.getItem('bitki_user')) {
+                currentUser = null;
             }
+            loadUserData();
+            refreshAuthUI();
+        });
+    } else {
+        loadUserData();
+        refreshAuthUI();
+    }
+
+    btnProfile.addEventListener('click', () => {
+        if (currentUser) {
+            updateProfileModal();
+            profileModal.style.display = 'flex';
+        } else {
+            window.location.href = 'login.html';
         }
     });
 
-    // OTURUMU KAPAT / ÇIKIŞ YAP
-    document.getElementById('btnLogoutUser').addEventListener('click', () => {
+    btnCloseProfile.addEventListener('click', () => {
+        profileModal.style.display = 'none';
+    });
+
+    if (tabLogin) tabLogin.addEventListener('click', () => { window.location.href = 'login.html'; });
+    if (tabRegister) tabRegister.addEventListener('click', () => { window.location.href = 'register.html'; });
+
+    // OTURUMU KAPAT / ÇIKIŞ YAP (Firebase & Local State Cleared)
+    document.getElementById('btnLogoutUser').addEventListener('click', async () => {
         if (confirm('Oturumu kapatmak istediğinize emin misiniz?')) {
             saveUserData();
             currentUser = null;
             localStorage.removeItem('bitki_user');
+            if (typeof firebase !== 'undefined' && firebase.auth) {
+                try {
+                    await firebase.auth().signOut();
+                } catch (e) {
+                    console.error("Firebase Signout Error:", e);
+                }
+            }
             userName = "Botanik Sevdalısı";
             userEmail = "";
             loadUserData();
             refreshAuthUI();
-            profileModal.style.display = 'flex';
-            alert('👋 Oturum kapatıldı.');
+            profileModal.style.display = 'none';
+            window.location.href = 'login.html';
         }
     });
 
@@ -1732,7 +1979,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    window.toggleTreatmentStep = function(idx) {
+    window.toggleTreatmentStep = function (idx) {
         const chk = document.getElementById(`trStep_${idx}`);
         const txt = document.getElementById(`trStepText_${idx}`);
         if (chk && txt) {
@@ -1744,60 +1991,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // 📊 GEMİNI AI 24 SAATLİK İSTEK SAYACI & MODALI
-    const usageModal = document.getElementById('usageModal');
-    const btnOpenUsage = document.getElementById('btnOpenUsage');
-    const btnCloseUsage = document.getElementById('btnCloseUsage');
-    const headerUsageCount = document.getElementById('headerUsageCount');
-
-    async function fetchGeminiUsageStats() {
-        try {
-            const API_BASE = 'http://localhost:3000/api';
-            const res = await fetch(`${API_BASE}/gemini-usage-stats`);
-            if (res.ok) {
-                const data = await res.json();
-                if (data && data.success) {
-                    if (headerUsageCount) headerUsageCount.textContent = `${data.count24h} İstek`;
-                    const el24h = document.getElementById('stat24hCount');
-                    const elTot = document.getElementById('statTotalCount');
-                    if (el24h) el24h.textContent = data.count24h;
-                    if (elTot) elTot.textContent = data.totalAllTime;
-
-                    const breakdownList = document.getElementById('usageBreakdownList');
-                    if (breakdownList) {
-                        const keys = Object.keys(data.modelBreakdown || {});
-                        if (keys.length === 0) {
-                            breakdownList.innerHTML = '<li style="font-style: italic; color: var(--text-subtitle);">Son 24 saat içinde henüz canlı istek atılmadı.</li>';
-                        } else {
-                            breakdownList.innerHTML = keys.map(k => `
-                                <li style="display: flex; justify-content: space-between; padding: 6px 10px; background: rgba(0,0,0,0.03); border-radius: 6px;">
-                                    <span>🤖 <b>${k}</b></span>
-                                    <span style="font-weight: 700; color: var(--primary-green);">${data.modelBreakdown[k]} İstek</span>
-                                </li>
-                            `).join('');
-                        }
-                    }
-                }
-            }
-        } catch (e) {
-            console.error("Gemini istek istatistikleri alınamadı:", e);
-        }
-    }
-
-    if (btnOpenUsage) {
-        btnOpenUsage.addEventListener('click', () => {
-            fetchGeminiUsageStats();
-            usageModal.style.display = 'flex';
-        });
-    }
-
-    if (btnCloseUsage) {
-        btnCloseUsage.addEventListener('click', () => usageModal.style.display = 'none');
-    }
-
-    // İlk yüklemede ve pencere açıldığında sayacı güncelle
-    fetchGeminiUsageStats();
-    window.fetchGeminiUsageStats = fetchGeminiUsageStats;
 });
 
 

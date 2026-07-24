@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Giriş Yap - Bitki Keşif Portalı</title>
+    <link rel="stylesheet" href="styles.css?v=10">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 50%, #081c15 100%);
+            margin: 0;
+            padding: 16px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            position: relative;
+            overflow-x: hidden;
+            box-sizing: border-border;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(82, 183, 136, 0.3) 0%, rgba(0,0,0,0) 70%);
+            top: -50px;
+            left: -50px;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(116, 198, 157, 0.2) 0%, rgba(0,0,0,0) 70%);
+            bottom: -100px;
+            right: -100px;
+            z-index: 0;
+        }
+
+        .auth-card {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 440px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            padding: 36px 28px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            animation: fadeIn 0.5s ease-out;
+            box-sizing: border-box;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .auth-card-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .auth-logo {
+            font-size: 44px;
+            margin-bottom: 6px;
+            display: inline-block;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+        }
+
+        .auth-card-header h2 {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1b4332;
+            margin: 0 0 6px 0;
+        }
+
+        .auth-card-header p {
+            color: #52796f;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #2d6a4f;
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper span {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            padding: 14px 16px 14px 44px;
+            border: 2px solid #e0e6ed;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+            background: #f8faf9;
+        }
+
+        .input-wrapper input:focus {
+            outline: none;
+            border-color: #40916c;
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(64, 145, 108, 0.15);
+        }
+
+        .btn-primary-auth {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #2d6a4f 0%, #1b4332 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 8px 16px rgba(45, 106, 79, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-sizing: border-box;
+        }
+
+        .btn-primary-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 20px rgba(45, 106, 79, 0.4);
+            background: linear-gradient(135deg, #40916c 0%, #2d6a4f 100%);
+        }
+
+        .btn-google-auth {
+            width: 100%;
+            padding: 12px;
+            background: #ffffff;
+            color: #333333;
+            border: 2px solid #e0e6ed;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+            margin-top: 16px;
+            box-sizing: border-box;
+        }
+
+        .btn-google-auth:hover {
+            background: #f4f6f8;
+            border-color: #cbd5e1;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 20px 0;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .divider span {
+            padding: 0 12px;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #52796f;
+        }
+
+        .auth-footer a {
+            color: #1b4332;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 14px;
+            font-size: 13px;
+            color: #74c69d;
+            text-decoration: none;
+            font-weight: 600;
+            text-align: center;
+            width: 100%;
+        }
+
+        .back-link:hover {
+            color: #ffffff;
+        }
+
+        .alert-message {
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .alert-error {
+            background-color: #ffeef0;
+            color: #d32f2f;
+            border: 1px solid #ffcdd2;
+        }
+
+        .alert-success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 12px 10px;
+            }
+            .auth-card {
+                padding: 24px 18px;
+                border-radius: 20px;
+            }
+            .auth-card-header h2 {
+                font-size: 22px;
+            }
+            .btn-google-auth {
+                font-size: 13.5px !important;
+                padding: 12px 10px !important;
+            }
+            .btn-primary-auth {
+                font-size: 15px;
+                padding: 12px;
+            }
+        }
+    </style>
+    <!-- Firebase SDK (Compat Version for seamless vanilla JS) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+
+    <div class="auth-card">
+        <div class="auth-card-header">
+            <div class="auth-logo">🌱</div>
+            <h2>Giriş Yap</h2>
+            <p>Bitki Keşif Portalı'na hoş geldiniz</p>
+        </div>
+
+        <div id="alertBox" class="alert-message"></div>
+
+        <!-- Google Hızlı Giriş (Ana Öncelikli Seçenek) -->
+        <button class="btn-google-auth" id="btnGoogleLogin" style="background: #ffffff; border: 2px solid #4285F4; padding: 14px; border-radius: 14px; font-size: 16px; font-weight: 700; color: #1a73e8; box-shadow: 0 4px 14px rgba(66, 133, 244, 0.2); transition: all 0.2s ease;">
+            <svg width="22" height="22" viewBox="0 0 18 18">
+                <path fill="#4285F4" d="M17.64 9.2c0-.74-.06-1.28-.19-1.84H9v3.34h4.96c-.1.83-.64 2.08-1.84 2.92l2.84 2.2c1.7-1.57 2.68-3.88 2.68-6.62z"/>
+                <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.84-2.2c-.76.53-1.78.9-3.12.9-2.38 0-4.41-1.57-5.13-3.75L.97 13.04C2.45 15.98 5.48 18 9 18z"/>
+                <path fill="#FBBC05" d="M3.87 10.77c-.19-.58-.3-1.2-.3-1.77s.11-1.19.3-1.77L.97 4.96C.35 6.18 0 7.55 0 9s.35 2.82.97 4.04l2.9-2.27z"/>
+                <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.45 2.02.97 4.96l2.9 2.27c.72-2.18 2.75-3.65 5.13-3.65z"/>
+            </svg>
+            Google Hesabı ile Tek Tıkla Giriş Yap 🚀
+        </button>
+
+        <div class="divider">
+            <span>veya E-posta ile Giriş</span>
+        </div>
+
+        <form id="loginForm" onsubmit="return false;">
+            <div class="form-group">
+                <label for="emailInput">E-posta Adresi</label>
+                <div class="input-wrapper">
+                    <span>📧</span>
+                    <input type="email" id="emailInput" placeholder="ornek@gmail.com" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="passwordInput">Şifre</label>
+                <div class="input-wrapper">
+                    <span>🔒</span>
+                    <input type="password" id="passwordInput" placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary-auth" id="btnLogin">
+                🔑 Oturum Aç
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            Hesabınız yok mu? <a href="register.html">Hemen Kayıt Ol 🌿</a>
+        </div>
+        <a href="index.html" class="back-link">← Ana Sayfaya Dön (Misafir Olarak Devam Et)</a>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('emailInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const alertBox = document.getElementById('alertBox');
+        const btnGoogle = document.getElementById('btnGoogleLogin');
+
+        function showAlert(msg, isError = true) {
+            alertBox.textContent = msg;
+            alertBox.className = `alert-message ${isError ? 'alert-error' : 'alert-success'}`;
+            alertBox.style.display = 'block';
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                showAlert('Lütfen tüm alanları doldurun.');
+                return;
+            }
+
+            try {
+                if (typeof firebase !== 'undefined' && firebase.auth) {
+                    const res = await firebase.auth().signInWithEmailAndPassword(email, password);
+                    const user = res.user;
+                    const userData = {
+                        name: user.displayName || (user.email ? user.email.split('@')[0] : "Botanik Sevdalısı"),
+                        email: user.email || "",
+                        avatar: user.photoURL || "🌿"
+                    };
+                    localStorage.setItem('bitki_user', JSON.stringify(userData));
+                    showAlert('Giriş başarılı! Yönlendiriliyorsunuz...', false);
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 800);
+                } else {
+                    const userData = {
+                        name: email.split('@')[0],
+                        email: email,
+                        avatar: "🌿"
+                    };
+                    localStorage.setItem('bitki_user', JSON.stringify(userData));
+                    showAlert('Giriş başarılı! Yönlendiriliyorsunuz...', false);
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 800);
+                }
+            } catch (err) {
+                console.error("Giriş Hatası:", err);
+                let message = 'Giriş yapılamadı. E-posta veya şifre hatalı.';
+                if (err.code === 'auth/user-not-found') message = 'Bu e-posta adresiyle kayıtlı kullanıcı bulunamadı.';
+                if (err.code === 'auth/wrong-password') message = 'Hatalı şifre girdiniz.';
+                if (err.code === 'auth/invalid-email') message = 'Geçersiz e-posta adresi.';
+                showAlert(message);
+            }
+        });
+
+        btnGoogle.addEventListener('click', async () => {
+            try {
+                if (typeof firebase !== 'undefined' && firebase.auth) {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    const res = await firebase.auth().signInWithPopup(provider);
+                    const user = res.user;
+                    const userData = {
+                        name: user.displayName || (user.email ? user.email.split('@')[0] : "Botanik Sevdalısı"),
+                        email: user.email || "",
+                        avatar: user.photoURL || "🌿"
+                    };
+                    localStorage.setItem('bitki_user', JSON.stringify(userData));
+                    window.location.href = 'index.html';
+                } else {
+                    showAlert('Firebase yapılandırılmamış.');
+                }
+            } catch (err) {
+                console.error("Google Login Error:", err);
+                showAlert('Google ile giriş yapılırken hata oluştu.');
+            }
+        });
+    </script>
+</body>
+</html>

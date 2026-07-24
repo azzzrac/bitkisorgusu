@@ -65,6 +65,10 @@ public class BitkiGUI extends JFrame {
     private final JLabel triviaLabel = new JLabel("💡 Biliyor muydunuz? Bitkiler dünyadaki oksijenin %99'unu üretir!");
     private final RoundedPanel triviaCard = new RoundedPanel(14, new Color(254, 249, 231), new Color(245, 230, 180));
 
+    private final CardLayout cardLayout = new CardLayout();
+    private final JPanel rootPanel = new JPanel(cardLayout);
+    private JPanel authPagePanel;
+
     private final JPanel mainPanel = new JPanel(new BorderLayout(14, 14));
     private final RoundedPanel headerCard = new RoundedPanel(18, Color.WHITE, new Color(220, 235, 222));
     private final RoundedPanel inputCard = new RoundedPanel(18, Color.WHITE, new Color(220, 235, 222));
@@ -404,7 +408,7 @@ public class BitkiGUI extends JFrame {
         photoSearchButton.addActionListener(e -> {
             if (!isLoggedIn) {
                 JOptionPane.showMessageDialog(this, "⚠️ Bitki Keşif Portalı'nı kullanabilmek için lütfen öncelikle oturum açınız veya kayıt olunuz.", "Oturum Gerekli", JOptionPane.WARNING_MESSAGE);
-                showAuthDialog();
+                showAuthPage();
                 return;
             }
 
@@ -542,7 +546,11 @@ public class BitkiGUI extends JFrame {
 
         mainPanel.add(topContainer, BorderLayout.NORTH);
         mainPanel.add(resultCard, BorderLayout.CENTER);
-        add(mainPanel);
+
+        rootPanel.add(mainPanel, "MAIN");
+        authPagePanel = createAuthPagePanel();
+        rootPanel.add(authPagePanel, "AUTH");
+        add(rootPanel);
 
         applyTheme();
 
@@ -550,7 +558,13 @@ public class BitkiGUI extends JFrame {
         searchButton.addActionListener(this::sorgula);
         inputField.addActionListener(this::sorgula);
 
-        profileButton.addActionListener(e -> showProfileDialog());
+        profileButton.addActionListener(e -> {
+            if (isLoggedIn) {
+                showProfileDialog();
+            } else {
+                showAuthPage();
+            }
+        });
 
         randomButton.addActionListener(e -> {
             int r = (int) (Math.random() * dictionary.size());
@@ -731,7 +745,7 @@ public class BitkiGUI extends JFrame {
         loadFromDisk();
         SwingUtilities.invokeLater(() -> {
             if (!isLoggedIn) {
-                showAuthDialog();
+                showAuthPage();
             }
         });
     }
@@ -739,7 +753,7 @@ public class BitkiGUI extends JFrame {
     // 👤 "HESABIM" PROFİL VE ARAÇLAR PENCERESİ (Giriş Yapılınca Açılır)
     private void showProfileDialog() {
         if (!isLoggedIn) {
-            showAuthDialog();
+            showAuthPage();
             return;
         }
 
@@ -873,6 +887,7 @@ public class BitkiGUI extends JFrame {
                 userAvatar = "🌿";
                 profileButton.setText("👤 Giriş Yap / Kayıt Ol");
                 profileDialog.dispose();
+                showAuthPage();
                 JOptionPane.showMessageDialog(this, "👋 Oturumunuz kapatıldı.", "Bilgi", JOptionPane.INFORMATION_MESSAGE);
             }
         });
@@ -891,41 +906,59 @@ public class BitkiGUI extends JFrame {
         profileDialog.setVisible(true);
     }
 
-    // 🔐 GİRİŞ YAP & HESAP OLUŞTUR PENCERESİ
-    private void showAuthDialog() {
-        JDialog authDialog = new JDialog(this, "🔐 Oturum Aç veya Kayıt Ol", true);
-        authDialog.setSize(440, 480);
-        authDialog.setLocationRelativeTo(this);
+    // 🔐 AYRI GİRİŞ & HESAP OLUŞTURMA SAYFASI PANELİ (CARDLAYOUT İLE AYRI SAYFA GÖRÜNÜMÜ)
+    private JPanel createAuthPagePanel() {
+        JPanel authContainer = new JPanel(new BorderLayout(14, 14));
+        authContainer.setBorder(new EmptyBorder(24, 30, 24, 30));
+        authContainer.setBackground(isDarkMode ? new Color(20, 28, 21) : new Color(242, 247, 243));
 
-        JPanel mainPanel = new JPanel(new BorderLayout(12, 12));
-        mainPanel.setBorder(new EmptyBorder(20, 24, 20, 24));
-        mainPanel.setBackground(isDarkMode ? new Color(20, 28, 21) : new Color(242, 247, 243));
+        // Top Navigation Bar (Geri Butonu + Logo)
+        JPanel navBar = new JPanel(new BorderLayout());
+        navBar.setOpaque(false);
+        ModernButton backBtn = new ModernButton("← Ana Sayfaya Dön", new Color(117, 117, 117), new Color(158, 158, 158));
+        backBtn.setPreferredSize(new Dimension(170, 36));
+        backBtn.addActionListener(e -> showMainPage());
 
-        // Başlık
-        JLabel titleLbl = new JLabel("🌱 Bitki Keşif Portalı", SwingConstants.CENTER);
-        titleLbl.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        JLabel navBrand = new JLabel("🌱 Bitki Keşif Portalı", SwingConstants.RIGHT);
+        navBrand.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        navBrand.setForeground(isDarkMode ? new Color(129, 199, 132) : new Color(27, 94, 32));
+
+        navBar.add(backBtn, BorderLayout.WEST);
+        navBar.add(navBrand, BorderLayout.EAST);
+
+        // Center Card Panel
+        RoundedPanel authCard = new RoundedPanel(24, isDarkMode ? new Color(30, 42, 31) : Color.WHITE, isDarkMode ? new Color(48, 68, 50) : new Color(220, 235, 222));
+        authCard.setLayout(new BorderLayout(20, 20));
+        authCard.setBorder(new EmptyBorder(30, 36, 30, 36));
+
+        // Header Text
+        JLabel titleLbl = new JLabel("🌱 Bitki Keşif Portalı'na Hoş Geldiniz!", SwingConstants.CENTER);
+        titleLbl.setFont(new Font("Segoe UI", Font.BOLD, 22));
         titleLbl.setForeground(isDarkMode ? new Color(129, 199, 132) : new Color(27, 94, 32));
 
-        JLabel subTitleLbl = new JLabel("Keşiflerinizi ve rozetlerinizi kaydetmek için giriş yapın.", SwingConstants.CENTER);
-        subTitleLbl.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        JLabel subTitleLbl = new JLabel("Keşiflerinizi ve rozetlerinizi kaydetmek için giriş yapın veya kayıt olun.", SwingConstants.CENTER);
+        subTitleLbl.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         subTitleLbl.setForeground(isDarkMode ? new Color(160, 195, 165) : new Color(80, 115, 85));
 
-        JPanel topHeader = new JPanel(new GridLayout(2, 1, 4, 4));
-        topHeader.setOpaque(false);
-        topHeader.add(titleLbl);
-        topHeader.add(subTitleLbl);
+        JPanel headerPanel = new JPanel(new GridLayout(2, 1, 6, 6));
+        headerPanel.setOpaque(false);
+        headerPanel.add(titleLbl);
+        headerPanel.add(subTitleLbl);
 
-        // Form Elemanları
-        JPanel formPanel = new JPanel(new GridLayout(3, 2, 8, 10));
+        // Form Fields
+        JPanel formPanel = new JPanel(new GridLayout(3, 2, 12, 16));
         formPanel.setOpaque(false);
 
         JLabel nameLbl = new JLabel("Ad Soyad:");
+        nameLbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
         PlaceholderTextField nameField = new PlaceholderTextField("Örn: Ahmet Yılmaz");
 
         JLabel emailLbl = new JLabel("E-posta:");
+        emailLbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
         PlaceholderTextField emailField = new PlaceholderTextField("ornek@gmail.com");
 
         JLabel passLbl = new JLabel("Şifre:");
+        passLbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
         JPasswordField passField = new JPasswordField();
 
         formPanel.add(nameLbl);
@@ -935,29 +968,32 @@ public class BitkiGUI extends JFrame {
         formPanel.add(passLbl);
         formPanel.add(passField);
 
-        // Alt Butonlar
-        JPanel actionPanel = new JPanel(new GridLayout(1, 2, 10, 0));
+        // Buttons Panel
+        JPanel actionPanel = new JPanel(new GridLayout(1, 2, 14, 0));
         actionPanel.setOpaque(false);
 
         ModernButton loginBtn = new ModernButton("🔑 Giriş Yap", new Color(46, 125, 50), new Color(67, 160, 71));
+        loginBtn.setPreferredSize(new Dimension(0, 42));
+
         ModernButton registerBtn = new ModernButton("📝 Kayıt Ol", new Color(0, 137, 123), new Color(0, 150, 136));
+        registerBtn.setPreferredSize(new Dimension(0, 42));
 
         loginBtn.addActionListener(e -> {
             String em = emailField.getText().trim().toLowerCase();
             String pwd = new String(passField.getPassword()).trim();
             if (em.isBlank() || pwd.isBlank()) {
-                JOptionPane.showMessageDialog(authDialog, "Lütfen e-posta ve şifre giriniz.", "Uyarı", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Lütfen e-posta ve şifre giriniz.", "Uyarı", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             if (!registeredUserDb.containsKey(em)) {
-                JOptionPane.showMessageDialog(authDialog, "⚠️ HATA: \"" + em + "\" e-posta adresi ile kayıtlı bir hesap bulunamadı!\nLütfen önce '📝 Kayıt Ol' butonunu kullanarak kayıt olun.", "Kayıtsız Hesap", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "⚠️ HATA: \"" + em + "\" e-posta adresi ile kayıtlı bir hesap bulunamadı!\nLütfen önce '📝 Kayıt Ol' butonunu kullanarak kayıt olun.", "Kayıtsız Hesap", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             String[] userData = registeredUserDb.get(em);
             if (!userData[1].equals(pwd)) {
-                JOptionPane.showMessageDialog(authDialog, "⚠️ HATA: Şifreniz hatalı! Lütfen tekrar deneyin.", "Giriş Hatası", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "⚠️ HATA: Şifreniz hatalı! Lütfen tekrar deneyin.", "Giriş Hatası", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             userName = userData[0];
@@ -967,9 +1003,8 @@ public class BitkiGUI extends JFrame {
             userAvatar = "🌿";
             isLoggedIn = true;
             profileButton.setText("👤 " + userName);
-            authDialog.dispose();
+            showMainPage();
             JOptionPane.showMessageDialog(this, "🎉 Başarıyla giriş yapıldı! Hoş geldiniz, " + userName, "Başarılı", JOptionPane.INFORMATION_MESSAGE);
-            showProfileDialog();
         });
 
         registerBtn.addActionListener(e -> {
@@ -977,13 +1012,12 @@ public class BitkiGUI extends JFrame {
             String em = emailField.getText().trim().toLowerCase();
             String pwd = new String(passField.getPassword()).trim();
             if (nm.isBlank() || em.isBlank() || pwd.isBlank()) {
-                JOptionPane.showMessageDialog(authDialog, "Lütfen Ad Soyad, E-posta ve Şifre alanlarını doldurunuz.", "Uyarı", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Lütfen Ad Soyad, E-posta ve Şifre alanlarını doldurunuz.", "Uyarı", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            // Çift E-posta Kontrolü
             if (registeredUserDb.containsKey(em)) {
-                JOptionPane.showMessageDialog(authDialog, "⚠️ HATA: \"" + em + "\" e-posta adresi ile zaten kayıt yapılmış!\nLütfen '🔑 Giriş Yap' butonunu kullanarak oturum açın.", "Zaten Kayıtlı", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "⚠️ HATA: \"" + em + "\" e-posta adresi ile zaten kayıt yapılmış!\nLütfen '🔑 Giriş Yap' butonunu kullanarak oturum açın.", "Zaten Kayıtlı", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
@@ -994,25 +1028,33 @@ public class BitkiGUI extends JFrame {
             isLoggedIn = true;
             switchUser(userEmail);
             profileButton.setText("👤 " + userName);
-            authDialog.dispose();
+            showMainPage();
             JOptionPane.showMessageDialog(this, "🎉 Hesabınız başarıyla oluşturuldu! Hoş geldiniz, " + userName, "Tebrikler", JOptionPane.INFORMATION_MESSAGE);
-            showProfileDialog();
         });
 
         actionPanel.add(loginBtn);
         actionPanel.add(registerBtn);
 
-        JPanel centerBox = new JPanel();
-        centerBox.setLayout(new BoxLayout(centerBox, BoxLayout.Y_AXIS));
-        centerBox.setOpaque(false);
-        centerBox.add(formPanel);
+        authCard.add(headerPanel, BorderLayout.NORTH);
+        authCard.add(formPanel, BorderLayout.CENTER);
+        authCard.add(actionPanel, BorderLayout.SOUTH);
 
-        mainPanel.add(topHeader, BorderLayout.NORTH);
-        mainPanel.add(centerBox, BorderLayout.CENTER);
-        mainPanel.add(actionPanel, BorderLayout.SOUTH);
+        JPanel centerWrapper = new JPanel(new GridBagLayout());
+        centerWrapper.setOpaque(false);
+        centerWrapper.add(authCard);
 
-        authDialog.add(mainPanel);
-        authDialog.setVisible(true);
+        authContainer.add(navBar, BorderLayout.NORTH);
+        authContainer.add(centerWrapper, BorderLayout.CENTER);
+
+        return authContainer;
+    }
+
+    private void showAuthPage() {
+        cardLayout.show(rootPanel, "AUTH");
+    }
+
+    private void showMainPage() {
+        cardLayout.show(rootPanel, "MAIN");
     }
 
     private JLabel createStatItem(String label, String value) {
@@ -1189,16 +1231,42 @@ public class BitkiGUI extends JFrame {
     }
 
     private String getPlantTrivia(String plantName) {
+        if (plantName == null || plantName.isEmpty()) return "💡 Biliyor muydunuz? Bitkiler dünyadaki oksijenin %99'unu üreterek yaşamın devamlılığını sağlar!";
         String p = plantName.toLowerCase(Locale.forLanguageTag("tr-TR")).trim();
-        if (p.contains("lavanta")) return "💡 Biliyor muydunuz? Lavanta kokusunun stresi azaltıp uyku kalitesini %20 artırdığı kanıtlanmıştır.";
-        if (p.contains("gül")) return "💡 Biliyor muydunuz? Dünyanın en eski yaşayan gülü Almanya'daki Hildesheim Katedrali'ndedir ve 1000 yaşındadır!";
-        if (p.contains("orkide")) return "💡 Biliyor muydunuz? Orkideler dünyadaki en geniş bitki türlerindendir (28.000'den fazla türü vardır)!";
-        if (p.contains("papatya")) return "💡 Biliyor muydunuz? Papatyalar Antarktika hariç dünyadaki tüm kıtalarda doğal olarak yetişebilir!";
-        if (p.contains("kaktüs")) return "💡 Biliyor muydunuz? Bazı dev kaktüs türleri bünyesinde 3000 litreden fazla su depolayabilir!";
-        if (p.contains("nane")) return "💡 Biliyor muydunuz? Nane bitkisi doğal bir böcek uzaklaştırıcıdır ve mentol içeriğiyle zihni açar!";
-        if (p.contains("limon")) return "💡 Biliyor muydunuz? Tek bir limon ağacı yılda ortalama 1500 ila 3000 adet limon verebilir!";
-        if (p.contains("zeytin")) return "💡 Biliyor muydunuz? Akdeniz'deki bazı zeytin ağaçları 2000 yıldan uzun süredir meyve vermektedir!";
-        return "💡 Biliyor muydunuz? Bitkiler dünyadaki oksijenin %99'unu üreterek yaşamın devamlılığını sağlar!";
+
+        if (p.contains("lavanta")) return "💡 Biliyor muydunuz? Lavanta kokusunun stresi azaltıp uyku kalitesini %20 artırdığı ve beyin dalgalarını sakinleştirdiği kanıtlanmıştır.";
+        if (p.contains("gül")) return "💡 Biliyor muydunuz? Dünyanın en eski yaşayan gülü Almanya'daki Hildesheim Katedrali'ndedir ve 1000 yaşından büyüktür!";
+        if (p.contains("orkide")) return "💡 Biliyor muydunuz? Orkideler dünyadaki en geniş bitki familyalarındandır (28.000'den fazla türü vardır) ve bazı türleri 100 yıla kadar yaşayabilir!";
+        if (p.contains("papatya")) return "💡 Biliyor muydunuz? Papatyalar Antarktika hariç dünyadaki tüm kıtalarda doğal olarak yetişebilir ve bir papatya çiçeği aslında yüzlerce minik çiçekçikten oluşur!";
+        if (p.contains("kaktüs")) return "💡 Biliyor muydunuz? Bazı dev kaktüs türleri bünyesinde 3.000 litreden fazla su depolayabilir ve 200 yıldan fazla yaşayabilir!";
+        if (p.contains("aloe")) return "💡 Biliyor muydunuz? Eski Mısırlılar Aloe Vera bitkisine 'Ölümsüzlük Bitkisi' derdi ve Kleopatra cilt bakımı için Aloe jelini kullanırdı!";
+        if (p.contains("monstera") || p.contains("deve tabanı")) return "💡 Biliyor muydunuz? Monstera yapraklarındaki delikler, doğal yaşam alanı olan yağmur ormanlarında şiddetli rüzgarların ve yağmurun yaprağı yırtmasını önlemek için evrimleşmiştir!";
+        if (p.contains("paşa kılıcı")) return "💡 Biliyor muydunuz? Paşa Kılıcı çoğu bitkinin aksine gece boyunca karbondioksiti emip ortama bol miktarda saf oksijen salgılar!";
+        if (p.contains("begonvil")) return "💡 Biliyor muydunuz? Begonvilin rengarenk görünen kısımları aslında taç yaprak değil 'bract' denilen koruyucu yapraklardır; gerçek çiçekleri ortadaki minik beyaz kısımdır!";
+        if (p.contains("bonsai")) return "💡 Biliyor muydunuz? 'Bonsai' kelimesi Japonca 'saksıdaki ağaç' anlamına gelir ve doğru bakılan bazı Bonsai ağaçları 800 yıldan fazla yaşayabilir!";
+        if (p.contains("fesleğen") || p.contains("reyhan")) return "💡 Biliyor muydunuz? Fesleğen yapraklarındaki doğal uçucu yağlar sivrisinekleri ve zararlı böcekleri uzak tutan harika bir doğal kovucudur!";
+        if (p.contains("bambu")) return "💡 Biliyor muydunuz? Bazı bambu türleri günde 90 santimetreye kadar büyüyerek dünyadaki en hızlı büyüyen odunsu bitki unvanına sahiptir!";
+        if (p.contains("nane")) return "💡 Biliyor muydunuz? Nane yapraklarındaki mentol maddesi, beynimizdeki soğukluk algılayıcı reseptörleri uyararak ferahlık ve serinlik hissi yaratır!";
+        if (p.contains("limon")) return "💡 Biliyor muydunuz? Tek bir yetişkin limon ağacı yılda ortalama 1.500 ila 3.000 adet şifalı limon üretebilir!";
+        if (p.contains("zeytin")) return "💡 Biliyor muydunuz? Akdeniz havzasındaki bazı zeytin ağaçları 2.000 yıldan uzun süredir kesintisiz olarak zeytin meyvesi vermeye devam etmektedir!";
+        if (p.contains("ıhlamur")) return "💡 Biliyor muydunuz? Ihlamur ağacının mis kokulu çiçekleri arılar için muazzam bir nektar kaynağıdır ve ıhlamur çayı doğal bir rahatlatıcıdır!";
+        if (p.contains("defne")) return "💡 Biliyor muydunuz? Antik Yunan ve Roma döneminde defne yapraklarından yapılan taçlar bilgeliğin, zaferin ve başarının en yüce simgesiydi!";
+        if (p.contains("yasemin")) return "💡 Biliyor muydunuz? Yasemin çiçekleri en yoğun ve büyüleyici kokularını gece karanlığında, havanın serinlemesiyle birlikte salgılar!";
+        if (p.contains("lale")) return "💡 Biliyor muydunuz? 17. yüzyılda Hollanda'da yaşanan 'Lale Çılgınlığı' döneminde tek bir lale soğanı lüks bir ev fiyatına satılıyordu!";
+        if (p.contains("sümbül")) return "💡 Biliyor muydunuz? Sümbül çiçeklerinin yoğun tatlı kokusu, doğada tozlaşmayı sağlayan arıları ve kelebekleri kilometrelerce öteden çeker!";
+        if (p.contains("sardunya")) return "💡 Biliyor muydunuz? Sardunyalar yapraklarına dokunulduğunda hücrelerindeki koku keseciklerini kırarak etrafa aromatik hoş bir koku yayar!";
+        if (p.contains("kardelen")) return "💡 Biliyor muydunuz? Kardelen bitkisi karların arasından fışkırırken kendi ürettiği doğal ısı sayesinde etrafındaki karları eriterek açar!";
+        if (p.contains("manolya")) return "💡 Biliyor muydunuz? Manolyalar dünyada arılardan bile önce (yaklaşık 95 milyon yıl önce) evrimleştiği için tozlaşmalarını kınkanatlı böceklerle yaparlar!";
+        if (p.contains("şakayık")) return "💡 Biliyor muydunuz? Çin kültüründe 'Çiçeklerin Kralı' olarak bilinen Şakayık bitkisi zenginliğin, zarafetin ve iyi şansın simgesidir!";
+        if (p.contains("biberiye")) return "💡 Biliyor muydunuz? Biberiye kokusunun hafızayı ve konsantrasyonu %75 oranında artırdığı nörolojik araştırmalarla kanıtlanmıştır!";
+        if (p.contains("kekik")) return "💡 Biliyor muydunuz? Kekik yağı içerisindeki 'Timol' bileşeni, güçlü doğal bir antiseptiktir ve mikroplarla savaşmada etkilidir!";
+        if (p.contains("safran")) return "💡 Biliyor muydunuz? Dünyanın en pahalı baharatı olan safranın sadece 1 gramını elde etmek için yaklaşık 150 adet safran çiçeği elle toplanır!";
+        if (p.contains("sukulent")) return "💡 Biliyor muydunuz? Sukulentler etli yapraklarında su depo ederek çöl ve kurak iklim koşullarında aylarca susuz yaşayabilir!";
+        if (p.contains("zencefil")) return "💡 Biliyor muydunuz? Zencefil bitkisinin kök gövdesi (rizom) binlerce yıldır doğal bir bulantı önleyici ve bağışıklık güçlendirici olarak kullanılır!";
+        if (p.contains("zerdeçal")) return "💡 Biliyor muydunuz? Zerdeçalın içindeki aktif bileşen olan Curcumin, güçlü bir antioksidan ve doğal bir iltihap sökücüdür!";
+        if (p.contains("nergis")) return "💡 Biliyor muydunuz? Mitolojide Nergis (Narcissus) çiçeği, suda kendi yansımasına aşık olan Narkissos'tan adını almıştır!";
+
+        return "💡 Biliyor muydunuz? " + plantName + " bitkisi doğadaki fotosentez döngüsünün ve havayı temizleyen eko-sistemin büyüleyici bir parçasıdır!";
     }
 
     private void applyTheme() {
@@ -1539,7 +1607,7 @@ public class BitkiGUI extends JFrame {
     private void sorgula(ActionEvent event) {
         if (!isLoggedIn) {
             JOptionPane.showMessageDialog(this, "⚠️ Bitki Keşif Portalı'nı kullanabilmek için lütfen öncelikle oturum açınız veya kayıt olunuz.", "Oturum Gerekli", JOptionPane.WARNING_MESSAGE);
-            showAuthDialog();
+            showAuthPage();
             return;
         }
 
@@ -1552,7 +1620,24 @@ public class BitkiGUI extends JFrame {
         }
 
         if (!bitkiAdiDogrula(bitkiAdi)) {
-            setInfoText("⚠️ Böyle bir bitki bulunmuyor, tekrar deneyiniz.", new Color(198, 40, 40));
+            String oneri = bulEnYakinBitkiOnerisiJava(bitkiAdi);
+            if (oneri != null && !oneri.equalsIgnoreCase(bitkiAdi)) {
+                setInfoText("⚠️ '" + bitkiAdi + "' bulunamadı. 💡 Bunu mu demek istediniz: " + oneri + "?", new Color(198, 40, 40));
+                int choice = JOptionPane.showConfirmDialog(
+                    this,
+                    "💡 '" + bitkiAdi + "' adında sonuç bulunamadı.\nBunu mu demek istediniz: '" + oneri + "'?",
+                    "Harf Hatası Algılandı",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE
+                );
+                if (choice == JOptionPane.YES_OPTION) {
+                    inputField.setText(oneri);
+                    sorgula(event);
+                    return;
+                }
+            } else {
+                setInfoText("⚠️ Böyle bir bitki bulunmuyor, tekrar deneyiniz.", new Color(198, 40, 40));
+            }
             statusLabel.setText("Uyarı: Böyle bir bitki bulunmuyor.");
             return;
         }
@@ -1713,7 +1798,24 @@ public class BitkiGUI extends JFrame {
                         currentWikiUrl = null;
                         updateCareTips("-", "-", "-");
                         triviaLabel.setText("💡 Biliyor muydunuz? Bitkiler dünyadaki oksijenin %99'unu üretir!");
-                        setInfoText("⚠️ Böyle bir bitki bulunmuyor, tekrar deneyiniz.", new Color(198, 40, 40));
+                        String oneri = bulEnYakinBitkiOnerisiJava(bitkiAdi);
+                        if (oneri != null && !oneri.equalsIgnoreCase(bitkiAdi)) {
+                            setInfoText("⚠️ '" + bitkiAdi + "' bulunamadı. 💡 Bunu mu demek istediniz: " + oneri + "?", new Color(198, 40, 40));
+                            int choice = JOptionPane.showConfirmDialog(
+                                BitkiGUI.this,
+                                "💡 '" + bitkiAdi + "' adında sonuç bulunamadı.\nBunu mu demek istediniz: '" + oneri + "'?",
+                                "Harf Hatası Algılandı",
+                                JOptionPane.YES_NO_OPTION,
+                                JOptionPane.QUESTION_MESSAGE
+                            );
+                            if (choice == JOptionPane.YES_OPTION) {
+                                inputField.setText(oneri);
+                                sorgula(null);
+                                return;
+                            }
+                        } else {
+                            setInfoText("⚠️ Böyle bir bitki bulunmuyor, tekrar deneyiniz.", new Color(198, 40, 40));
+                        }
                         statusLabel.setText("Sonuç bulunamadı.");
                     }
 
@@ -1735,6 +1837,72 @@ public class BitkiGUI extends JFrame {
                 }
             }
         }.execute();
+    }
+
+    private String trNormalizeCleanJava(String str) {
+        if (str == null) return "";
+        return str.toLowerCase(Locale.forLanguageTag("tr-TR"))
+                .replace("ç", "c")
+                .replace("ğ", "g")
+                .replace("ı", "i")
+                .replace("ö", "o")
+                .replace("ş", "s")
+                .replace("ü", "u")
+                .replaceAll("[^a-z0-9]", "")
+                .trim();
+    }
+
+    private int levenshteinDistanceJava(String a, String b) {
+        if (a == null || a.isEmpty()) return b == null ? 0 : b.length();
+        if (b == null || b.isEmpty()) return a.length();
+
+        int[][] matrix = new int[b.length() + 1][a.length() + 1];
+        for (int i = 0; i <= b.length(); i++) matrix[i][0] = i;
+        for (int j = 0; j <= a.length(); j++) matrix[0][j] = j;
+
+        for (int i = 1; i <= b.length(); i++) {
+            for (int j = 1; j <= a.length(); j++) {
+                int cost = (b.charAt(i - 1) == a.charAt(j - 1)) ? 0 : 1;
+                matrix[i][j] = Math.min(
+                    Math.min(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1),
+                    matrix[i - 1][j - 1] + cost
+                );
+            }
+        }
+        return matrix[b.length()][a.length()];
+    }
+
+    private String bulEnYakinBitkiOnerisiJava(String sorgu) {
+        if (sorgu == null || sorgu.trim().length() < 2) return null;
+        String sorguNorm = trNormalizeCleanJava(sorgu);
+        if (sorguNorm.isEmpty()) return null;
+
+        String enYakinBitki = null;
+        int minMesafe = Integer.MAX_VALUE;
+
+        for (String plant : dictionary) {
+            String plantNorm = trNormalizeCleanJava(plant);
+            if (plantNorm.isEmpty()) continue;
+
+            if (sorguNorm.equals(plantNorm)) {
+                return plant;
+            }
+
+            int dist = levenshteinDistanceJava(sorguNorm, plantNorm);
+            int maxTol = 1;
+            if (sorguNorm.length() >= 5 && sorguNorm.length() <= 8) maxTol = 2;
+            else if (sorguNorm.length() > 8) maxTol = 3;
+
+            boolean isPrefix = plantNorm.startsWith(sorguNorm) || sorguNorm.startsWith(plantNorm);
+            int effectiveDist = isPrefix ? Math.min(dist, 1) : dist;
+
+            if (effectiveDist <= maxTol && effectiveDist < minMesafe) {
+                minMesafe = effectiveDist;
+                enYakinBitki = plant;
+            }
+        }
+
+        return enYakinBitki;
     }
 
     private boolean bitkiAdiDogrula(String bitkiAdi) {

@@ -4,7 +4,7 @@ services:
   bitkisorgu_app:
     build:
       context: .
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     container_name: bitkisorgusu_container
     ports:
       - "3000:3000"

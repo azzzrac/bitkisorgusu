@@ -1,0 +1,18 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "**/*.java",
+      "**/*.class",
+      "**/*.bat",
+      "**/*.cmd",
+      "**/*.db",
+      "Dockerfile*",
+      "docker-compose.yml"
+    ],
+    "cleanUrls": true
+  }
+}
