@@ -124,7 +124,8 @@ app.post('/api/identify-plant', async (req, res) => {
         return res.status(400).json({ error: 'Görsel verisi bulunamadı.' });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.FIREBASE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+
 
     if (apiKey) {
         try {
@@ -295,7 +296,8 @@ app.post('/api/diagnose-plant-disease', async (req, res) => {
         return res.status(400).json({ error: 'Bitki görseli bulunamadı.' });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.FIREBASE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+
 
     if (apiKey) {
         try {
@@ -376,7 +378,8 @@ app.post('/api/plant-info', async (req, res) => {
         return res.status(400).json({ error: 'Bitki adı bulunamadı.' });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.FIREBASE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+
 
     if (apiKey) {
         try {
