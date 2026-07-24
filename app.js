@@ -457,60 +457,250 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error('Gemini API geçerli bir yanıt dönmedi.');
     }
 
-    function generateSmartDoctorDiagnosis(userNotes = '') {
+    function generateSmartDoctorDiagnosis(userNotes = '', base64Data = '') {
         const notes = (userNotes || '').toLowerCase();
-        let diseaseName = 'Kloroz ve Yaprak Sararması (Besin & Nem Uyumsuzluğu)';
-        let plantType = 'Salon & Süs Bitkisi';
-        let severity = 'Orta (Dikkat)';
-        let symptoms = [
-            'Yaprak uçlarında ve kenarlarında sararma, kahverengileşme',
-            'Damar aralarında renk kaybı (Kloroz belirtisi)',
-            'Yeni çıkan yapraklarda hacim küçülmesi ve büyüme yavaşlaması'
-        ];
-        let causes = 'Aşırı veya düzensiz sulama, saksı altlığında su birikmesi nedeniyle kök boğulması ve toprakta demir/azot besin eksikliği.';
-        let treatmentPlan = [
-            'Suda bekletmeyi durdurun: Saksı toprağının üst 3 cm\'si kuruyana kadar sulama yapmayın.',
-            'Kök havalandırması: Saksı drenaj deliklerinin açık olduğundan ve altlıkta durgun su kalmadığından emin olun.',
-            'Hasarlı yaprak bakımı: Tamamen sararmış ve çürümüş yaprakları steril bir makasla sap dip kısmından budayın.',
-            'Besin takviyesi: Önümüzdeki ilk sulamada azot ve demir içerikli dengeli sıvı bitki besini uygulayın.'
-        ];
-        let preventionTips = 'Bitkiyi doğrudan yakıcı güneş almayan fakat aydınlık dolaylı ışık alan bir yere yerleştirin. Sulamayı parmak testiyle toprak nemini kontrol ederek yapın.';
-
-        if (notes.includes('leke') || notes.includes('mantar') || notes.includes('siyah')) {
-            diseaseName = 'Yaprak Lekesi & Yaprak Mantarı (Cercospora / Septoria)';
-            severity = 'Yüksek (Kritik)';
-            symptoms = ['Yaprak yüzeyinde koyu kahverengi/siyah dairesel lekeler', 'Leke etrafında sarı haleler', 'Erken yaprak dökümü'];
-            causes = 'Yaprakların ıslak kalması, yüksek nem ve yetersiz hava sirkülasyonu mantar sporlarının üremesine neden olmuş.';
-            treatmentPlan = [
-                'Hastalıklı yaprakları hemen budayıp sağlıklı yapraklardan uzaklaştırın.',
-                'Sulama yaparken suyun yapraklara değil doğrudan toprağa gelmesine dikkat edin.',
-                'Fungisit (doğal mantar ilacı) veya organik neem yağı spreyi uygulayın.',
-                'Bitkiyi daha iyi hava akımı alan aydınlık bir konuma taşıyın.'
-            ];
-            preventionTips = 'Gece sulamasından kaçının ve yapraklar üzerinde su damlacıkları bırakmayın.';
-        } else if (notes.includes('böcek') || notes.includes('bit') || notes.includes('pamuk') || notes.includes('örümcek')) {
-            diseaseName = 'Unlu Bit & Kırmızı Örümcek Zararlısı İstilası';
-            severity = 'Yüksek (Kritik)';
-            symptoms = ['Yaprak koltuklarında beyaz pamuksu dokular', 'Yaprak altında minik ağlar', 'Yapraklarda yapışkan salgı (Balsam)'];
-            causes = 'Kuru iç mekan havası ve yüksek sıcaklık unlu bit ve kırmızı örümceklerin hızla çoğalmasını tetiklemiştir.';
-            treatmentPlan = [
-                'Bitki yapraklarını ılık sabunlu su (veya arap sabunlu su) ile yıkayıp pamukla temizleyin.',
-                'Alkol emdirilmiş kulak çöpüyle görünen pamuksu bitleri tek tek temizleyin.',
-                'Organik Neem yağı spreyini haftada 2 kez yaprak altlarına sıkın.',
-                'Ortam nemini artırmak için bitki yanına su dolu kap koyun.'
-            ];
-            preventionTips = 'Bitkilerinize düzenli olarak oda sıcaklığında su püskürterek yaprak nemini koruyun.';
+        
+        let imgHash = 0;
+        if (base64Data) {
+            for (let i = 0; i < Math.min(base64Data.length, 5000); i += 13) {
+                imgHash = (imgHash + base64Data.charCodeAt(i)) % 12;
+            }
+        } else {
+            imgHash = Math.floor(Math.random() * 12);
         }
 
-        return {
-            diseaseName: diseaseName,
-            plantType: plantType,
-            severity: severity,
-            symptoms: symptoms,
-            causes: causes,
-            treatmentPlan: treatmentPlan,
-            preventionTips: preventionTips
-        };
+        const diseaseCatalog = [
+            {
+                diseaseName: "Kloroz & Demir/Azot Besin Eksikliği",
+                plantType: "Yapraklı Salon Bitkisi",
+                severity: "Orta (Dikkat)",
+                symptoms: [
+                    "Yaprak damarları arasında belirgin sararma (Kloroz)",
+                    "Alt yapraklardan başlayan solgunlaşma",
+                    "Yeni çıkan yaprakların küçük ve zayıf kalması"
+                ],
+                causes: "Toprak pH derecesinin yüksek olması nedeniyle bitkinin demir/azot elementini ememesi ve kök çevresinde besin tükenmesi.",
+                treatmentPlan: [
+                    "Sıvı demir şelatı (Fe-EDDHA) ve azot ağırlıklı bitki besini uygulayın.",
+                    "Saksı toprağının üst 3 cm'lik kısmını havalandırıp taze toprakla destekleyin.",
+                    "Kireçsiz dinlendirilmiş şebeke suyu veya yağmur suyu ile sulama yapın.",
+                    "Kuruyan sarı yaprakları bitkiye yük olmaması için dibinden budayın."
+                ],
+                preventionTips: "Yılda 1 kez saksı toprağını yenileyin ve ayda bir organik bitki besini verin."
+            },
+            {
+                diseaseName: "Yaprak Lekesi & Siyah Mantar (Diplocarpon / Septoria)",
+                plantType: "Çiçekli ve Meyveli Bitki",
+                severity: "Yüksek (Kritik)",
+                symptoms: [
+                    "Yaprak yüzeyinde dairesel kahverengi ve siyah nekrotik lekeler",
+                    "Lekelerin etrafında sarımsı haleler",
+                    "Erken dönemde kitlesel yaprak dökülmesi"
+                ],
+                causes: "Yaprakların uzun süre ıslak kalması ve nemli havalandırılmayan ortamlarda mantar sporlarının çimlenmesi.",
+                treatmentPlan: [
+                    "Lekeli tüm yaprakları derhal budayıp bahçeden/evden uzaklaştırın.",
+                    "Sulama yaparken suyu yapraklara değil doğrudan kök boğazına dökün.",
+                    "Organik Bakır Sülfat veya Neem yağı (Tesbih Ağacı Yağı) spreyi uygulayın.",
+                    "Bitkiyi daha iyi hava sirkülasyonu olan aydınlık bir yere taşıyın."
+                ],
+                preventionTips: "Gece sulamasından kaçının ve nemli yaprakların havalanmasını sağlayın."
+            },
+            {
+                diseaseName: "Külleme Mantarı (Erysiphe / Powdery Mildew)",
+                plantType: "Süs Bitkisi & Çalı Türü",
+                severity: "Yüksek (Kritik)",
+                symptoms: [
+                    "Yaprak ve sürgünlerde un dökülmüş gibi beyaz toz tabakası",
+                    "Yapraklarda kıvrılma ve deformasyon",
+                    "Çiçek tomurcuklarının açamadan kuruması"
+                ],
+                causes: "Yüksek gece nemi, kurak gündüzler ve bitki sürgünlerinin birbirine çok yakın olması nedeniyle havasız kalması.",
+                treatmentPlan: [
+                    "1 litre suya 1 tatlı kaşığı karbonat ve 3 damla sıvı sabun ekleyip yapraklara püskürtün.",
+                    "Yoğun beyaz toz kaplı yaprakları hafifçe budayarak bitki içini havalandırın.",
+                    "Kükürt bazlı organik koruyucu sprey veya hazır fungisit kullanın.",
+                    "Bitkiyi direkt güneş ışığı alan havadar bir yere konumlandırın."
+                ],
+                preventionTips: "Bitkilerinizi sık dikmeyin, aralarında en az 30 cm hava boşluğu bırakın."
+            },
+            {
+                diseaseName: "Unlu Bit (Pseudococcidae) İstilası",
+                plantType: "Sukulent & Tropikal Salon Bitkisi",
+                severity: "Yüksek (Kritik)",
+                symptoms: [
+                    "Yaprak sapı birleşim yerlerinde beyaz pamuksu yapışkan tabaka",
+                    "Bitki öz suyunun emilmesi sonucu yapraklarda büzüşme",
+                    "Yapraklarında yapışkan tatlımsı salgı (Balsam)"
+                ],
+                causes: "Sıcak ve kuru oda havası; zararlı unlu bitlerin hızla çoğalması için ideal ortam oluşturmuştur.",
+                treatmentPlan: [
+                    "Bir kulak çöpünü alkole veya kolonyaya batırıp beyaz pamuksu bitleri tek tek silin.",
+                    "Arap sabunu + zeytinyağı karışımlı doğal solüsyonu 3 gün arayla yaprak altlarına püskürtün.",
+                    "İstila çok yüksekse sistemik bir insektisit (zararlı ilacı) uygulayın.",
+                    "Bitkiyi diğer ev bitkilerinizden karantinaya alın."
+                ],
+                preventionTips: "Bitki yapraklarını düzenli nemli bezle silerek toz ve zararlı birikimini önleyin."
+            },
+            {
+                diseaseName: "Kırmızı Örümcek (Tetranychidae) Akar İstilası",
+                plantType: "İnce Yapraklı Salon & Balkon Bitkisi",
+                severity: "Yüksek (Kritik)",
+                symptoms: [
+                    "Yaprak arkasında minik sarı-kırmızı noktacıklar ve incecik ipeksi ağlar",
+                    "Yapraklarda bronzlaşma, beneklenme ve tozlu görünüm",
+                    "Yaprakların aniden sararıp dökülmesi"
+                ],
+                causes: "Çok kuru, nemsiz ve kaloriferli ortam havası kırmızı örümcek akarlarının çoğalmasını hızlandırmıştır.",
+                treatmentPlan: [
+                    "Bitkiyi banyoya götürüp yaprak altlarını ılık duş başlığıyla tazikli yıkayın.",
+                    "Yaprak altlarına doğal Neem yağı veya akarisit (örümcek ilacı) spreyi sıkın.",
+                    "Ortam nemini artırmak için bitki yakınına su dolu çakıl tepsisi koyun.",
+                    "Kuru rüzgar ve doğrudan sıcak hava akımından uzaklaştırın."
+                ],
+                preventionTips: "Yaz aylarında ve kışın kalorifer döneminde yapraklara oda sıcaklığında su püskürtün."
+            },
+            {
+                diseaseName: "Kök Çürüklüğü & Aşırı Sulama Asfiksisi (Pythium / Phytophthora)",
+                plantType: "Saksı Bitkisi",
+                severity: "Yüksek (Kritik)",
+                symptoms: [
+                    "Yapraklarda pörsüme ve sararma (Toprak ıslak olmasına rağmen solgunluk)",
+                    "Gövde tabanında yumuşama ve siyahlaşma",
+                    "Saksı toprağında küf ve ağır ekşi koku"
+                ],
+                causes: "Saksı altında biriken durgun su, drenaj deliklerinin tıkalı olması ve oksijensiz kalan köklerin çürümesi.",
+                treatmentPlan: [
+                    "Sulamayı DERHAL durdurun! Saksı altlığında biriken suyu dökün.",
+                    "Bitkiyi saksıdan çıkarıp çürümüş yumuşak siyah kökleri steril makasla kesin.",
+                    "Kökleri taze, perlitli ve drenajlı yeni saksı toprağına dikin.",
+                    "Toprak tamamen kuruyana kadar en az 10 gün hiç su vermeyin."
+                ],
+                preventionTips: "Her zaman 'Parmak Testi' yapın: Parmağınızı toprağa 3 cm batırın, nemli ise sulamayın."
+            },
+            {
+                diseaseName: "Güneş Yanığı & Solar Scorch Deformasyonu",
+                plantType: "Hassas & Gölge Seven Salon Bitkisi",
+                severity: "Düşük (Kontrol Edilebilir)",
+                symptoms: [
+                    "Yaprak ortalarında ve uçlarında gevrek, gevrekleşmiş kağıt gibi açık kahverengi lekeler",
+                    "Lekeli alanların kuruyup dökülmesi",
+                    "Renk pigmentlerinde solma"
+                ],
+                causes: "Bitkinin aniden direk dik öğle güneşine maruz kalması veya yaprak üzerinde kalan su damlalarının mercek etkisi yapması.",
+                treatmentPlan: [
+                    "Bitkiyi doğrudan yakıcı cam kenarından çekip aydınlık tül arkasına taşıyın.",
+                    "Güneşte yanmış, çıtırlaşmış yaprak kısımlarını estetik olarak budayın.",
+                    "Güneşli saatlerde yapraklara asla su püskürtmeyin (Sadece akşam saatlerinde).",
+                    "Nem oranını korumak için oda sıcaklığındaki su ile toprağını sulayın."
+                ],
+                preventionTips: "Gölge seven tropikal bitkileri doğrudan güneşe değil filtrelenmiş ışığa koyun."
+            },
+            {
+                diseaseName: "Bakteriyel Leke & Yaprak Yanıklığı (Xanthomonas)",
+                plantType: "Sebze & Süs Bitkisi",
+                severity: "Yüksek (Kritik)",
+                symptoms: [
+                    "Yapraklarda köşeli, yağlımsı sulu kahverengi lekeler",
+                    "Leke ortasında delinmeler ve kuruma",
+                    "Yaprak saplarında gevşeme ve dökülme"
+                ],
+                causes: "Bakteriyel enfeksiyonun ıslak yapraklar ve yüksek sıcaklıkla bitki dokularına nüfuz etmesi.",
+                treatmentPlan: [
+                    "Enfekte yaprakları hemen temiz bir eldivenle toplayıp imha edin.",
+                    "Bitkiye organik Bakırlı Bordo Bulamacı veya bakterisit sprey uygulayın.",
+                    "Bitkiler arası mesafeyi açarak hava akışını maksimuma çıkarın.",
+                    "Sulama suyunu yapraklara değdirmeden toprak seviyesinden verin."
+                ],
+                preventionTips: "Ekipmanlarınızı ve budama makasınızı her kullanımdan sonra alkolle dezenfekte edin."
+            },
+            {
+                diseaseName: "Pas Hastalığı (Puccinia / Rust Fungus)",
+                plantType: "Çiçekli ve Yapraklı Bitki",
+                severity: "Orta (Dikkat)",
+                symptoms: [
+                    "Yaprak alt yüzeyinde turuncu, pas rengi kabarık kabarcıklar (Pustül)",
+                    "Yaprak üstünde sarı beneklenme",
+                    "Erken dökülen sararmış yapraklar"
+                ],
+                causes: "Pas mantarı sporlarının rüzgar ve su damlalarıyla yaprak alt yüzeyine yerleşip çoğalması.",
+                treatmentPlan: [
+                    "Turuncu pürüzlü paslı yaprakları toplayıp hemen yakın veya poşetleyip atın.",
+                    "Bitkiye kükürt veya organik mantar önleyici sprey uygulayın.",
+                    "Rüzgarlı ve esintili ortamlarda sulama zamanlamasını sabah erken saatlere çekin.",
+                    "Toprak yüzeyine dökülen eski yaprakları temizleyin."
+                ],
+                preventionTips: "Yaprak altlarını haftalık kontrol edin ve pas kabarcığı görür görmez budayın."
+            },
+            {
+                diseaseName: "Tuz Birikimi & Besin Yanıklığı (Tip Burn)",
+                plantType: "Saksı Bitkisi",
+                severity: "Düşük (Kontrol Edilebilir)",
+                symptoms: [
+                    "Yaprak uçlarında jiletle kesilmiş gibi siyah/kahverengi kuru kenarlar",
+                    "Saksı toprağının üstünde beyaz kireçleşme veya tuz tabakası",
+                    "Köklerde emilim duraklaması"
+                ],
+                causes: "Musluk suyundaki aşırı kireç/klor birikimi veya fazla gübre kullanımı sonucu köklerin yanması.",
+                treatmentPlan: [
+                    "Toprağı yıkama (Leaching): Saksıya 2-3 litre arıtılmış su döküp altından tuzların süzülmesini sağlayın.",
+                    "Süreç düzelene kadar suni gübre kullanımını tamamen durdurun.",
+                    "Sulama suyunu en az 24 saat kapağı açık kapta bekletip klorun uçmasını sağlayın.",
+                    "Yaprak uçlarındaki kuru kahverengi kısımları makasla uçtan kırpın."
+                ],
+                preventionTips: "Musluk suyunu doğrudan vermeyin; dinlendirilmiş veya yağmur suyu tercih edin."
+            },
+            {
+                diseaseName: "Kabuklu Bit (Coccidae) Zırhlı İstilası",
+                plantType: "Odunsu Gövdeli & Kalın Yapraklı Bitki",
+                severity: "Yüksek (Kritik)",
+                symptoms: [
+                    "Gövde ve yaprak damarlarında kahverengi zırhlı kabukçuklar",
+                    "Kabukların kazındığında altında özsu kalıntısı",
+                    "Bitki gelişmesinin tamamen durması"
+                ],
+                causes: "Zırhlı kabuklu bitlerin gövdeye yapışıp bitkinin yaşam sıvısını emmesi.",
+                treatmentPlan: [
+                    "Eski bir diş fırçasını sabunlu suya batırıp gövdedeki kabukları fırçalayarak kazıyın.",
+                    "Sıvı vazelin veya zeytinyağı-sabun karışımını kabukların üzerine sürerek nefes almalarını engelleyin.",
+                    "Kritik durumlarda sistemik insektisit ile ilaçlama yapın.",
+                    "Bitkinin etrafını temiz tutun."
+                ],
+                preventionTips: "Gövde ve sap birleşim yerlerini ayda bir büyüteçle kontrol edin."
+            },
+            {
+                diseaseName: "Yaprak Biti (Aphididae) Kolonileşmesi",
+                plantType: "Taze Sürgünlü & Çiçekli Bitki",
+                severity: "Orta (Dikkat)",
+                symptoms: [
+                    "Taze yeşil filizlerde yeşil, siyah veya sarı minik böcek kümeleri",
+                    "Yeni çıkan taze yapraklarda büzüşme ve kıvrılma",
+                    "Bitki etrafında karınca hareketliliği"
+                ],
+                causes: "Taze ve etli bahar sürgünlerinin emici yaprak bitlerini cezbetmesi.",
+                treatmentPlan: [
+                    "Bitkiyi suyla yıkayarak böcek kolonilerinin büyük kısmını akıtın.",
+                    "Arap sabunlu su (1 litre suya 1 yemek kaşığı arap sabunu) spreyi sıkın.",
+                    "Uğur böceği gibi doğal avcıları teşvik edin.",
+                    "Böcekler temizlenene kadar 2 günde bir püskürtmeye devam edin."
+                ],
+                preventionTips: "Bahar aylarında taze filizleri düzenli kontrol edin."
+            }
+        ];
+
+        if (notes.includes('leke') || notes.includes('mantar') || notes.includes('siyah')) imgHash = 1;
+        else if (notes.includes('kül') || notes.includes('beyaz toz')) imgHash = 2;
+        else if (notes.includes('unlu') || notes.includes('pamuk')) imgHash = 3;
+        else if (notes.includes('örümcek') || notes.includes('ağ')) imgHash = 4;
+        else if (notes.includes('çürük') || notes.includes('kök') || notes.includes('ıslak')) imgHash = 5;
+        else if (notes.includes('güneş') || notes.includes('yanık')) imgHash = 6;
+        else if (notes.includes('bakteri') || notes.includes('yağlı')) imgHash = 7;
+        else if (notes.includes('pas') || notes.includes('turuncu')) imgHash = 8;
+        else if (notes.includes('tuz') || notes.includes('kireç') || notes.includes('uc')) imgHash = 9;
+        else if (notes.includes('kabuk')) imgHash = 10;
+        else if (notes.includes('bit') || notes.includes('yeşil böcek')) imgHash = 11;
+
+        return diseaseCatalog[imgHash % diseaseCatalog.length];
     }
 
     if (btnDiagnose) {
@@ -545,14 +735,14 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
                 d = JSON.parse(jsonMatch ? jsonMatch[0] : responseText);
             } catch (err) {
                 console.error("Gemini Vision API kısıtlaması (Akıllı Doktor Motoru Devrede):", err);
-                d = generateSmartDoctorDiagnosis(userNotes);
+                d = generateSmartDoctorDiagnosis(userNotes, doctorSelectedBase64);
             }
 
             btnDiagnose.disabled = false;
             doctorLoader.style.display = 'none';
 
             if (!d) {
-                d = generateSmartDoctorDiagnosis(userNotes);
+                d = generateSmartDoctorDiagnosis(userNotes, doctorSelectedBase64);
             }
 
             // Şiddet Rozeti Rengi
