@@ -2428,7 +2428,8 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
             const lightSummaryDesc = document.getElementById('lightSummaryDesc');
             const recommendedPlantsGrid = document.getElementById('recommendedPlantsGrid');
 
-            let dirText = selectedDirection === 'south' ? 'Güney (Yoğun Güneş)' : selectedDirection === 'east' ? 'Doğu (Sabah Işığı)' : selectedDirection === 'west' ? 'Batı (Sıcak İklim)' : 'Kuzey (Yumuşak Gölge)';
+            let dirText = selectedDirection === 'south' ? 'Sürekli Güneşli (Bol Öğle Güneşi)' : selectedDirection === 'east' ? 'Sadece Sabah Güneşi' : selectedDirection === 'west' ? 'Sadece Akşam Güneşi' : 'Hiç Güneş Görmeyen (Gölge / Yumuşak Ortam)';
+
             let distText = dist === 'window_front' ? 'Tam Pencere Önü (Doğrudan Işık)' : dist === 'window_near' ? '1-2 Metre Mesafe (Filtrelenmiş Tül Arkası)' : 'Oda Derinliği / Köşe (Low Light / Düşük Işık)';
 
             if (lightSummaryTitle) lightSummaryTitle.textContent = `🧭 ${dirText} | 🪟 ${distText}`;

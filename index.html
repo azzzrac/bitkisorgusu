@@ -448,32 +448,33 @@
             <div class="modal-body">
                 <p class="modal-subtitle">Pencerenizin baktığı yönü ve mesafeyi seçin; evinizin ortamına en uygun %100 ideal bitkileri hesaplayalım.</p>
 
-                <!-- Step 1: Direction Selection -->
+                <!-- Step 1: Sunlight Exposure Selection -->
                 <div style="margin-top: 14px;">
-                    <label style="font-weight: 700; font-size: 14px; color: var(--text-title); display: block; margin-bottom: 8px;">1. Pencerenizin Baktığı Yönü Seçin: 🧭</label>
-                    <div class="direction-selector-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px;">
+                    <label style="font-weight: 700; font-size: 14px; color: var(--text-title); display: block; margin-bottom: 8px;">1. Evinizin Güneş Alma Durumu: ☀️</label>
+                    <div class="direction-selector-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px;">
                         <button class="btn btn-direction active" data-dir="south" style="background: rgba(245, 124, 0, 0.15); border: 2px solid var(--accent-orange); color: var(--text-title); flex-direction: column; padding: 12px 8px; text-align: center;">
                             <span style="font-size: 22px;">☀️</span>
-                            <b>Güney (South)</b>
-                            <small style="font-size: 11px; opacity: 0.8;">Yoğun Öğle Güneşi</small>
+                            <b>Sürekli Güneşli</b>
+                            <small style="font-size: 11px; opacity: 0.8;">Tüm Gün Bol Güneşli</small>
                         </button>
                         <button class="btn btn-direction" data-dir="east" style="background: rgba(46, 125, 50, 0.08); border: 1px solid var(--card-border); color: var(--text-title); flex-direction: column; padding: 12px 8px; text-align: center;">
                             <span style="font-size: 22px;">🌅</span>
-                            <b>Doğu (East)</b>
-                            <small style="font-size: 11px; opacity: 0.8;">Yumuşak Sabah Güneşi</small>
+                            <b>Sadece Sabah Güneşi</b>
+                            <small style="font-size: 11px; opacity: 0.8;">Taze Yumuşak Işık</small>
                         </button>
                         <button class="btn btn-direction" data-dir="west" style="background: rgba(46, 125, 50, 0.08); border: 1px solid var(--card-border); color: var(--text-title); flex-direction: column; padding: 12px 8px; text-align: center;">
                             <span style="font-size: 22px;">🌇</span>
-                            <b>Batı (West)</b>
+                            <b>Sadece Akşam Güneşi</b>
                             <small style="font-size: 11px; opacity: 0.8;">Sıcak Akşamüstü Işığı</small>
                         </button>
                         <button class="btn btn-direction" data-dir="north" style="background: rgba(46, 125, 50, 0.08); border: 1px solid var(--card-border); color: var(--text-title); flex-direction: column; padding: 12px 8px; text-align: center;">
                             <span style="font-size: 22px;">🏔️</span>
-                            <b>Kuzey (North)</b>
-                            <small style="font-size: 11px; opacity: 0.8;">Yumuşak / Gölge Işık</small>
+                            <b>Hiç Güneş Görmeyen</b>
+                            <small style="font-size: 11px; opacity: 0.8;">Gölge / Az Işıklı Ortam</small>
                         </button>
                     </div>
                 </div>
+
 
                 <!-- Step 2: Distance Selection -->
                 <div style="margin-top: 16px;">
