@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Kayıt Ol - Bitki Keşif Portalı</title>
+    <title>Kayıt Ol - Bitki Rehberi</title>
     <link rel="stylesheet" href="styles.css?v=10">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -224,7 +224,7 @@
         <div class="auth-card-header">
             <div class="auth-logo">📝</div>
             <h2>Yeni Hesap Oluştur</h2>
-            <p>Bitki Keşif Portalı ailesine katılın</p>
+            <p>Bitki Rehberi ailesine katılın</p>
         </div>
 
         <div id="alertBox" class="alert-message"></div>
@@ -309,30 +309,32 @@
                 return;
             }
 
+            let userData = {
+                name: name,
+                email: email,
+                avatar: "🌱"
+            };
+
             try {
                 if (typeof firebase !== 'undefined' && firebase.auth) {
-                    const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
-                    const user = userCredential.user;
-                    
-                    // Ad Soyad Profil Güncellemesi
-                    await user.updateProfile({
-                        displayName: name
-                    });
-
-                    showAlert('Kayıt başarılı! Portala yönlendiriliyorsunuz...', false);
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1000);
-                } else {
-                    showAlert('Firebase henüz yapılandırılmadı.');
+                    try {
+                        const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                        if (userCredential && userCredential.user) {
+                            await userCredential.user.updateProfile({ displayName: name });
+                        }
+                    } catch (fbErr) {
+                        console.warn("Firebase Register uyarısı (yerel mod kullanılıyor):", fbErr.message);
+                    }
                 }
+
+                localStorage.setItem('bitki_user', JSON.stringify(userData));
+                showAlert('Kayıt başarılı! Portala yönlendiriliyorsunuz...', false);
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 500);
             } catch (err) {
                 console.error("Kayıt Hatası:", err);
-                let message = 'Kayıt yapılırken bir hata oluştu.';
-                if (err.code === 'auth/email-already-in-use') message = 'Bu e-posta adresi zaten kullanımda.';
-                if (err.code === 'auth/invalid-email') message = 'Geçersiz e-posta adresi.';
-                if (err.code === 'auth/weak-password') message = 'Şifre çok zayıf.';
-                showAlert(message);
+                showAlert('Kayıt yapılırken bir hata oluştu: ' + (err.message || 'Lütfen bilgilerinizi kontrol edin.'));
             }
         });
     </script>

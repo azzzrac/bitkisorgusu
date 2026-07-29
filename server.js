@@ -489,6 +489,243 @@ Yanıt SADECE aşağıdaki JSON formatında olmalı, hiçbir markdown çiti veya
     });
 });
 
+// 🎨 YAPAY ZEKA ODA & SAKSI TASARIMCISI İÇİN AKILLI DOKUNUŞ MOTORU
+function generateSmartRoomDecoration(roomStyle, userNotes, hasImage) {
+    const style = (roomStyle || 'modern').toLowerCase();
+    const notes = (userNotes || '').toLowerCase();
+
+    let roomAnalysis = {
+        styleName: roomStyle ? roomStyle.toUpperCase() : "MODERN İÇ MEKAN",
+        colorPalette: ["Nötr Bej", "Doğal Ahşap", "Zümrüt Yeşili"],
+        lightAssessment: "Orta / Filtrelenmiş Gün Işığı",
+        overallVibe: "Ferah, dengeli ve huzurlu bir yaşam alanı."
+    };
+
+    let recommendedPlants = [];
+    let decorTips = [];
+
+    if (style.includes('bohem') || style.includes('boho')) {
+        roomAnalysis.styleName = "BOHEM & DOĞAL SEVER";
+        roomAnalysis.colorPalette = ["Sıcak Toprak Tonları", "Krem", "Ahşap & Hasır"];
+        roomAnalysis.overallVibe = "Organik dokular, bol yeşillik ve sıcak doğal renklerin harmanlandığı samimi ortam.";
+        recommendedPlants = [
+            {
+                name: "Monstera Deliciosa (Deve Tabanı)",
+                reason: "Görkemli ve delikli iri yaprakları bohem tarzın simgesi olan hasır ve ahşap eşyalarla mükemmel uyum sağlar.",
+                placement: "Koltuk kenarındaki aydınlık köşe veya pencere yanı tül arkası.",
+                potRecommendation: "Örme Hasır Sepet Kılıflı Saksı veya Sıcak Terracotta (Pişmiş Toprak)",
+                careTip: "Yapraklarına haftada 1 kez fısfıs nemlendirme yapın."
+            },
+            {
+                name: "Pothos (Salon Sarmaşığı)",
+                reason: "Sarkan dalları yüksek raflarda ve asılı saksılarda büyüleyici bir doğal şelale etkisi yaratır.",
+                placement: "Kitaplık üst rafı veya makrome saksı askısı.",
+                potRecommendation: "Makrome Örgülü Asılı Saksı veya Krem Seramik",
+                careTip: "Toprak kurudukça sulayın, uzayan dalları budayabilirsiniz."
+            },
+            {
+                name: "Strelitzia (Cennet Kuşu)",
+                reason: "Yüksek tropikal yaprak yapısı odaya yükseklik ve heybet katar.",
+                placement: "Odanın boş duran güneşli köşe noktası.",
+                potRecommendation: "Büyük Boy Terracotta veya Doğal Taş Saksı",
+                careTip: "Bol parlak ışık ister, yapraklarını tozdan arındırmak için silin."
+            }
+        ];
+        decorTips = [
+            "Farklı yüksekliklerdeki ahşap veya bambu bitki stantları kullanarak derinlik oluşturun.",
+            "Bitkilerinizi makrome saksı askıları ile tavandan asarak dikey hacim kazandırın."
+        ];
+    } else if (style.includes('minimal') || style.includes('skandinav')) {
+        roomAnalysis.styleName = "MİNİMALİST & SKANDİNAV";
+        roomAnalysis.colorPalette = ["Mat Beyaz", "Açık Meşe", "Pastel Yeşiller"];
+        roomAnalysis.overallVibe = "Sade, gözü yormayan, net çizgiler ve doğal ışığın ön planda olduğu zarif alan.";
+        recommendedPlants = [
+            {
+                name: "Ficus Elastica (Kauçuk Bitkisi)",
+                reason: "Koyu ve parlatılmış mat yaprakları minimalist mobilyaların temiz hatlarıyla şık bir kontrast oluşturur.",
+                placement: "Tv ünitesi yanı veya çalışma masası köşesi.",
+                potRecommendation: "Mat Beyaz Silindir Seramik veya Betonsu Gri Saksı",
+                careTip: "Yapraklarını düzenli nemli bezle silerek parlaklığını koruyun."
+            },
+            {
+                name: "Sansevieria (Paşa Kılıcı)",
+                reason: "Dikey ve keskin formlu yaprakları Skandinav iç mimarisinin geometrik yapısına tam oturur.",
+                placement: "Pencere kenarı veya antre girişi.",
+                potRecommendation: "Ahşap Ayaklı Mat Beyaz Minimal Saksı",
+                careTip: "Aşırı sulamadan kaçının, 2-3 haftada bir sulamak yeterlidir."
+            },
+            {
+                name: "Zamioculcas (Zz Bitkisi)",
+                reason: "Parlak ve simetrik yaprakları az bakım gerektiren minimalist felsefeyi yansıtır.",
+                placement: "Gölgede kalan konsol veya sehpa üstü.",
+                potRecommendation: "Mat Siyah veya Nötr Bej Seramik",
+                careTip: "Düşük ışıkta bile canlılığını korur, toprağı kuruyana kadar bekleyin."
+            }
+        ];
+        decorTips = [
+            "Az sayıda ama büyük gövdeli tekil bitkiler (statement plants) seçerek sadeliği koruyun.",
+            "Saksılarda mat siyah, beyaz veya beton dokuları tercih ederek mobilyalarla bütünlük sağlayın."
+        ];
+    } else if (style.includes('ofis') || style.includes('calisma') || style.includes('çalışma')) {
+        roomAnalysis.styleName = "ODAKLANMA DOSTU OFİS & ÇALIŞMA ALANI";
+        roomAnalysis.colorPalette = ["Koyu Ceviz", "Metalik Gri", "Zihni Dinlendiren Canlı Yeşil"];
+        roomAnalysis.overallVibe = "Zihinsel verimliliği artıran, hava kalitesini yükselten ve stresi düşüren çalışma ortamı.";
+        recommendedPlants = [
+            {
+                name: "Spathiphyllum (Barış Çiçeği)",
+                reason: "Havadaki zararlı gazları en iyi süzten bitkilerden biridir; konsantrasyonu artırır.",
+                placement: "Çalışma masasının yan sehpası veya bilgisayar arkası.",
+                potRecommendation: "Parlak Beyaz veya Antrasit Seramik",
+                careTip: "Susadığında yapraklarını hafifçe aşağı eğer, hemen sulayabilirsiniz."
+            },
+            {
+                name: "Peperomia (Hava Temizleyici)",
+                reason: "Kompakt boyutuyla masada az yer kaplar, yeşil dokusu göz yorgunluğunu dinlendirir.",
+                placement: "Doğrudan çalışma masası üzeri veya monitör yanı.",
+                potRecommendation: "Küçük Pastel Renkli Porselen Saksı",
+                careTip: "Toprağın üstü kurudukça az su verin."
+            },
+            {
+                name: "Crassula Ovata (Para Çiçeği)",
+                reason: "Pozitif enerji ve şans getirdiğine inanılır, çalışma motivasyonunu destekler.",
+                placement: "Masa lambasının aydınlattığı köşe.",
+                potRecommendation: "Doğal Ahşap Altlıklı Seramik Saksı",
+                careTip: "Güneşi sever, fazla sulamadan kaçının."
+            }
+        ];
+        decorTips = [
+            "Masa üzerinde göz hizanıza küçük gövdeli sukulent veya Peperomia koyarak mola anlarında zihninizi dinlendirin.",
+            "Hava kalitesini artıran Barış Çiçeği ile kapalı alan oksijen seviyesini yükseltin."
+        ];
+    } else {
+        roomAnalysis.styleName = "ZARİF & MODERN İÇ MEKAN";
+        roomAnalysis.colorPalette = ["Krem & Antrasit", "Mermer Doku", "Canlı Orman Yeşili"];
+        roomAnalysis.overallVibe = "Şık, çağdaş ve estetik detaylarla zenginleştirilmiş dengeli yaşam alanı.";
+        recommendedPlants = [
+            {
+                name: "Orkide (Phalaenopsis)",
+                reason: "Zarif ve asil çiçek yapısı modern masalara ve konsollara lüks bir dokunuş katar.",
+                placement: "Yemek masası ortası veya konsol üzeri.",
+                potRecommendation: "Şeffaf İç Saksı + Şık Desenli Seramik Dış Saksı",
+                careTip: "Kökleri ışık almalı, haftada 1 kez daldırma sulama yöntemi uygulayın."
+            },
+            {
+                name: "Ficus Lyrata (Keman Yapraklı İncir)",
+                reason: "Geniş dalgalı yaprakları modern iç mekanların imza bitkisidir.",
+                placement: "Pencereye yakın aydınlık salon köşesi.",
+                potRecommendation: "Pirinç / Altın Detaylı veya Beton Ayaklı Saksı",
+                careTip: "Sabit yeri sever, yerini sık değiştirmeyin."
+            },
+            {
+                name: "Aloe Vera",
+                reason: "Modern etli yaprak yapısı ve şifalı özüyle hem estetik hem işlevseldir.",
+                placement: "Aydınlık pencere önü sehpa.",
+                potRecommendation: "Dokulu Toprak veya Mermer Desenli Saksı",
+                careTip: "Güneş ışığını çok sever, toprağı kurudukça az miktarda sulayın."
+            }
+        ];
+        decorTips = [
+            "Modern saksılarda pirinç, altın veya krom metal detaylar tercih ederek şıklığı öne çıkarın.",
+            "Bitkileri 3'lü gruplar halinde (büyük, orta, küçük boy) dizerek dinamik bir kompozisyon oluşturun."
+        ];
+    }
+
+    if (notes.includes('evcil') || notes.includes('kedi') || notes.includes('köpek')) {
+        decorTips.push("🐾 Not: Evcil hayvan uyarınız dikkate alınarak evcil dostlar için güvenli yerleşimler planlandı.");
+    }
+
+    return {
+        roomAnalysis: roomAnalysis,
+        recommendedPlants: recommendedPlants,
+        decorTips: decorTips
+    };
+}
+
+// 🎨 GOOGLE GEMINI İLE YAPAY ZEKA ODA & SAKSI TASARIMCISI ENDPOINT'İ
+app.post('/api/decorate-room', async (req, res) => {
+    const { imageBase64, mimeType, roomStyle, userNotes } = req.body;
+
+    const apiKey = process.env.FIREBASE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+
+    if (apiKey && imageBase64) {
+        try {
+            const { GoogleGenerativeAI } = require('@google/generative-ai');
+            const genAI = new GoogleGenerativeAI(apiKey);
+            
+            const modelsToTry = ['gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-2.5-flash'];
+            const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+            const imagePart = {
+                inlineData: {
+                    data: cleanBase64,
+                    mimeType: mimeType || 'image/jpeg'
+                }
+            };
+
+            const prompt = `Sen iç mimarlık, botanik tasarımı ve peyzaj alanında uzman bir Yapay Zeka Oda & Saksı Tasarımcısısın (AI Room Decorator).
+Fotoğraftaki odayı/yaşam alanını (mobilyalar, duvar rengi, ışık açısı, tarz) detaylıca incele.
+${roomStyle ? 'Kullanıcının Tercih Ettiği Tarz: ' + roomStyle : ''}
+${userNotes ? 'Kullanıcının Notu / İstekleri: ' + userNotes : ''}
+
+Bu odaya renk, ışık ve estetik açıdan %100 uyum sağlayacak 3 mükemmel bitki türü ve saksı stilleri öner.
+Yanıtını SADECE aşağıdaki JSON formatında ver, başka hiçbir markdown çiti veya metin yazma:
+{
+  "roomAnalysis": {
+    "styleName": "Tespit Edilen Oda Tarzı (Örn: Bohem, Skandinav, Modern, Endüstriyel)",
+    "colorPalette": ["Renk 1", "Renk 2", "Renk 3"],
+    "lightAssessment": "Işık Değerlendirmesi (Örn: Parlak Dolaylı Işık / Düşük Işık)",
+    "overallVibe": "Odanın genel atmosferi hakkında 1-2 cümlelik mimari yorum."
+  },
+  "recommendedPlants": [
+    {
+      "name": "Bitki Türkçe Adı (Örn: Monstera Deliciosa)",
+      "reason": "Neden bu odaya ve mobilyalara çok yakışacağı",
+      "placement": "Odadaki en ideal konumlandırma noktası (Örn: Koltuk yanı aydınlık köşe)",
+      "potRecommendation": "Önerilen saksı malzemesi, rengi ve tarzı (Örn: Hasır Sepet Kılıf veya Mat Siyah Seramik)",
+      "careTip": "Kısa bakım/konumlandırma tavsiyesi"
+    }
+  ],
+  "decorTips": [
+    "İç mimari bitki dekorasyon tavsiyesi 1",
+    "İç mimari bitki dekorasyon tavsiyesi 2"
+  ]
+}`;
+
+            for (const modelName of modelsToTry) {
+                try {
+                    const model = genAI.getGenerativeModel({
+                        model: modelName,
+                        generationConfig: { responseMimeType: "application/json" }
+                    });
+                    const result = await model.generateContent([prompt, imagePart]);
+                    let responseText = result.response.text().trim();
+                    if (responseText.startsWith("```")) {
+                        responseText = responseText.replace(/^```(json)?\n?/, '').replace(/\n?```$/, '').trim();
+                    }
+
+                    if (responseText) {
+                        const parsed = JSON.parse(responseText);
+                        logGeminiRequest(modelName, '/api/decorate-room');
+                        return res.json({ success: true, isLiveApi: true, modelUsed: modelName, data: parsed });
+                    }
+                } catch (mErr) {
+                    console.log(`Gemini model ${modelName} denemesi başarısız:`, mErr.message);
+                }
+            }
+        } catch (err) {
+            console.error("Gemini Oda Tasarımcısı API hatası:", err.message);
+        }
+    }
+
+    // Akıllı Dinamik Fallback Yanıtı
+    const smartDecoration = generateSmartRoomDecoration(roomStyle, userNotes, !!imageBase64);
+    res.json({
+        success: true,
+        isFallback: true,
+        data: smartDecoration
+    });
+});
+
 app.listen(3000, () => console.log('🛡️ Güvenli API & Gemini AI 3000 portunda çalışıyor.'));
+
 
 

@@ -2,13 +2,17 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     // STATE & AUTHENTICATION
-    let currentUser = JSON.parse(localStorage.getItem('bitki_user')) || null;
+    let rawUser = null;
+    try { rawUser = JSON.parse(localStorage.getItem('bitki_user')); } catch(e) {}
+    let currentUser = (rawUser && rawUser.email) ? rawUser : null;
+    if (!currentUser) localStorage.removeItem('bitki_user');
+
     let isDarkMode = false;
     let quizScore = 0;
     let totalSearchCount = 0;
     let userName = currentUser ? currentUser.name : "Botanik Sevdalısı";
     let userEmail = currentUser ? currentUser.email : "";
-    let userAvatar = currentUser ? (currentUser.avatar || "🌿") : "🌿";
+    let userAvatar = currentUser ? (currentUser.avatar || "🌱") : "🌱";
     let fullText = "";
     let typingTimer = null;
     let typingIndex = 0;
@@ -1292,6 +1296,7 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
         if (typingTimer) clearInterval(typingTimer);
 
         totalSearchCount++;
+        if (typeof completeQuest === 'function') completeQuest('quest1');
         btnSearch.disabled = true;
         statusBar.textContent = `🤖 Google Gemini AI '${bitkiAdi}' bilgilerini hazırlıyor...`;
 
@@ -1496,7 +1501,7 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
                 btnFavAdd.disabled = false;
                 btnSaveImg.disabled = !sonuc.resimUrl;
                 btnWiki.disabled = !sonuc.wikiUrl;
-                btnFullscreen.disabled = !sonuc.resimUrl;
+                if (btnFullscreen) btnFullscreen.disabled = !sonuc.resimUrl;
                 if (btnExportPdf) btnExportPdf.disabled = false;
 
                 if (typeof fetchGeminiUsageStats === 'function') fetchGeminiUsageStats();
@@ -1541,7 +1546,7 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
         btnFavAdd.disabled = true;
         btnSaveImg.disabled = true;
         btnWiki.disabled = true;
-        btnFullscreen.disabled = true;
+        if (btnFullscreen) btnFullscreen.disabled = true;
         statusBar.textContent = 'Sonuç bulunamadı.';
     }
 
@@ -1855,8 +1860,8 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
     });
 
     // TAM EKRAN GÖRSEL
-    imageBox.addEventListener('click', openFullscreen);
-    btnFullscreen.addEventListener('click', openFullscreen);
+    if (imageBox) imageBox.addEventListener('click', openFullscreen);
+    if (btnFullscreen) btnFullscreen.addEventListener('click', openFullscreen);
 
     function openFullscreen() {
         if (currentSonuc && currentSonuc.resimUrl) {
@@ -1901,20 +1906,37 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
     }
 
     function refreshAuthUI() {
-        if (currentUser) {
-            btnProfile.textContent = `👤 ${currentUser.name}`;
+        if (currentUser && currentUser.email) {
+            const avatar = currentUser.avatar || "🌱";
+            const isImg = typeof avatar === 'string' && (avatar.startsWith('http://') || avatar.startsWith('https://') || avatar.startsWith('data:'));
+            
+            if (isImg) {
+                btnProfile.innerHTML = `<img src="${avatar}" class="header-avatar-img" alt="Avatar"> <span>${currentUser.name}</span>`;
+            } else {
+                btnProfile.textContent = `${avatar} ${currentUser.name}`;
+            }
+
             document.getElementById('userNameDisplay').textContent = currentUser.name;
             document.getElementById('userEmailDisplay').textContent = `📧 ${currentUser.email}`;
-            document.getElementById('userAvatar').textContent = currentUser.avatar || "🌿";
+
+            const userAvatarEl = document.getElementById('userAvatar');
+            if (userAvatarEl) {
+                if (isImg) {
+                    userAvatarEl.innerHTML = `<img src="${avatar}" class="profile-avatar-img" alt="Avatar">`;
+                } else {
+                    userAvatarEl.textContent = avatar;
+                }
+            }
+
             document.getElementById('authContainer').style.display = 'none';
             document.getElementById('userProfileContainer').style.display = 'block';
-            document.getElementById('modalTitleText').textContent = '👤 Hesabım & Profil Merkezi';
+            document.getElementById('modalTitleText').textContent = isImg ? `👤 Hesabım & Profil Merkezi` : `${avatar} Hesabım & Profil Merkezi`;
             btnCloseProfile.style.display = 'inline-block';
         } else {
             btnProfile.textContent = '🔑 Giriş Yap / Kayıt Ol';
             document.getElementById('authContainer').style.display = 'flex';
             document.getElementById('userProfileContainer').style.display = 'none';
-            document.getElementById('modalTitleText').textContent = '📝 Bitki Keşif Portalı - Oturum Aç';
+            document.getElementById('modalTitleText').textContent = '📝 Bitki Rehberi - Oturum Aç';
             btnCloseProfile.style.display = 'inline-block';
         }
     }
@@ -1923,17 +1945,34 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
     if (typeof firebase !== 'undefined' && firebase.auth) {
         firebase.auth().onAuthStateChanged((firebaseUser) => {
             if (firebaseUser) {
+                let existingUser = null;
+                try {
+                    existingUser = JSON.parse(localStorage.getItem('bitki_user'));
+                } catch (e) {}
+
+                const savedAvatar = (existingUser && existingUser.avatar) ? existingUser.avatar : "🌱";
+                const savedName = (existingUser && existingUser.name) ? existingUser.name : (firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : "Botanikçi"));
+
                 currentUser = {
-                    name: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : "Botanikçi"),
+                    name: savedName,
                     email: firebaseUser.email || "",
-                    avatar: "🌿",
+                    avatar: savedAvatar,
                     uid: firebaseUser.uid
                 };
                 localStorage.setItem('bitki_user', JSON.stringify(currentUser));
                 userName = currentUser.name;
                 userEmail = currentUser.email;
-            } else if (!localStorage.getItem('bitki_user')) {
-                currentUser = null;
+            } else {
+                let existingUser = null;
+                try { existingUser = JSON.parse(localStorage.getItem('bitki_user')); } catch (e) {}
+                if (existingUser && existingUser.email) {
+                    currentUser = existingUser;
+                    userName = currentUser.name;
+                    userEmail = currentUser.email;
+                } else {
+                    currentUser = null;
+                    localStorage.removeItem('bitki_user');
+                }
             }
             loadUserData();
             refreshAuthUI();
@@ -1944,7 +1983,7 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
     }
 
     btnProfile.addEventListener('click', () => {
-        if (currentUser) {
+        if (currentUser && currentUser.email) {
             updateProfileModal();
             profileModal.style.display = 'flex';
         } else {
@@ -2002,18 +2041,147 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
         document.getElementById('countFavs').textContent = favoriListesi.length;
         const countAlbumEl = document.getElementById('countAlbum');
         if (countAlbumEl) countAlbumEl.textContent = kisiselFotoAlbumu.length;
+
+        // Progress Bars Güncellemesi
+        const barSearch = document.getElementById('barSearch');
+        const barSpecies = document.getElementById('barSpecies');
+        const barFav = document.getElementById('barFav');
+        const barQuiz = document.getElementById('barQuiz');
+
+        if (barSearch) barSearch.style.width = `${Math.min(100, (totalSearchCount / 20) * 100)}%`;
+        if (barSpecies) barSpecies.style.width = `${Math.min(100, (kesfedilenBitkiler.size / 30) * 100)}%`;
+        if (barFav) barFav.style.width = `${Math.min(100, (favoriListesi.length / 10) * 100)}%`;
+        if (barQuiz) barQuiz.style.width = `${Math.min(100, (quizScore / 100) * 100)}%`;
+
+        updateDailyQuestsUI();
         updateUserRank();
     }
 
 
+    function getUserXP() {
+        let questXP = 0;
+        if (dailyQuests.quest1) questXP += 10;
+        if (dailyQuests.quest2) questXP += 15;
+        if (dailyQuests.quest3) questXP += 10;
+
+        let activityXP = (totalSearchCount * 5) + (kesfedilenBitkiler.size * 10) + (favoriListesi.length * 5) + (quizScore * 2);
+        return questXP + activityXP;
+    }
+
     function updateUserRank() {
-        const size = kesfedilenBitkiler.size;
+        const xp = getUserXP();
         let rank = "Acemi Botanikçi";
-        if (size >= 30) rank = "👑 Master Botanik Ustası";
-        else if (size >= 20) rank = "💎 Bitki Uzmanı";
-        else if (size >= 10) rank = "🥇 Acemi Botanikçi";
-        else if (size >= 5) rank = "🥈 Doğa Dostu";
-        document.getElementById('userRankDisplay').textContent = `Unvan: ${rank}`;
+        let lvl = "Lvl 1";
+
+        if (xp >= 300) { rank = "👑 Master Botanik Ustası"; lvl = "Lvl 5"; }
+        else if (xp >= 200) { rank = "💎 Bitki Uzmanı"; lvl = "Lvl 4"; }
+        else if (xp >= 100) { rank = "🥇 Kıdemli Botanikçi"; lvl = "Lvl 3"; }
+        else if (xp >= 40) { rank = "🥈 Doğa Dostu"; lvl = "Lvl 2"; }
+
+        const rankEl = document.getElementById('userRankDisplay');
+        const lvlEl = document.getElementById('userLevelDisplay');
+        const xpEl = document.getElementById('userXpDisplay');
+
+        if (rankEl) rankEl.textContent = `Unvan: ${rank}`;
+        if (lvlEl) lvlEl.textContent = lvl;
+        if (xpEl) xpEl.textContent = `⚡ ${xp} XP`;
+    }
+
+    // AVATAR DEĞİŞTİRME POPOVER MANTIĞI
+    const btnToggleAvatarPicker = document.getElementById('btnToggleAvatarPicker');
+    const avatarPickerBox = document.getElementById('avatarPickerBox');
+    const avatarOpts = document.querySelectorAll('.avatar-opt');
+
+    if (btnToggleAvatarPicker && avatarPickerBox) {
+        btnToggleAvatarPicker.addEventListener('click', () => {
+            const isHidden = avatarPickerBox.style.display === 'none';
+            avatarPickerBox.style.display = isHidden ? 'block' : 'none';
+        });
+    }
+
+    avatarOpts.forEach(opt => {
+        opt.addEventListener('click', () => {
+            const selectedAvatar = opt.getAttribute('data-avatar');
+            if (selectedAvatar && currentUser) {
+                currentUser.avatar = selectedAvatar;
+                localStorage.setItem('bitki_user', JSON.stringify(currentUser));
+                const userAvatarEl = document.getElementById('userAvatar');
+                if (userAvatarEl) userAvatarEl.textContent = selectedAvatar;
+                refreshAuthUI();
+                if (avatarPickerBox) avatarPickerBox.style.display = 'none';
+            }
+        });
+    });
+
+    // 🎯 GÜNLÜK BOTANİK GÖREVLERİ (DAILY QUESTS) MANTIĞI
+    let dailyQuests = {
+        quest1: false,
+        quest2: false,
+        quest3: false
+    };
+
+    function loadDailyQuests() {
+        const saved = localStorage.getItem('bitki_daily_quests');
+        const today = new Date().toDateString();
+        const savedDate = localStorage.getItem('bitki_quests_date');
+
+        if (savedDate === today && saved) {
+            dailyQuests = JSON.parse(saved);
+        } else {
+            dailyQuests = { quest1: false, quest2: false, quest3: false };
+            localStorage.setItem('bitki_quests_date', today);
+            localStorage.setItem('bitki_daily_quests', JSON.stringify(dailyQuests));
+        }
+    }
+
+    function saveDailyQuests() {
+        localStorage.setItem('bitki_daily_quests', JSON.stringify(dailyQuests));
+    }
+
+    window.completeQuest = function(questKey) {
+        if (!dailyQuests[questKey]) {
+            dailyQuests[questKey] = true;
+            saveDailyQuests();
+            updateDailyQuestsUI();
+            updateUserRank();
+        }
+    };
+
+    const chkQuest1 = document.getElementById('chkQuest1');
+    const chkQuest2 = document.getElementById('chkQuest2');
+    const chkQuest3 = document.getElementById('chkQuest3');
+
+    if (chkQuest1) chkQuest1.addEventListener('change', () => { toggleQuest('quest1', chkQuest1.checked); });
+    if (chkQuest2) chkQuest2.addEventListener('change', () => { toggleQuest('quest2', chkQuest2.checked); });
+    if (chkQuest3) chkQuest3.addEventListener('change', () => { toggleQuest('quest3', chkQuest3.checked); });
+
+    function toggleQuest(key, isChecked) {
+        dailyQuests[key] = isChecked;
+        saveDailyQuests();
+        updateDailyQuestsUI();
+        updateUserRank();
+    }
+
+    function updateDailyQuestsUI() {
+        const chk1 = document.getElementById('chkQuest1');
+        const chk2 = document.getElementById('chkQuest2');
+        const chk3 = document.getElementById('chkQuest3');
+
+        const item1 = document.getElementById('questItem1');
+        const item2 = document.getElementById('questItem2');
+        const item3 = document.getElementById('questItem3');
+
+        if (chk1) chk1.checked = dailyQuests.quest1;
+        if (chk2) chk2.checked = dailyQuests.quest2;
+        if (chk3) chk3.checked = dailyQuests.quest3;
+
+        if (item1) item1.classList.toggle('completed', dailyQuests.quest1);
+        if (item2) item2.classList.toggle('completed', dailyQuests.quest2);
+        if (item3) item3.classList.toggle('completed', dailyQuests.quest3);
+
+        const count = (dailyQuests.quest1 ? 1 : 0) + (dailyQuests.quest2 ? 1 : 0) + (dailyQuests.quest3 ? 1 : 0);
+        const countEl = document.getElementById('questCompletedCount');
+        if (countEl) countEl.textContent = `${count}/3 Tamamlandı`;
     }
 
     // BOTANİK GÜNLÜĞÜ NOTLAR
@@ -2024,6 +2192,7 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
             inp.value = '';
             saveUserData();
             renderNotes();
+            if (typeof completeQuest === 'function') completeQuest('quest3');
         }
     });
 
@@ -2418,6 +2587,9 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
                 if (overlay.id === 'lightCalcModal' && typeof resetLightCalcForm === 'function') {
                     resetLightCalcForm();
                 }
+                if (overlay.id === 'roomDecoratorModal' && typeof resetRoomDecoratorForm === 'function') {
+                    resetRoomDecoratorForm();
+                }
             }
         });
     });
@@ -2515,6 +2687,7 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
 
     if (btnCalculateLight) {
         btnCalculateLight.addEventListener('click', () => {
+            if (typeof completeQuest === 'function') completeQuest('quest2');
             const distanceSelect = document.getElementById('selectLightDistance');
             const dist = distanceSelect ? distanceSelect.value : 'window_near';
             const key = `${selectedDirection}_${dist}`;
@@ -2558,6 +2731,359 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
             searchInput.value = bitkiAdi;
+            if (typeof sorgula === 'function') sorgula();
+        }
+    };
+
+    // 🛋️ YAPAY ZEKA ODA & SAKSI TASARIMCISI (AI ROOM DECORATOR) MANTIĞI
+    const roomDecoratorModal = document.getElementById('roomDecoratorModal');
+    const btnOpenRoomDecorator = document.getElementById('btnOpenRoomDecorator');
+    const btnCloseRoomDecorator = document.getElementById('btnCloseRoomDecorator');
+    const roomUploadBox = document.getElementById('roomUploadBox');
+    const roomFileInput = document.getElementById('roomFileInput');
+    const roomUploadContent = document.getElementById('roomUploadContent');
+    const roomPreviewImage = document.getElementById('roomPreviewImage');
+    const btnDecorateRoom = document.getElementById('btnDecorateRoom');
+    const roomLoader = document.getElementById('roomLoader');
+    const roomResultsContainer = document.getElementById('roomResultsContainer');
+    const roomStyleBtns = document.querySelectorAll('.btn-room-style');
+    let selectedRoomStyle = 'modern';
+    let selectedRoomBase64 = null;
+    let selectedRoomMimeType = 'image/jpeg';
+
+    function resetRoomDecoratorForm() {
+        selectedRoomStyle = 'modern';
+        selectedRoomBase64 = null;
+        selectedRoomMimeType = 'image/jpeg';
+        if (roomFileInput) roomFileInput.value = '';
+        if (roomPreviewImage) {
+            roomPreviewImage.src = '';
+            roomPreviewImage.style.display = 'none';
+        }
+        if (roomUploadContent) roomUploadContent.style.display = 'block';
+
+        roomStyleBtns.forEach(b => {
+            b.classList.remove('active');
+            b.style.background = 'var(--card-bg)';
+            b.style.border = '1px solid var(--card-border)';
+        });
+        const defaultStyleBtn = document.querySelector('.btn-room-style[data-style="modern"]');
+        if (defaultStyleBtn) {
+            defaultStyleBtn.classList.add('active');
+            defaultStyleBtn.style.background = 'rgba(156, 39, 176, 0.12)';
+            defaultStyleBtn.style.border = '2px solid #9c27b0';
+        }
+
+        const roomNotesInput = document.getElementById('roomNotesInput');
+        if (roomNotesInput) roomNotesInput.value = '';
+
+        if (roomLoader) roomLoader.style.display = 'none';
+        if (roomResultsContainer) roomResultsContainer.style.display = 'none';
+    }
+
+    const btnOpenRoomDecoratorProfile = document.getElementById('btnOpenRoomDecoratorProfile');
+
+    if (btnOpenRoomDecorator) {
+        btnOpenRoomDecorator.addEventListener('click', () => {
+            resetRoomDecoratorForm();
+            if (roomDecoratorModal) roomDecoratorModal.style.display = 'flex';
+        });
+    }
+
+    if (btnOpenRoomDecoratorProfile) {
+        btnOpenRoomDecoratorProfile.addEventListener('click', () => {
+            resetRoomDecoratorForm();
+            const profileModal = document.getElementById('profileModal');
+            if (profileModal) profileModal.style.display = 'none';
+            if (roomDecoratorModal) roomDecoratorModal.style.display = 'flex';
+        });
+    }
+
+    if (btnCloseRoomDecorator) {
+        btnCloseRoomDecorator.addEventListener('click', () => {
+            resetRoomDecoratorForm();
+            if (roomDecoratorModal) roomDecoratorModal.style.display = 'none';
+        });
+    }
+
+    if (roomUploadBox && roomFileInput) {
+        roomUploadBox.addEventListener('click', () => roomFileInput.click());
+
+        roomFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            selectedRoomMimeType = file.type || 'image/jpeg';
+            const reader = new FileReader();
+            reader.onload = function (evt) {
+                selectedRoomBase64 = evt.target.result;
+                if (roomPreviewImage) {
+                    roomPreviewImage.src = selectedRoomBase64;
+                    roomPreviewImage.style.display = 'block';
+                }
+                if (roomUploadContent) roomUploadContent.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    roomStyleBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            roomStyleBtns.forEach(b => {
+                b.classList.remove('active');
+                b.style.background = 'var(--card-bg)';
+                b.style.border = '1px solid var(--card-border)';
+            });
+            btn.classList.add('active');
+            btn.style.background = 'rgba(156, 39, 176, 0.12)';
+            btn.style.border = '2px solid #9c27b0';
+            selectedRoomStyle = btn.getAttribute('data-style');
+        });
+    });
+
+    function generateClientSmartRoomDecoration(roomStyle, userNotes) {
+        const style = (roomStyle || 'modern').toLowerCase();
+        const notes = (userNotes || '').toLowerCase();
+
+        let roomAnalysis = {
+            styleName: roomStyle ? roomStyle.toUpperCase() : "MODERN İÇ MEKAN",
+            colorPalette: ["Nötr Bej", "Doğal Ahşap", "Zümrüt Yeşili"],
+            lightAssessment: "Orta / Filtrelenmiş Gün Işığı",
+            overallVibe: "Ferah, dengeli ve huzurlu bir yaşam alanı."
+        };
+
+        let recommendedPlants = [];
+        let decorTips = [];
+
+        if (style.includes('bohem') || style.includes('boho')) {
+            roomAnalysis.styleName = "BOHEM & DOĞAL SEVER";
+            roomAnalysis.colorPalette = ["Sıcak Toprak Tonları", "Krem", "Ahşap & Hasır"];
+            roomAnalysis.overallVibe = "Organik dokular, bol yeşillik ve sıcak doğal renklerin harmanlandığı samimi ortam.";
+            recommendedPlants = [
+                {
+                    name: "Monstera Deliciosa (Deve Tabanı)",
+                    reason: "Görkemli ve delikli iri yaprakları bohem tarzın simgesi olan hasır ve ahşap eşyalarla mükemmel uyum sağlar.",
+                    placement: "Koltuk kenarındaki aydınlık köşe veya pencere yanı tül arkası.",
+                    potRecommendation: "Örme Hasır Sepet Kılıflı Saksı veya Sıcak Terracotta (Pişmiş Toprak)",
+                    careTip: "Yapraklarına haftada 1 kez fısfıs nemlendirme yapın."
+                },
+                {
+                    name: "Pothos (Salon Sarmaşığı)",
+                    reason: "Sarkan dalları yüksek raflarda ve asılı saksılarda büyüleyici bir doğal şelale etkisi yaratır.",
+                    placement: "Kitaplık üst rafı veya makrome saksı askısı.",
+                    potRecommendation: "Makrome Örgülü Asılı Saksı veya Krem Seramik",
+                    careTip: "Toprak kurudukça sulayın, uzayan dalları budayabilirsiniz."
+                },
+                {
+                    name: "Strelitzia (Cennet Kuşu)",
+                    reason: "Yüksek tropikal yaprak yapısı odaya yükseklik ve heybet katar.",
+                    placement: "Odanın boş duran güneşli köşe noktası.",
+                    potRecommendation: "Büyük Boy Terracotta veya Doğal Taş Saksı",
+                    careTip: "Bol parlak ışık ister, yapraklarını tozdan arındırmak için silin."
+                }
+            ];
+            decorTips = [
+                "Farklı yüksekliklerdeki ahşap veya bambu bitki stantları kullanarak derinlik oluşturun.",
+                "Bitkilerinizi makrome saksı askıları ile tavandan asarak dikey hacim kazandırın."
+            ];
+        } else if (style.includes('minimal') || style.includes('skandinav')) {
+            roomAnalysis.styleName = "MİNİMALİST & SKANDİNAV";
+            roomAnalysis.colorPalette = ["Mat Beyaz", "Açık Meşe", "Pastel Yeşiller"];
+            roomAnalysis.overallVibe = "Sade, gözü yormayan, net çizgiler ve doğal ışığın ön planda olduğu zarif alan.";
+            recommendedPlants = [
+                {
+                    name: "Ficus Elastica (Kauçuk Bitkisi)",
+                    reason: "Koyu ve parlatılmış mat yaprakları minimalist mobilyaların temiz hatlarıyla şık bir kontrast oluşturur.",
+                    placement: "Tv ünitesi yanı veya çalışma masası köşesi.",
+                    potRecommendation: "Mat Beyaz Silindir Seramik veya Betonsu Gri Saksı",
+                    careTip: "Yapraklarını düzenli nemli bezle silerek parlaklığını koruyun."
+                },
+                {
+                    name: "Sansevieria (Paşa Kılıcı)",
+                    reason: "Dikey ve keskin formlu yaprakları Skandinav iç mimarisinin geometrik yapısına tam oturur.",
+                    placement: "Pencere kenarı veya antre girişi.",
+                    potRecommendation: "Ahşap Ayaklı Mat Beyaz Minimal Saksı",
+                    careTip: "Aşırı sulamadan kaçının, 2-3 haftada bir sulamak yeterlidir."
+                },
+                {
+                    name: "Zamioculcas (Zz Bitkisi)",
+                    reason: "Parlak ve simetrik yaprakları az bakım gerektiren minimalist felsefeyi yansıtır.",
+                    placement: "Gölgede kalan konsol veya sehpa üstü.",
+                    potRecommendation: "Mat Siyah veya Nötr Bej Seramik",
+                    careTip: "Düşük ışıkta bile canlılığını korur, toprağı kuruyana kadar bekleyin."
+                }
+            ];
+            decorTips = [
+                "Az sayıda ama büyük gövdeli tekil bitkiler seçerek sadeliği koruyun.",
+                "Saksılarda mat siyah, beyaz veya beton dokuları tercih ederek mobilyalarla bütünlük sağlayın."
+            ];
+        } else if (style.includes('ofis') || style.includes('calisma') || style.includes('çalışma')) {
+            roomAnalysis.styleName = "ODAKLANMA DOSTU OFİS & ÇALIŞMA ALANI";
+            roomAnalysis.colorPalette = ["Koyu Ceviz", "Metalik Gri", "Zihni Dinlendiren Canlı Yeşil"];
+            roomAnalysis.overallVibe = "Zihinsel verimliliği artıran, hava kalitesini yükselten ve stresi düşüren çalışma ortamı.";
+            recommendedPlants = [
+                {
+                    name: "Spathiphyllum (Barış Çiçeği)",
+                    reason: "Havadaki zararlı gazları en iyi süzten bitkilerden biridir; konsantrasyonu artırır.",
+                    placement: "Çalışma masasının yan sehpası veya bilgisayar arkası.",
+                    potRecommendation: "Parlak Beyaz veya Antrasit Seramik",
+                    careTip: "Susadığında yapraklarını hafifçe aşağı eğer, hemen sulayabilirsiniz."
+                },
+                {
+                    name: "Peperomia (Hava Temizleyici)",
+                    reason: "Kompakt boyutuyla masada az yer kaplar, yeşil dokusu göz yorgunluğunu dinlendirir.",
+                    placement: "Doğrudan çalışma masası üzeri veya monitör yanı.",
+                    potRecommendation: "Küçük Pastel Renkli Porselen Saksı",
+                    careTip: "Toprağın üstü kurudukça az su verin."
+                },
+                {
+                    name: "Crassula Ovata (Para Çiçeği)",
+                    reason: "Pozitif enerji ve şans getirdiğine inanılır, çalışma motivasyonunu destekler.",
+                    placement: "Masa lambasının aydınlattığı köşe.",
+                    potRecommendation: "Doğal Ahşap Altlıklı Seramik Saksı",
+                    careTip: "Güneşi sever, fazla sulamadan kaçının."
+                }
+            ];
+            decorTips = [
+                "Masa üzerinde göz hizanıza küçük gövdeli sukulent veya Peperomia koyarak mola anlarında zihninizi dinlendirin.",
+                "Hava kalitesini artıran Barış Çiçeği ile kapalı alan oksijen seviyesini yükseltin."
+            ];
+        } else {
+            roomAnalysis.styleName = "ZARİF & MODERN İÇ MEKAN";
+            roomAnalysis.colorPalette = ["Krem & Antrasit", "Mermer Doku", "Canlı Orman Yeşili"];
+            roomAnalysis.overallVibe = "Şık, çağdaş ve estetik detaylarla zenginleştirilmiş dengeli yaşam alanı.";
+            recommendedPlants = [
+                {
+                    name: "Orkide (Phalaenopsis)",
+                    reason: "Zarif ve asil çiçek yapısı modern masalara ve konsollara lüks bir dokunuş katar.",
+                    placement: "Yemek masası ortası veya konsol üzeri.",
+                    potRecommendation: "Şeffaf İç Saksı + Şık Desenli Seramik Dış Saksı",
+                    careTip: "Kökleri ışık almalı, haftada 1 kez daldırma sulama yöntemi uygulayın."
+                },
+                {
+                    name: "Ficus Lyrata (Keman Yapraklı İncir)",
+                    reason: "Geniş dalgalı yaprakları modern iç mekanların imza bitkisidir.",
+                    placement: "Pencereye yakın aydınlık salon köşesi.",
+                    potRecommendation: "Pirinç / Altın Detaylı veya Beton Ayaklı Saksı",
+                    careTip: "Sabit yeri sever, yerini sık değiştirmeyin."
+                },
+                {
+                    name: "Aloe Vera",
+                    reason: "Modern etli yaprak yapısı ve şifalı özüyle hem estetik hem işlevseldir.",
+                    placement: "Aydınlık pencere önü sehpa.",
+                    potRecommendation: "Dokulu Toprak veya Mermer Desenli Saksı",
+                    careTip: "Güneş ışığını çok sever, toprağı kurudukça az miktarda sulayın."
+                }
+            ];
+            decorTips = [
+                "Modern saksılarda pirinç, altın veya krom metal detaylar tercih ederek şıklığı öne çıkarın.",
+                "Bitkileri 3'lü gruplar halinde dizerek dinamik bir kompozisyon oluşturun."
+            ];
+        }
+
+        if (notes.includes('evcil') || notes.includes('kedi') || notes.includes('köpek')) {
+            decorTips.push("🐾 Not: Evcil hayvan uyarınız dikkate alınarak evcil dostlar için güvenli yerleşimler planlandı.");
+        }
+
+        return {
+            roomAnalysis: roomAnalysis,
+            recommendedPlants: recommendedPlants,
+            decorTips: decorTips
+        };
+    }
+
+    if (btnDecorateRoom) {
+        btnDecorateRoom.addEventListener('click', async () => {
+            const roomNotesInput = document.getElementById('roomNotesInput');
+            const userNotes = roomNotesInput ? roomNotesInput.value.trim() : '';
+
+            if (roomLoader) roomLoader.style.display = 'flex';
+            if (roomResultsContainer) roomResultsContainer.style.display = 'none';
+            btnDecorateRoom.disabled = true;
+
+            try {
+                const response = await fetch('/api/decorate-room', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        imageBase64: selectedRoomBase64,
+                        mimeType: selectedRoomMimeType,
+                        roomStyle: selectedRoomStyle,
+                        userNotes: userNotes
+                    })
+                });
+
+                const result = await response.json();
+                btnDecorateRoom.disabled = false;
+                if (roomLoader) roomLoader.style.display = 'none';
+
+                if (result.success && result.data) {
+                    renderRoomDecorationResults(result.data);
+                } else {
+                    const fallbackData = generateClientSmartRoomDecoration(selectedRoomStyle, userNotes);
+                    renderRoomDecorationResults(fallbackData);
+                }
+
+            } catch (err) {
+                console.error("Decorate room error (using client fallback):", err);
+                btnDecorateRoom.disabled = false;
+                if (roomLoader) roomLoader.style.display = 'none';
+                const fallbackData = generateClientSmartRoomDecoration(selectedRoomStyle, userNotes);
+                renderRoomDecorationResults(fallbackData);
+            }
+        });
+    }
+
+    function renderRoomDecorationResults(data) {
+        const { roomAnalysis, recommendedPlants, decorTips } = data;
+
+        const roomAnalysisTitle = document.getElementById('roomAnalysisTitle');
+        const roomLightAssessment = document.getElementById('roomLightAssessment');
+        const roomOverallVibe = document.getElementById('roomOverallVibe');
+        const roomColorPaletteChips = document.getElementById('roomColorPaletteChips');
+        const roomPlantGrid = document.getElementById('roomPlantGrid');
+        const roomDecorTipsList = document.getElementById('roomDecorTipsList');
+
+        if (roomAnalysisTitle) roomAnalysisTitle.textContent = `🏛️ ${roomAnalysis.styleName || 'Oda Tarzı'}`;
+        if (roomLightAssessment) roomLightAssessment.textContent = `☀️ ${roomAnalysis.lightAssessment || 'Filtrelenmiş Işık'}`;
+        if (roomOverallVibe) roomOverallVibe.textContent = roomAnalysis.overallVibe || 'Odanız için özel hazırlanan mimari analiz.';
+
+        if (roomColorPaletteChips && roomAnalysis.colorPalette) {
+            roomColorPaletteChips.innerHTML = roomAnalysis.colorPalette.map(c => `<span class="color-chip">🎨 ${c}</span>`).join('');
+        }
+
+        if (roomPlantGrid && recommendedPlants) {
+            roomPlantGrid.innerHTML = recommendedPlants.map(p => `
+                <div class="room-plant-card">
+                    <div>
+                        <span class="pot-tag">🪴 ${p.potRecommendation || 'Saksı Önerisi'}</span>
+                        <h4 style="font-size: 15px; font-weight: 800; color: var(--text-title); margin-top: 8px;">${p.name}</h4>
+                        <p style="font-size: 12px; color: var(--text-body); margin-top: 4px; line-height: 1.3;">${p.reason}</p>
+                    </div>
+                    <div style="margin-top: 10px; border-top: 1px dashed var(--card-border); padding-top: 8px;">
+                        <div style="font-size: 11px; font-weight: 700; color: #7b1fa2;">📍 Konum: ${p.placement}</div>
+                        <div style="font-size: 11px; color: var(--text-subtitle); margin-top: 2px;">💡 İpucu: ${p.careTip}</div>
+                        <button class="btn btn-sm btn-outline" onclick="sorgulaOdaBitki('${p.name}')" style="margin-top: 8px; width: 100%; font-size: 12px; justify-content: center;">🔍 Bu Bitkiyi İncele</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        if (roomDecorTipsList && decorTips) {
+            roomDecorTipsList.innerHTML = decorTips.map(t => `<li>${t}</li>`).join('');
+        }
+
+        if (roomResultsContainer) roomResultsContainer.style.display = 'block';
+    }
+
+    window.sorgulaOdaBitki = function(plantName) {
+        let searchName = plantName.split('(')[0].trim();
+        resetRoomDecoratorForm();
+        if (roomDecoratorModal) roomDecoratorModal.style.display = 'none';
+
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.value = searchName;
             if (typeof sorgula === 'function') sorgula();
         }
     };

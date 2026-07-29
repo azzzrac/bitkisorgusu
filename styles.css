@@ -145,6 +145,8 @@ body {
 .header-actions {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
     gap: 8px;
 }
 
@@ -1715,3 +1717,273 @@ body[data-theme="dark"] .treatment-step-item {
     font-family: 'Courier New', Consolas, monospace !important;
     font-size: 13px !important;
 }
+
+/* 🛋️ YAPAY ZEKA ODA & SAKSI TASARIMCISI STİLLERİ */
+.room-style-grid .btn-room-style {
+    transition: all 0.2s ease;
+}
+
+.room-style-grid .btn-room-style:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(156, 39, 176, 0.15);
+}
+
+.room-style-grid .btn-room-style.active {
+    border-color: #9c27b0 !important;
+    background: rgba(156, 39, 176, 0.15) !important;
+    color: var(--text-title) !important;
+    box-shadow: 0 2px 8px rgba(156, 39, 176, 0.2);
+}
+
+.room-upload-box:hover {
+    background: rgba(156, 39, 176, 0.08) !important;
+    border-color: #7b1fa2 !important;
+}
+
+.room-plant-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.room-plant-card:hover {
+    transform: translateY(-4px);
+    border-color: #9c27b0;
+    box-shadow: 0 8px 20px rgba(156, 39, 176, 0.15);
+}
+
+.pot-tag {
+    background: rgba(123, 31, 162, 0.08);
+    border: 1px solid rgba(156, 39, 176, 0.25);
+    color: #7b1fa2;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-block;
+}
+
+.color-chip {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(156, 39, 176, 0.1);
+    color: var(--text-title);
+    border: 1px solid rgba(156, 39, 176, 0.2);
+}
+
+/* 👤 YENİLENMİŞ KULLANICI PROFİLİ STİLLERİ */
+.profile-glass-card {
+    background: linear-gradient(135deg, rgba(46, 125, 50, 0.12) 0%, rgba(200, 230, 201, 0.25) 100%);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(46, 125, 50, 0.3);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 8px 24px rgba(46, 125, 50, 0.08);
+}
+
+[data-theme="dark"] .profile-glass-card {
+    background: linear-gradient(135deg, rgba(27, 94, 32, 0.4) 0%, rgba(48, 68, 50, 0.5) 100%);
+    border-color: rgba(129, 199, 132, 0.3);
+}
+
+.profile-avatar-wrapper {
+    position: relative;
+}
+
+.avatar-circle-lg {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--card-bg);
+    border: 2px solid var(--primary-green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.2);
+    overflow: hidden;
+}
+
+.header-avatar-img {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 6px;
+    vertical-align: middle;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.profile-avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-change-btn {
+    position: absolute;
+    bottom: -2px;
+    right: -4px;
+    background: var(--primary-green);
+    color: #fff;
+    border: 1.5px solid #fff;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rank-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+}
+
+.rank-tag {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-subtitle);
+    background: rgba(46, 125, 50, 0.1);
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+
+.level-badge {
+    font-size: 11px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #f57c00, #ff9800);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.avatar-picker-box {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-top: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.avatar-options {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.avatar-opt {
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 8px;
+    transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.avatar-opt:hover {
+    transform: scale(1.25);
+    background: rgba(46, 125, 50, 0.1);
+}
+
+/* 🎯 GÜNLÜK GÖREVLER WIDGET */
+.daily-quests-card {
+    background: rgba(245, 124, 0, 0.05);
+    border: 1px solid rgba(245, 124, 0, 0.25);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-top: 10px;
+}
+
+.quests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.quest-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-body);
+    background: var(--card-bg);
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    transition: all 0.2s ease;
+}
+
+.quest-item.completed {
+    background: rgba(46, 125, 50, 0.08);
+    border-color: var(--primary-green);
+    text-decoration: line-through;
+    color: var(--text-subtitle);
+}
+
+.quest-chk {
+    accent-color: var(--primary-green);
+    width: 15px;
+    height: 15px;
+}
+
+/* 📊 PROGRESS BAR STATS DASHBOARD */
+.stats-dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.stat-progress-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.stat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-title);
+    font-weight: 700;
+}
+
+.profile-progress-bg {
+    width: 100%;
+    height: 6px;
+    background: rgba(46, 125, 50, 0.12);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.profile-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-green), var(--primary-hover));
+    border-radius: 10px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+

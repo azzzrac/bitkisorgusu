@@ -7,15 +7,27 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>🌱 Bitki Keşif Portalı | Mobil & Web</title>
+    <title>🌱 Bitki Rehberi | Mobil & Web</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=10">
+    <link rel="stylesheet" href="styles.css?v=25">
     <script>
-        // Oturum açılmamışsa doğrudan Giriş Ekranına (login.html) yönlendir
-        if (!localStorage.getItem('bitki_user')) {
+        // Geçerli e-postaya sahip bir oturum yoksa doğrudan Giriş Ekranına (login.html) yönlendir
+        try {
+            const rawUser = localStorage.getItem('bitki_user');
+            if (!rawUser) {
+                window.location.href = 'login.html';
+            } else {
+                const parsedUser = JSON.parse(rawUser);
+                if (!parsedUser || !parsedUser.email) {
+                    localStorage.removeItem('bitki_user');
+                    window.location.href = 'login.html';
+                }
+            }
+        } catch (e) {
+            localStorage.removeItem('bitki_user');
             window.location.href = 'login.html';
         }
     </script>
@@ -38,10 +50,10 @@
         <!-- Header -->
         <header class="header-card">
             <div class="brand">
-                <h1 class="brand-title">🌱 Bitki Keşif Portalı <span class="version-badge" style="background: rgba(46, 125, 50, 0.15); color: var(--primary-green); font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; margin-left: 8px; border: 1px solid rgba(46, 125, 50, 0.3); vertical-align: middle;">v2.0.0</span></h1>
-                <p class="brand-subtitle">Bitkileri isimleriyle arayın, özelliklerini ve görsellerini inceleyin.</p>
+                <h1 class="brand-title">🌱 Bitki Rehberi <span class="version-badge" style="background: rgba(46, 125, 50, 0.15); color: var(--primary-green); font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; margin-left: 8px; border: 1px solid rgba(46, 125, 50, 0.3); vertical-align: middle;">v2.0.0</span></h1>
             </div>
             <div class="header-actions">
+                <button class="btn btn-purple" id="btnOpenRoomDecorator" style="background: linear-gradient(135deg, #7b1fa2, #9c27b0); color: white;">🛋️ AI Oda & Saksı Tasarımcısı</button>
                 <button class="btn btn-orange" id="btnOpenLightCalc" style="background: var(--accent-orange);">☀️ Işık & Konum Hesaplayıcı</button>
                 <button class="btn btn-doctor" id="btnOpenDoctor">🩺 Bitki Doktoru (AI Teşhis)</button>
                 <button class="btn btn-profile" id="btnProfile">👤 Giriş Yap / Kayıt Ol</button>
@@ -140,7 +152,6 @@
                     <button class="btn btn-orange" id="btnFavAdd" disabled>⭐ Favorile</button>
                     <button class="btn btn-brown" id="btnSaveImg" disabled>💾 Resmi Kaydet</button>
                     <button class="btn btn-purple" id="btnWiki" disabled>🌐 Vikipedi'de Oku</button>
-                    <button class="btn btn-blue" id="btnFullscreen" disabled>🖼️ Görseli Büyüt</button>
                     <button class="btn btn-success" id="btnExportPdf" disabled>📄 Bakım Kartı (PDF)</button>
                 </div>
                 <div class="status-bar" id="statusBar">Hazır</div>
@@ -165,42 +176,117 @@
                 <!-- 1. GİRİŞ YAP / KAYIT OL FORMU (Giriş Yapılmadığında Görünür) -->
                 <div class="auth-container" id="authContainer" style="text-align: center; padding: 20px 10px;">
                     <div class="auth-icon" style="font-size: 44px; margin-bottom: 12px;">🌱</div>
-                    <h4 style="font-size: 18px; font-weight: 800; color: var(--text-title); margin-bottom: 8px;">Bitki Keşif Portalı'na Hoş Geldiniz!</h4>
+                    <h4 style="font-size: 18px; font-weight: 800; color: var(--text-title); margin-bottom: 8px;">Bitki Rehberi'ne Hoş Geldiniz!</h4>
                     <p style="font-size: 14px; color: var(--text-subtitle); margin-bottom: 20px;">Keşiflerinizi, rozetlerinizi ve kişisel bitki listenizi kaydetmek için lütfen oturum açın.</p>
                     <a href="login.html" class="btn btn-success btn-block" style="display: block; text-decoration: none; padding: 12px; font-size: 15px; font-weight: 700; border-radius: 10px; background: var(--primary-green); color: white;">🔑 Giriş Yap / Kayıt Ol Sayfasına Git 🚀</a>
                 </div>
 
                 <!-- 2. KULLANICI PROFİL ALANI (Giriş Yapıldığında Görünür) -->
                 <div class="user-profile-container" id="userProfileContainer" style="display: none;">
-                    <div class="user-profile-header">
-                        <div class="avatar-circle" id="userAvatar">🌿</div>
-                        <div class="user-meta">
-                            <h4 id="userNameDisplay">Botanik Sevdalısı</h4>
-                            <p class="user-email-badge" id="userEmailDisplay">📧 ahmet@gmail.com</p>
-                            <p class="user-rank" id="userRankDisplay">Unvan: Acemi Botanikçi</p>
+                    <!-- Glassmorphic Header Card -->
+                    <div class="profile-glass-card">
+                        <div class="profile-avatar-wrapper">
+                            <div class="avatar-circle-lg" id="userAvatar">🌱</div>
+                            <button class="avatar-change-btn" id="btnToggleAvatarPicker" title="Avatarları Değiştir">✏️</button>
                         </div>
-                        <button class="btn btn-sm btn-outline" id="btnEditName">✏️ İsmi Düzenle</button>
+                        <div class="profile-info">
+                            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                                <h4 id="userNameDisplay">Botanik Sevdalısı</h4>
+                                <button class="btn btn-sm btn-outline" id="btnEditName" style="font-size: 11px; padding: 3px 8px;">✏️ Düzenle</button>
+                            </div>
+                            <span class="user-email-badge" id="userEmailDisplay">📧 ahmet@gmail.com</span>
+                            <div class="rank-badge-row">
+                                <span class="rank-tag" id="userRankDisplay">Unvan: Acemi Botanikçi</span>
+                                <span class="level-badge" id="userLevelDisplay">Lvl 1</span>
+                                <span class="level-badge" style="background: linear-gradient(135deg, #f57c00, #ff9800); color: white;" id="userXpDisplay">⚡ 0 XP</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Avatar Seçim Popover -->
+                    <div class="avatar-picker-box" id="avatarPickerBox" style="display: none;">
+                        <span style="font-size: 12px; font-weight: 700; color: var(--text-title); display: block; margin-bottom: 6px;">İkonunu Seç:</span>
+                        <div class="avatar-options">
+                            <span class="avatar-opt" data-avatar="🌱">🌱</span>
+                            <span class="avatar-opt" data-avatar="🌿">🌿</span>
+                            <span class="avatar-opt" data-avatar="🌴">🌴</span>
+                            <span class="avatar-opt" data-avatar="🌵">🌵</span>
+                            <span class="avatar-opt" data-avatar="🌸">🌸</span>
+                            <span class="avatar-opt" data-avatar="🌻">🌻</span>
+                            <span class="avatar-opt" data-avatar="🫒">🫒</span>
+                            <span class="avatar-opt" data-avatar="👑">👑</span>
+                        </div>
+                    </div>
+
+                    <!-- 🎯 Günlük Botanik Görevleri (Daily Quests Widget) -->
+                    <div class="daily-quests-card">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <b style="font-size: 13px; color: var(--primary-green);">🎯 Günlük Botanik Görevlerim</b>
+                            <span style="font-size: 11px; font-weight: 800; color: var(--accent-orange);" id="questCompletedCount">0/3 Tamamlandı</span>
+                        </div>
+                        <div class="quests-list">
+                            <div class="quest-item" id="questItem1">
+                                <input type="checkbox" id="chkQuest1" class="quest-chk" style="cursor: pointer;">
+                                <label for="chkQuest1" style="cursor: pointer;">🔍 Bugün 1 bitki ara veya keşfet (+10 XP)</label>
+                            </div>
+                            <div class="quest-item" id="questItem2">
+                                <input type="checkbox" id="chkQuest2" class="quest-chk" style="cursor: pointer;">
+                                <label for="chkQuest2" style="cursor: pointer;">☀️ Işık Hesaplayıcı veya AI Oda Tasarımcısı kullan (+15 XP)</label>
+                            </div>
+                            <div class="quest-item" id="questItem3">
+                                <input type="checkbox" id="chkQuest3" class="quest-chk" style="cursor: pointer;">
+                                <label for="chkQuest3" style="cursor: pointer;">📝 Günlüğüne yeni not veya bitki ekle (+10 XP)</label>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- 5 Ana Araç -->
                     <div class="profile-tools-grid">
-                        <button class="btn btn-badge" id="btnOpenBadges">🏆 Keşifler & Rozetler (<span
-                                id="countBadges">0</span>)</button>
+                        <button class="btn btn-badge" id="btnOpenBadges">🏆 Keşifler & Rozetler (<span id="countBadges">0</span>)</button>
                         <button class="btn btn-quiz" id="btnOpenQuiz">🎮 Bitki Quizi Oyna</button>
                         <button class="btn btn-rem" id="btnOpenWatering">⏰ Sulama Takvimim</button>
-                        <button class="btn btn-fav" id="btnOpenFavs">⭐ Favori Bitkilerim (<span
-                                id="countFavs">0</span>)</button>
-                        <button class="btn btn-purple" id="btnOpenGallery">📸 Bitki Albümüm (<span
-                                id="countAlbum">0</span>)</button>
+                        <button class="btn btn-fav" id="btnOpenFavs">⭐ Favori Bitkilerim (<span id="countFavs">0</span>)</button>
+                        <button class="btn btn-purple" id="btnOpenGallery">📸 Bitki Albümüm (<span id="countAlbum">0</span>)</button>
                     </div>
 
-
-                    <!-- İstatistikler -->
-                    <div class="stats-grid">
-                        <div class="stat-box"><b>🔍 Toplam Arama:</b> <span id="statSearchCount">0</span></div>
-                        <div class="stat-box"><b>🌿 Keşfedilen Tür:</b> <span id="statSpeciesCount">0</span></div>
-                        <div class="stat-box"><b>⭐ Favori Sayısı:</b> <span id="statFavCount">0</span></div>
-                        <div class="stat-box"><b>🏆 Quiz Skoru:</b> <span id="statQuizScore">0 Puan</span></div>
+                    <!-- İstatistikler & Progress Bars Dashboard -->
+                    <div class="stats-dashboard-grid">
+                        <div class="stat-progress-card">
+                            <div class="stat-card-header">
+                                <span>🔍 Arama Sayısı</span>
+                                <b id="statSearchCount">0</b>
+                            </div>
+                            <div class="profile-progress-bg">
+                                <div class="profile-progress-bar" id="barSearch" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                        <div class="stat-progress-card">
+                            <div class="stat-card-header">
+                                <span>🌿 Keşfedilen Tür</span>
+                                <b id="statSpeciesCount">0</b>
+                            </div>
+                            <div class="profile-progress-bg">
+                                <div class="profile-progress-bar" id="barSpecies" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                        <div class="stat-progress-card">
+                            <div class="stat-card-header">
+                                <span>⭐ Favoriler</span>
+                                <b id="statFavCount">0</b>
+                            </div>
+                            <div class="profile-progress-bg">
+                                <div class="profile-progress-bar" id="barFav" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                        <div class="stat-progress-card">
+                            <div class="stat-card-header">
+                                <span>🏆 Quiz Skoru</span>
+                                <b id="statQuizScore">0 Puan</b>
+                            </div>
+                            <div class="profile-progress-bg">
+                                <div class="profile-progress-bar" id="barQuiz" style="width: 0%;"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Botanik Günlüğüm -->
@@ -216,8 +302,7 @@
                     </div>
 
                     <!-- Oturumu Kapat Butonu -->
-                    <button class="btn btn-danger btn-block" id="btnLogoutUser" style="margin-top: 16px;">🚪 Oturumu
-                        Kapat / Çıkış Yap</button>
+                    <button class="btn btn-danger btn-block" id="btnLogoutUser" style="margin-top: 16px;">🚪 Oturumu Kapat / Çıkış Yap</button>
                 </div>
             </div>
         </div>
@@ -504,11 +589,103 @@
         </div>
     </div>
 
+    <!-- 🛋️ Yapay Zeka Oda & Saksı Tasarımcısı Modalı -->
+    <div class="modal-overlay" id="roomDecoratorModal">
+        <div class="modal-card" style="max-width: 720px; width: 94%;">
+            <div class="modal-header" style="background: linear-gradient(135deg, rgba(123, 31, 162, 0.1), rgba(156, 39, 176, 0.05)); border-bottom: 1px solid rgba(156, 39, 176, 0.2);">
+                <h3>🛋️ Yapay Zeka Oda & Saksı Tasarımcısı (AI Room Decorator)</h3>
+                <button class="modal-close" id="btnCloseRoomDecorator">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-subtitle">Odanızın fotoğrafını yükleyin veya tarzını seçin; Gemini AI mimarimiz salonunuza, ışığınıza ve mobilyalarınıza %100 uyumlu bitki ve saksı tasarımlarını hazırlasın.</p>
+
+                <!-- Fotoğraf Yükleme Alanı -->
+                <div class="room-upload-box" id="roomUploadBox"
+                    style="border: 2px dashed #9c27b0; border-radius: 14px; padding: 22px; text-align: center; cursor: pointer; background: rgba(156, 39, 176, 0.04); transition: all 0.2s ease; margin-top: 12px;">
+                    <input type="file" id="roomFileInput" accept="image/*" style="display: none;">
+                    <div class="room-upload-content" id="roomUploadContent">
+                        <div style="font-size: 38px; margin-bottom: 6px;">📸</div>
+                        <b style="color: var(--text-title); font-size: 14px;">Oda veya Salon Fotoğrafınızı Yükleyin</b>
+                        <p style="font-size: 12px; color: var(--text-subtitle); margin-top: 4px;">PNG, JPG, WEBP formatları desteklenmektedir (Fotoğrafsız da tarz seçerek devam edebilirsiniz).</p>
+                    </div>
+                    <img id="roomPreviewImage" src="" alt="Yüklenen Oda Fotoğrafı"
+                        style="display: none; max-height: 220px; border-radius: 12px; object-fit: contain; margin: 0 auto;">
+                </div>
+
+                <!-- Oda Tarzı Seçimi Grid -->
+                <div style="margin-top: 16px;">
+                    <label style="font-weight: 700; font-size: 14px; color: var(--text-title); display: block; margin-bottom: 8px;">🎨 Oda Dekorasyon Tarzınız:</label>
+                    <div class="room-style-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px;">
+                        <button class="btn btn-room-style active" data-style="modern" style="padding: 10px 6px; font-size: 13px; font-weight: 700; border-radius: 10px; border: 2px solid #9c27b0; background: rgba(156, 39, 176, 0.12); color: var(--text-title); cursor: pointer;">
+                            ✨ Modern
+                        </button>
+                        <button class="btn btn-room-style" data-style="minimalist" style="padding: 10px 6px; font-size: 13px; font-weight: 700; border-radius: 10px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text-title); cursor: pointer;">
+                            🤍 Skandinav / Minimalist
+                        </button>
+                        <button class="btn btn-room-style" data-style="bohem" style="padding: 10px 6px; font-size: 13px; font-weight: 700; border-radius: 10px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text-title); cursor: pointer;">
+                            🌿 Bohem & Doğal
+                        </button>
+                        <button class="btn btn-room-style" data-style="ofis" style="padding: 10px 6px; font-size: 13px; font-weight: 700; border-radius: 10px; border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text-title); cursor: pointer;">
+                            💻 Ofis / Çalışma
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Ek Not / Tercih Girişi -->
+                <div style="margin-top: 14px;">
+                    <label style="font-weight: 700; font-size: 13px; color: var(--text-title);">📝 Özel İstek veya Notunuz (Opsiyonel):</label>
+                    <input type="text" id="roomNotesInput" placeholder="Örn: Evcil kedi var, büyük yapraklı bitkiler ve ahşap saksı seviyorum..."
+                        style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--card-border); font-size: 13px; background: var(--card-bg); color: var(--text-body); margin-top: 4px;">
+                </div>
+
+                <!-- Tasarla Butonu -->
+                <button class="btn btn-purple btn-block" id="btnDecorateRoom" style="margin-top: 16px; padding: 14px; font-size: 15px; font-weight: 800; background: linear-gradient(135deg, #7b1fa2, #ab47bc); color: white; border-radius: 12px; width: 100%; cursor: pointer;">
+                    🛋️ AI ile Odam İçin Bitki & Saksı Tasarla 🚀
+                </button>
+
+                <!-- Yükleme Göstergesi -->
+                <div class="botanical-loader" id="roomLoader"
+                    style="display: none; padding: 24px 10px; gap: 16px; flex-direction: row; align-items: center; justify-content: center;">
+                    <span class="botanical-spinner">🎨</span>
+                    <span class="botanical-loader-text">Gemini AI odanızın renklerini, mobilyalarını ve ışığını inceliyor...</span>
+                </div>
+
+                <!-- Tasarım Sonuç Kartı -->
+                <div id="roomResultsContainer" style="display: none; margin-top: 18px;">
+                    <!-- Oda İklim ve Mimari Analiz Özeti -->
+                    <div style="background: rgba(156, 39, 176, 0.08); border: 1px solid rgba(156, 39, 176, 0.3); padding: 14px 16px; border-radius: 14px; margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                            <b style="color: #7b1fa2; font-size: 15px;" id="roomAnalysisTitle">🏛️ Tespit Edilen Oda Tarzı</b>
+                            <span id="roomLightAssessment" style="background: rgba(123, 31, 162, 0.15); color: #7b1fa2; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px;">☀️ Parlak Dolaylı Işık</span>
+                        </div>
+                        <p style="font-size: 13px; color: var(--text-body); margin-top: 6px; line-height: 1.4;" id="roomOverallVibe">Odanın mimari atmosferi yükleniyor...</p>
+                        <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <span style="font-size: 12px; font-weight: 700; color: var(--text-title);">🎨 Uyumlu Renk Paleti:</span>
+                            <div id="roomColorPaletteChips" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
+                        </div>
+                    </div>
+
+                    <h4 style="font-size: 15px; font-weight: 800; color: var(--text-title); margin-bottom: 12px;">✨ Odanız İçin Mükemmel Bitki & Saksı Önerileri:</h4>
+                    <div id="roomPlantGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
+                        <!-- JS ile Kartlar Eklenecek -->
+                    </div>
+
+                    <!-- İç Mimari İpuçları -->
+                    <div style="margin-top: 16px; background: rgba(46, 125, 50, 0.06); border: 1px solid var(--primary-green); padding: 14px; border-radius: 12px;">
+                        <b style="font-size: 13px; color: var(--primary-green); display: block; margin-bottom: 6px;">📐 İç Mimardan Dekorasyon Tüyoları:</b>
+                        <ul id="roomDecorTipsList" style="margin-left: 18px; font-size: 13px; color: var(--text-body); display: flex; flex-direction: column; gap: 4px;"></ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDK (Compat Version) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="firebase-config.js?v=10"></script>
-    <script src="app.js?v=10"></script>
+    <script src="firebase-config.js?v=25"></script>
+    <script src="app.js?v=25"></script>
 </body>
 
 
