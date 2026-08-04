@@ -2394,12 +2394,67 @@ public class BitkiGUI extends JFrame {
         }
 
         BufferedImage image = null;
+        if (imageUrl == null || isGenericTreeImage(imageUrl, title)) {
+            imageUrl = getFallbackPlantImageUrl(title);
+        }
+
         if (imageUrl != null) {
             image = resimYukle(imageUrl);
         }
 
         String titleUpper = title.toUpperCase(Locale.forLanguageTag("tr-TR"));
         return new AramaSonucu(titleUpper, extract, image, fullWikiUrl);
+    }
+
+    private static boolean isGenericTreeImage(String url, String plantName) {
+        if (url == null || url.isBlank()) return true;
+        String u = url.toLowerCase(Locale.forLanguageTag("tr-TR"));
+        String p = (plantName != null ? plantName : "").toLowerCase(Locale.forLanguageTag("tr-TR"));
+
+        if (p.contains("agac") || p.contains("ağaç") || p.contains("tree") || p.contains("orman") || p.contains("forest")) {
+            return false;
+        }
+
+        String[] genericSignatures = {
+            "tree_in_field", "single_tree", "forest_", "tree_leaf", "tree_trunk", "tree_silhouette",
+            "tree_green", "big_tree", "old_tree", "tree.jpg", "tree.png", "plantae_banner", "olive_tree_greece",
+            "bamboo_forest", "tree_02.jpg"
+        };
+
+        for (String sig : genericSignatures) {
+            if (u.contains(sig)) return true;
+        }
+        return false;
+    }
+
+    private static String getFallbackPlantImageUrl(String plantName) {
+        if (plantName == null) return "https://images.unsplash.com/photo-1463936575829-25148e1db1b8?w=600&auto=format&fit=crop";
+        String q = plantName.toLowerCase(Locale.forLanguageTag("tr-TR"));
+
+        if (q.contains("monstera") || q.contains("deve taban")) return "https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=600&auto=format&fit=crop";
+        if (q.contains("kaktus") || q.contains("kaktüs") || q.contains("cactus")) return "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=600&auto=format&fit=crop";
+        if (q.contains("sukulent") || q.contains("succulent")) return "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=600&auto=format&fit=crop";
+        if (q.contains("orkide") || q.contains("orchid")) return "https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?w=600&auto=format&fit=crop";
+        if (q.contains("aloe")) return "https://images.unsplash.com/photo-1596547609652-9cf5d8d76921?w=600&auto=format&fit=crop";
+        if (q.contains("pasa kilic") || q.contains("paşa kılıç") || q.contains("sansevieria")) return "https://images.unsplash.com/photo-1593482892290-f54927ae1bf6?w=600&auto=format&fit=crop";
+        if (q.contains("baris ciceg") || q.contains("barış çiçeğ") || q.contains("spatifilyum")) return "https://images.unsplash.com/photo-1593691509543-c55fb32e7355?w=600&auto=format&fit=crop";
+        if (q.contains("lavanta")) return "https://images.unsplash.com/photo-1528183429752-a97d0bf99b5a?w=600&auto=format&fit=crop";
+        if (q.contains("gul") || q.contains("gül") || q.contains("rose")) return "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop";
+        if (q.contains("papatya")) return "https://images.unsplash.com/photo-1606041008023-472dfb5e530f?w=600&auto=format&fit=crop";
+        if (q.contains("lale") || q.contains("tulip")) return "https://images.unsplash.com/photo-1520763185298-1b434c919102?w=600&auto=format&fit=crop";
+        if (q.contains("zeytin")) return "https://images.unsplash.com/photo-1541447271487-09612b3f49f7?w=600&auto=format&fit=crop";
+        if (q.contains("limon")) return "https://images.unsplash.com/photo-1534531141161-e4160499e97c?w=600&auto=format&fit=crop";
+        if (q.contains("cilek") || q.contains("çilek")) return "https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=600&auto=format&fit=crop";
+
+        String[] pool = {
+            "https://images.unsplash.com/photo-1463936575829-25148e1db1b8?w=600&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?w=600&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1448375240586-882707db888b?w=600&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=600&auto=format&fit=crop"
+        };
+        int hash = Math.abs(plantName.hashCode()) % pool.length;
+        return pool[hash];
     }
 
     private static boolean isBitkiIcerik(String title, String description, String extract) {

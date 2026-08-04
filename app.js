@@ -396,15 +396,49 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
+    // 🚀 HTML5 CANVAS İSTEMCİ TARAFLI GÖRSEL SIKIŞTIRMA MOTORU (10X HIZ & MİNİMUM VERİ)
+    function compressImage(dataUrl, maxDimension = 1024, quality = 0.85) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                let width = img.width;
+                let height = img.height;
+
+                if (width > maxDimension || height > maxDimension) {
+                    if (width > height) {
+                        height = Math.round((height * maxDimension) / width);
+                        width = maxDimension;
+                    } else {
+                        width = Math.round((width * maxDimension) / height);
+                        height = maxDimension;
+                    }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+                resolve(compressedBase64);
+            };
+            img.onerror = () => resolve(dataUrl);
+            img.src = dataUrl;
+        });
+    }
+
     if (doctorUploadBox && doctorFileInput) {
         doctorUploadBox.addEventListener('click', () => doctorFileInput.click());
         doctorFileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (!file) return;
-            doctorSelectedMime = file.type || 'image/jpeg';
+            doctorSelectedMime = 'image/jpeg';
             const reader = new FileReader();
-            reader.onload = (evt) => {
-                doctorSelectedBase64 = evt.target.result;
+            reader.onload = async (evt) => {
+                const rawBase64 = evt.target.result;
+                doctorSelectedBase64 = await compressImage(rawBase64, 1024, 0.85);
                 doctorPreviewImage.src = doctorSelectedBase64;
                 doctorPreviewImage.style.display = 'block';
                 doctorUploadContent.style.display = 'none';
@@ -1148,7 +1182,8 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
 
             const reader = new FileReader();
             reader.onload = async (event) => {
-                const imgDataUrl = event.target.result;
+                const rawDataUrl = event.target.result;
+                const imgDataUrl = await compressImage(rawDataUrl, 1024, 0.85);
 
                 // Yüklenen görseli resim kutusunda göster
                 plantImage.src = imgDataUrl;
@@ -2717,8 +2752,9 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = (evt) => {
-                selectedAlbumBase64 = evt.target.result;
+            reader.onload = async (evt) => {
+                const rawBase64 = evt.target.result;
+                selectedAlbumBase64 = await compressImage(rawBase64, 1024, 0.85);
                 btnSelectAlbumFile.textContent = '✅ Fotoğraf Seçildi';
                 btnSelectAlbumFile.classList.remove('btn-outline');
                 btnSelectAlbumFile.classList.add('btn-success');
