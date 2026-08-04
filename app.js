@@ -1577,9 +1577,9 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
                 plantDescription.textContent = ozet;
                 resultContent.style.display = 'block';
 
-                // Görsel Yükle (Wikipedia -> En-Wiki -> High Resolution Botanical Unsplash Fallback)
+                // Görsel Yükle (Jenerik Ağaç Görsellerini Filtrele -> Özel HD Botanik Kütüphanesi & Wikimedia)
                 let finalImgUrl = sonuc.resimUrl;
-                if (!finalImgUrl) {
+                if (!finalImgUrl || isGenericTreeImage(finalImgUrl, baslik)) {
                     finalImgUrl = await fetchFallbackPlantImage(baslik, botName);
                 }
 
@@ -1743,6 +1743,24 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
             "pantolon", "ayakkabı", "çorba", "tatlı", "doktor", "yazar", "şarkı", "sinema", "tiyatro", "resim", "tarih"
         ];
         return !yasaklar.includes(kelime);
+    }
+
+    function isGenericTreeImage(url, plantName) {
+        if (!url) return true;
+        const u = url.toLowerCase();
+        const p = (plantName || "").toLowerCase('tr-TR');
+
+        if (p.includes('agac') || p.includes('tree') || p.includes('orman') || p.includes('forest')) {
+            return false;
+        }
+
+        const genericSignatures = [
+            'tree_in_field', 'single_tree', 'forest_', 'tree_leaf', 'tree_trunk', 'tree_silhouette',
+            'tree_green', 'big_tree', 'old_tree', 'tree.jpg', 'tree.png', 'plantae_banner', 'olive_tree_greece',
+            'bamboo_forest', 'tree_02.jpg'
+        ];
+
+        return genericSignatures.some(sig => u.includes(sig));
     }
 
     async function fetchFallbackPlantImage(plantName, botanicalName) {
