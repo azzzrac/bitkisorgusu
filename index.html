@@ -707,14 +707,37 @@
         </div>
     </div>
 
+    <!-- 📲 PWA MOBİL UYGULAMA YÜKLEME REHBERİ MODALI -->
+    <div class="modal-overlay" id="pwaModal">
+        <div class="modal-card" style="max-width: 440px; text-align: center; padding: 24px;">
+            <div style="font-size: 42px; margin-bottom: 8px;">📱</div>
+            <h3 style="color: var(--primary-green); font-size: 20px; font-weight: 800; margin-bottom: 8px;">Uygulamayı Ana Ekrana Ekleyin</h3>
+            <p style="font-size: 13px; color: var(--text-body); margin-bottom: 16px; line-height: 1.5;">
+                Bitki Keşif Portalı'nı App Store / Google Play olmadan telefonunuzun ana ekranına uygulama olarak ekleyebilirsiniz!
+            </p>
+
+            <div style="background: rgba(46, 125, 50, 0.08); border: 1px dashed var(--primary-green); border-radius: 12px; padding: 14px; text-align: left; margin-bottom: 18px; font-size: 13px;">
+                <b style="color: var(--primary-green); display: block; margin-bottom: 8px;">🍏 iPhone (iOS Safari) İçin:</b>
+                1. Alt menüdeki <b>Paylaş (⎌)</b> ikonuna dokunun.<br>
+                2. Açılan listeden <b>"Ana Ekrana Ekle (+)"</b> seçeneğini seçin.
+                <hr style="margin: 10px 0; border: 0; border-top: 1px solid rgba(46, 125, 50, 0.2);">
+                <b style="color: var(--primary-green); display: block; margin-bottom: 8px;">🤖 Android (Chrome / Edge) İçin:</b>
+                1. Sağ üstteki <b>Üç Nokta (⋮)</b> menüsüne dokunun.<br>
+                2. <b>"Uygulamayı Yükle"</b> veya <b>"Ana Ekrana Ekle"</b> seçeneğine dokunun.
+            </div>
+
+            <button class="btn btn-primary" id="btnClosePwaModal" style="width: 100%;">Anladım, Harika! 👍</button>
+        </div>
+    </div>
+
     <!-- ⬆️ Yumuşak Başa Dön (Back to Top) Butonu -->
     <button class="back-to-top-btn" id="btnBackToTop" title="En Üste Çık" aria-label="En Üste Çık">⬆️</button>
 
     <!-- Firebase SDK (Compat Version) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="firebase-config.js?v=32"></script>
-    <script src="app.js?v=32"></script>
+    <script src="firebase-config.js?v=33"></script>
+    <script src="app.js?v=33"></script>
 </body>
 
 

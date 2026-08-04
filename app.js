@@ -3556,22 +3556,36 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
 
     let deferredPrompt = null;
     const btnInstallPWA = document.getElementById('btnInstallPWA');
+    const pwaModal = document.getElementById('pwaModal');
+    const btnClosePwaModal = document.getElementById('btnClosePwaModal');
+
+    if (btnInstallPWA) {
+        btnInstallPWA.style.display = 'inline-block';
+        btnInstallPWA.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`📲 PWA Yükleme Seçimi: ${outcome}`);
+                deferredPrompt = null;
+            } else if (pwaModal) {
+                pwaModal.style.display = 'flex';
+            }
+        });
+    }
+
+    if (btnClosePwaModal && pwaModal) {
+        btnClosePwaModal.addEventListener('click', () => {
+            pwaModal.style.display = 'none';
+        });
+        pwaModal.addEventListener('click', (e) => {
+            if (e.target === pwaModal) pwaModal.style.display = 'none';
+        });
+    }
 
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        if (btnInstallPWA) {
-            btnInstallPWA.style.display = 'inline-block';
-            btnInstallPWA.addEventListener('click', async () => {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    console.log(`📲 PWA Yükleme Seçimi: ${outcome}`);
-                    deferredPrompt = null;
-                    btnInstallPWA.style.display = 'none';
-                }
-            });
-        }
+        if (btnInstallPWA) btnInstallPWA.style.display = 'inline-block';
     });
 
     window.addEventListener('appinstalled', () => {
