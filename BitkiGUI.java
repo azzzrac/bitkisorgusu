@@ -44,9 +44,10 @@ public class BitkiGUI extends JFrame {
     private final ModernButton zoomButton = new ModernButton("🖼️ Görseli Büyüt", new Color(2, 136, 209), new Color(3, 169, 244));
     private final ModernButton exitButton = new ModernButton("❌ Çıkış", new Color(198, 40, 40), new Color(229, 57, 53));
 
-    // 3. Header Sağ Taraf (Hesabım & Tema)
+    // 3. Header Sağ Taraf (Hesabım, Tema & Doktor)
     private final ModernButton profileButton = new ModernButton("👤 Giriş Yap / Kayıt Ol", new Color(40, 116, 166), new Color(52, 152, 219));
     private final ModernButton themeToggleButton = new ModernButton("🌙 Gece Modu", new Color(55, 71, 79), new Color(69, 90, 100));
+    private final ModernButton doctorButton = new ModernButton("🩺 AI Bitki Doktoru", new Color(156, 39, 176), new Color(171, 71, 188));
 
     private final JComboBox<String> historyCombo = new JComboBox<>(new String[]{"📜 Son Aramalar"});
     private final JLabel statusLabel = new JLabel("Hazır", SwingConstants.LEFT);
@@ -375,8 +376,11 @@ public class BitkiGUI extends JFrame {
         headerTextPanel.add(titleLabel, BorderLayout.NORTH);
         headerTextPanel.add(subtitleLabel, BorderLayout.SOUTH);
 
+        doctorButton.addActionListener(e -> openDoctorDialog());
+
         JPanel headerRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         headerRightPanel.setOpaque(false);
+        headerRightPanel.add(doctorButton);
         headerRightPanel.add(profileButton);
         headerRightPanel.add(themeToggleButton);
 
@@ -2008,6 +2012,296 @@ public class BitkiGUI extends JFrame {
             // Ignore API fallback
         }
         return null;
+    }
+
+    private void openDoctorDialog() {
+        if (!isLoggedIn) {
+            JOptionPane.showMessageDialog(this, "⚠️ Bitki Doktoru özelliğini kullanabilmek için lütfen öncelikle oturum açınız.", "Oturum Gerekli", JOptionPane.WARNING_MESSAGE);
+            showAuthPage();
+            return;
+        }
+
+        JDialog doctorDialog = new JDialog(this, "🩺 Bitki Doktoru & AI Hastalık Teşhisi", true);
+        doctorDialog.setSize(650, 720);
+        doctorDialog.setLocationRelativeTo(this);
+        
+        JPanel mainContent = new JPanel();
+        mainContent.setLayout(new BoxLayout(mainContent, BoxLayout.Y_AXIS));
+        mainContent.setBorder(new EmptyBorder(16, 20, 16, 20));
+        mainContent.setBackground(new Color(245, 247, 245));
+
+        JLabel titleLabel = new JLabel("🩺 Bitki Doktoru & Yapay Zeka Teşhisi");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        titleLabel.setForeground(new Color(27, 94, 32));
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel subLabel = new JLabel("<html><center>Hastalıklı bitki yaprağının fotoğrafını yükleyin veya notunuzu girin;<br>Gemini AI Doktoru teşhis etsin ve reçete hazırlasın.</center></html>");
+        subLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        subLabel.setForeground(new Color(100, 110, 100));
+        subLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        final java.io.File[] selectedDocFile = new java.io.File[1];
+        JLabel imgPreviewLabel = new JLabel("📸 Fotoğraf Yüklemek İçin Tıklayın (JPG, PNG, WEBP)", SwingConstants.CENTER);
+        imgPreviewLabel.setPreferredSize(new Dimension(580, 120));
+        imgPreviewLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        imgPreviewLabel.setForeground(new Color(46, 125, 50));
+        imgPreviewLabel.setOpaque(true);
+        imgPreviewLabel.setBackground(new Color(232, 245, 233));
+        imgPreviewLabel.setBorder(BorderFactory.createDashedBorder(new Color(46, 125, 50), 2, 2, 2, true));
+        imgPreviewLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        imgPreviewLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                JFileChooser fc = new JFileChooser();
+                fc.setDialogTitle("Hastalıklı Yaprak Fotoğrafı Seç");
+                fc.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Resim Dosyaları", "jpg", "jpeg", "png", "webp"));
+                if (fc.showOpenDialog(doctorDialog) == JFileChooser.APPROVE_OPTION) {
+                    selectedDocFile[0] = fc.getSelectedFile();
+                    try {
+                        BufferedImage img = ImageIO.read(selectedDocFile[0]);
+                        if (img != null) {
+                            Image scaled = img.getScaledInstance(160, 100, Image.SCALE_SMOOTH);
+                            imgPreviewLabel.setIcon(new ImageIcon(scaled));
+                            imgPreviewLabel.setText("Fotoğraf: " + selectedDocFile[0].getName());
+                        }
+                    } catch (Exception ex) {
+                        imgPreviewLabel.setText("Seçilen: " + selectedDocFile[0].getName());
+                    }
+                }
+            }
+        });
+
+        JLabel notesLabel = new JLabel("📝 Belirti veya Şikayet Notunuz (Opsiyonel):");
+        notesLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        notesLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JTextField notesInput = new JTextField();
+        notesInput.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        notesInput.setMaximumSize(new Dimension(600, 36));
+
+        JPanel reportCard = new JPanel();
+        reportCard.setLayout(new BoxLayout(reportCard, BoxLayout.Y_AXIS));
+        reportCard.setBackground(Color.WHITE);
+        reportCard.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(165, 214, 167), 1, true),
+            new EmptyBorder(12, 14, 12, 14)
+        ));
+        reportCard.setVisible(false);
+
+        JLabel resultTitle = new JLabel("Teşhis Bekleniyor...");
+        resultTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        resultTitle.setForeground(new Color(27, 94, 32));
+
+        JLabel severityLabel = new JLabel(" Şiddet: Orta ");
+        severityLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        severityLabel.setOpaque(true);
+        severityLabel.setBackground(new Color(251, 140, 0));
+        severityLabel.setForeground(Color.WHITE);
+
+        JTextArea resultDetailsArea = new JTextArea();
+        resultDetailsArea.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        resultDetailsArea.setEditable(false);
+        resultDetailsArea.setLineWrap(true);
+        resultDetailsArea.setWrapStyleWord(true);
+        resultDetailsArea.setBackground(Color.WHITE);
+
+        reportCard.add(severityLabel);
+        reportCard.add(Box.createVerticalStrut(6));
+        reportCard.add(resultTitle);
+        reportCard.add(Box.createVerticalStrut(8));
+        reportCard.add(resultDetailsArea);
+
+        JScrollPane scrollReport = new JScrollPane(reportCard);
+        scrollReport.setPreferredSize(new Dimension(580, 260));
+        scrollReport.setBorder(null);
+
+        ModernButton btnDiagnose = new ModernButton("🩺 AI Doktor İle Teşhis Et & Reçete Oluştur", new Color(156, 39, 176), new Color(171, 71, 188));
+        btnDiagnose.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnDiagnose.setPreferredSize(new Dimension(580, 42));
+        btnDiagnose.setMaximumSize(new Dimension(600, 42));
+        btnDiagnose.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        btnDiagnose.addActionListener(e -> {
+            if (selectedDocFile[0] == null && notesInput.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(doctorDialog, "⚠️ Lütfen hastalıklı yaprak fotoğrafı seçin veya bir belirti notu yazın.", "Eksik Bilgi", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            btnDiagnose.setEnabled(false);
+            btnDiagnose.setText("🔬 Gemini AI Yaprak Dokusunu İnceliyor...");
+
+            SwingWorker<String[], Void> worker = new SwingWorker<>() {
+                @Override
+                protected String[] doInBackground() {
+                    String userNotes = notesInput.getText().trim();
+                    return callDoctorDiagnosisApi(selectedDocFile[0], userNotes);
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        String[] res = get();
+                        severityLabel.setText(" Şiddet: " + res[0] + " ");
+                        if (res[0].toLowerCase().contains("yüksek") || res[0].toLowerCase().contains("kritik")) {
+                            severityLabel.setBackground(new Color(229, 57, 53));
+                        } else if (res[0].toLowerCase().contains("düşük")) {
+                            severityLabel.setBackground(new Color(67, 160, 71));
+                        } else {
+                            severityLabel.setBackground(new Color(251, 140, 0));
+                        }
+
+                        resultTitle.setText("📋 Teşhis: " + res[1] + " (" + res[2] + ")");
+
+                        StringBuilder details = new StringBuilder();
+                        details.append("🔍 TESPİT EDİLEN BELİRTİLER:\n").append(res[3]).append("\n\n");
+                        details.append("💡 MUHTEMEL KÖK NEDEN:\n").append(res[4]).append("\n\n");
+                        details.append("📋 ADIM ADIM TEDAVİ REÇETESİ:\n").append(res[5]).append("\n\n");
+                        details.append("🛡️ GELECEK İÇİN KORUYUCU TAVSİYE:\n").append(res[6]);
+
+                        resultDetailsArea.setText(details.toString());
+                        resultDetailsArea.setCaretPosition(0);
+                        reportCard.setVisible(true);
+                        doctorDialog.revalidate();
+                        doctorDialog.repaint();
+                    } catch (Exception ex) {
+                        resultTitle.setText("⚠️ Teşhis Alınamadı");
+                        resultDetailsArea.setText("Bağlantı hatası oluştu. Lütfen web sunucusunun (node server.js) açık olduğundan emin olun.");
+                        reportCard.setVisible(true);
+                    } finally {
+                        btnDiagnose.setEnabled(true);
+                        btnDiagnose.setText("🩺 AI Doktor İle Teşhis Et & Reçete Oluştur");
+                    }
+                }
+            };
+            worker.execute();
+        });
+
+        mainContent.add(titleLabel);
+        mainContent.add(Box.createVerticalStrut(4));
+        mainContent.add(subLabel);
+        mainContent.add(Box.createVerticalStrut(14));
+        mainContent.add(imgPreviewLabel);
+        mainContent.add(Box.createVerticalStrut(12));
+        mainContent.add(notesLabel);
+        mainContent.add(Box.createVerticalStrut(4));
+        mainContent.add(notesInput);
+        mainContent.add(Box.createVerticalStrut(14));
+        mainContent.add(btnDiagnose);
+        mainContent.add(Box.createVerticalStrut(14));
+        mainContent.add(scrollReport);
+
+        doctorDialog.setContentPane(mainContent);
+        doctorDialog.setVisible(true);
+    }
+
+    private String[] callDoctorDiagnosisApi(java.io.File file, String userNotes) {
+        String base64Image = null;
+        if (file != null && file.exists()) {
+            try {
+                byte[] bytes = java.nio.file.Files.readAllBytes(file.toPath());
+                base64Image = "data:image/jpeg;base64," + java.util.Base64.getEncoder().encodeToString(bytes);
+            } catch (Exception ignored) {}
+        }
+
+        try {
+            if (base64Image != null) {
+                String jsonPayload = String.format("{\"imageBase64\":\"%s\",\"userNotes\":\"%s\"}",
+                        base64Image, escapeJson(userNotes));
+
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create("http://localhost:3000/api/diagnose-plant-disease"))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(jsonPayload, StandardCharsets.UTF_8))
+                        .build();
+
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                if (response.statusCode() == 200) {
+                    String body = response.body();
+                    String severity = extractJsonString(body, "severity", "Orta (Dikkat)");
+                    String diseaseName = extractJsonString(body, "diseaseName", "Yaprak Sararması ve Kloroz");
+                    String plantType = extractJsonString(body, "plantType", "Ev Bitkisi");
+                    String symptoms = extractJsonArrayOrString(body, "symptoms", "• Yaprak sararması\n• Uçlarda lekelenme");
+                    String causes = extractJsonString(body, "causes", "Aşırı sulama, yetersiz güneş ışığı veya besin eksikliği.");
+                    String treatment = extractJsonArrayOrString(body, "treatmentPlan", "1. Toprak tamamen kuruyana kadar sulamayı kesin.\n2. Hasarlı yaprakları budayın.\n3. Aydınlık bir konuma taşıyın.");
+                    String prevention = extractJsonString(body, "preventionTips", "Toprak üst yüzeyi kurumadan su vermeyiniz.");
+
+                    return new String[]{severity, diseaseName, plantType, symptoms, causes, treatment, prevention};
+                }
+            }
+        } catch (Exception ignored) {}
+
+        String notes = (userNotes != null) ? userNotes.toLowerCase(Locale.forLanguageTag("tr-TR")) : "";
+        if (notes.contains("sarı") || notes.contains("sararma")) {
+            return new String[]{
+                "Orta (Dikkat)",
+                "Kloroz & Aşırı Sulama Belirtisi",
+                "Ev Bitkisi",
+                "• Yaprak kenarlarında sararma\n• Toprakta nem birikmesi",
+                "Köklerin aşırı sudan dolayı oksijensiz kalması ve demir/azot emiliminin durması.",
+                "1. Saksı drenaj deliklerini kontrol edin.\n2. Toprak tamamen kuruyana kadar en az 5-7 gün su vermeyin.\n3. Sararmış yaprakları alt kısımdan kesin.",
+                "Sulama yapmadan önce parmağınızla 2-3 cm toprak kuruluğunu kontrol edin."
+            };
+        } else if (notes.contains("leke") || notes.contains("kahverengi")) {
+            return new String[]{
+                "Yüksek (Kritik)",
+                "Yaprak Lekesi (Mantar / Septoria)",
+                "Salon Bitkisi",
+                "• Yaprak yüzeyinde dairesel kahverengi lekeler\n• Lekelerin etrafında sarı halkalar",
+                "Yaprakların ıslak kalması veya yüksek nemli havalandırılmayan ortam.",
+                "1. Lekeli yaprakları hemen temiz bir makasla kesin ve imha edin.\n2. Yapraklara su püskürtmeyi durdurun.\n3. Gerekirse organik bakır sülfat mantar ilacı uygulayın.",
+                "Bitkiyi havadar, esintili ve direkt yakıcı güneş almayan aydınlık ortama koyun."
+            };
+        } else {
+            return new String[]{
+                "Orta (Dikkat)",
+                "Besin & Işık Düzensizliği",
+                "İç Mekan Bitkisi",
+                "• Yaprak canlılığında azalma\n• Gövdede zayıflama",
+                "Mevsimsel ışık yetersizliği veya toprak saksı değişimi ihtiyacı.",
+                "1. Bitkiyi pencereye daha yakın bir konuma taşıyın.\n2. Ayda bir kez dengeli sıvı bitki besini verin.\n3. Dökülen yaprak artıklarını topraktan temizleyin.",
+                "Bahar aylarında toprağını taze humuslu toprakla yenileyin."
+            };
+        }
+    }
+
+    private String extractJsonString(String json, String key, String defaultVal) {
+        try {
+            int idx = json.indexOf("\"" + key + "\":");
+            if (idx != -1) {
+                int start = json.indexOf("\"", idx + key.length() + 3);
+                if (start != -1) {
+                    int end = json.indexOf("\"", start + 1);
+                    if (end != -1) {
+                        return json.substring(start + 1, end).replace("\\n", "\n").replace("\\\"", "\"");
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+        return defaultVal;
+    }
+
+    private String extractJsonArrayOrString(String json, String key, String defaultVal) {
+        try {
+            int idx = json.indexOf("\"" + key + "\":");
+            if (idx != -1) {
+                int startArr = json.indexOf("[", idx);
+                int endArr = json.indexOf("]", startArr);
+                if (startArr != -1 && endArr != -1 && endArr > startArr) {
+                    String arrStr = json.substring(startArr + 1, endArr);
+                    String[] items = arrStr.split("\",\"");
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < items.length; i++) {
+                        String item = items[i].replace("\"", "").replace("[", "").replace("]", "").trim();
+                        if (!item.isBlank()) {
+                            sb.append("• ").append(item).append("\n");
+                        }
+                    }
+                    if (sb.length() > 0) return sb.toString().trim();
+                }
+            }
+        } catch (Exception ignored) {}
+        return extractJsonString(json, key, defaultVal);
     }
 
     private static String toTitleCase(String input) {

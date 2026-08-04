@@ -1,8 +1,12 @@
-/* --- BİTKİ KEŞİF PORTALI - MODERN MOBİL & WEB CSS TEMA KÜTÜPHANESİ --- */
+/* --- BİTKİ KEŞİF PORTALI - MODERN MOBİL & WEB GLASSMORPHISM CSS TEMA KÜTÜPHANESİ --- */
 :root {
-    --bg-main: #f2f7f3;
-    --card-bg: #ffffff;
-    --card-border: #dcebbe;
+    --bg-main: #edf5ee;
+    --glass-bg: rgba(255, 255, 255, 0.82);
+    --glass-border: rgba(46, 125, 50, 0.18);
+    --glass-blur: blur(16px);
+    --glass-shadow: 0 12px 32px rgba(46, 125, 50, 0.1);
+    --card-bg: rgba(255, 255, 255, 0.88);
+    --card-border: rgba(46, 125, 50, 0.18);
     --text-title: #1b5e20;
     --text-subtitle: #507355;
     --text-body: #2c4030;
@@ -13,19 +17,35 @@
     --accent-blue: #0288d1;
     --accent-teal: #00897b;
     --accent-red: #c62828;
-    --shadow-soft: 0 8px 24px rgba(46, 125, 50, 0.08);
-    --radius-card: 18px;
-    --radius-btn: 10px;
+    --shadow-soft: 0 10px 30px rgba(46, 125, 50, 0.12);
+    --radius-card: 20px;
+    --radius-btn: 12px;
 }
 
 [data-theme="dark"] {
-    --bg-main: #141e15;
-    --card-bg: #1e281f;
-    --card-border: #304432;
+    --bg-main: #0d150e;
+    --glass-bg: rgba(20, 32, 21, 0.84);
+    --glass-border: rgba(129, 199, 132, 0.22);
+    --glass-blur: blur(16px);
+    --glass-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+    --card-bg: rgba(26, 38, 27, 0.9);
+    --card-border: rgba(67, 160, 71, 0.25);
     --text-title: #81c784;
     --text-subtitle: #a0c3a5;
     --text-body: #e8f5e9;
-    --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --shadow-soft: 0 14px 40px rgba(0, 0, 0, 0.55);
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes pulseGlow {
+    0% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.4); }
+    70% { box-shadow: 0 0 0 8px rgba(46, 125, 50, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); }
 }
 
 html {
@@ -44,6 +64,9 @@ html {
 
 body {
     background-color: var(--bg-main);
+    background-image: radial-gradient(circle at 15% 15%, rgba(46, 125, 50, 0.08) 0%, transparent 40%),
+                      radial-gradient(circle at 85% 85%, rgba(123, 31, 162, 0.06) 0%, transparent 40%);
+    background-attachment: fixed;
     color: var(--text-body);
     min-height: 100vh;
     display: flex;
@@ -55,7 +78,6 @@ body {
     width: 100%;
 }
 
-
 .app-container {
     width: 100%;
     max-width: 1060px;
@@ -64,21 +86,34 @@ body {
     gap: 14px;
 }
 
-/* Günün Bitkisi Banner */
+/* Günün Bitkisi Banner (Animasyonlu Gradient & Glassmorphism) */
 .banner-card {
-    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-    border: 1px solid #a5d6a7;
-    border-radius: 14px;
-    padding: 10px 18px;
+    background: linear-gradient(-45deg, #e8f5e9, #c8e6c9, #a5d6a7, #e8f5e9);
+    background-size: 300% 300%;
+    animation: gradientShift 8s ease infinite;
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-radius: var(--radius-card);
+    padding: 12px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    box-shadow: 0 8px 24px rgba(46, 125, 50, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.banner-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(46, 125, 50, 0.16);
 }
 
 [data-theme="dark"] .banner-card {
-    background: linear-gradient(135deg, #1b331e 0%, #28472c 100%);
-    border-color: #38663d;
+    background: linear-gradient(-45deg, #1b331e, #28472c, #1a3c1f, #2e4d30);
+    background-size: 300% 300%;
+    animation: gradientShift 8s ease infinite;
+    border-color: rgba(129, 199, 132, 0.25);
 }
 
 .banner-content {
@@ -89,17 +124,19 @@ body {
 }
 
 .banner-badge {
-    background-color: #2e7d32;
+    background: linear-gradient(135deg, #2e7d32, #43a047);
     color: #fff;
     font-weight: 700;
     font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 6px;
+    padding: 5px 10px;
+    border-radius: 8px;
     letter-spacing: 0.5px;
+    box-shadow: 0 3px 8px rgba(46, 125, 50, 0.25);
 }
 
 .banner-text {
     font-size: 13px;
+    font-weight: 600;
     color: #1b5e20;
 }
 
@@ -107,27 +144,36 @@ body {
     color: #c8e6c9;
 }
 
-/* Base Card Style */
+/* Base Glass Card Style */
 .card {
-    background-color: var(--card-bg);
-    border: 1px solid var(--card-border);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-card);
     padding: 18px;
-    box-shadow: var(--shadow-soft);
-    transition: all 0.3s ease;
+    box-shadow: var(--glass-shadow);
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(46, 125, 50, 0.15);
 }
 
 /* Header Card */
 .header-card {
-    background-color: var(--card-bg);
-    border: 1px solid var(--card-border);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-card);
-    padding: 16px 20px;
+    padding: 16px 22px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    box-shadow: var(--shadow-soft);
+    box-shadow: var(--glass-shadow);
 }
 
 .brand-title {
@@ -154,7 +200,7 @@ body {
 .btn {
     border: none;
     border-radius: var(--radius-btn);
-    padding: 9px 16px;
+    padding: 10px 18px;
     font-size: 13px;
     font-weight: 700;
     color: #ffffff;
@@ -163,72 +209,88 @@ body {
     align-items: center;
     justify-content: center;
     gap: 6px;
-    transition: transform 0.15s ease, background-color 0.2s ease, opacity 0.2s ease;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease, filter 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+    filter: brightness(1.06);
 }
 
 .btn:active {
-    transform: scale(0.96);
+    transform: translateY(1px) scale(0.97);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    transform: none !important;
 }
 
 .btn-primary {
-    background-color: #2e7d32;
+    background: linear-gradient(135deg, #2e7d32, #43a047);
+    box-shadow: 0 4px 14px rgba(46, 125, 50, 0.3);
 }
 
 .btn-primary:hover {
-    background-color: #388e3c;
+    box-shadow: 0 8px 22px rgba(46, 125, 50, 0.45);
 }
 
 .btn-success {
-    background-color: #2e7d32;
+    background: linear-gradient(135deg, #2e7d32, #66bb6a);
+    box-shadow: 0 4px 14px rgba(46, 125, 50, 0.3);
 }
 
 .btn-success:hover {
-    background-color: #43a047;
+    box-shadow: 0 8px 22px rgba(46, 125, 50, 0.45);
 }
 
 .btn-teal {
-    background-color: #00897b;
+    background: linear-gradient(135deg, #00897b, #26a69a);
+    box-shadow: 0 4px 14px rgba(0, 137, 123, 0.3);
 }
 
 .btn-teal:hover {
-    background-color: #00a191;
+    box-shadow: 0 8px 22px rgba(0, 137, 123, 0.45);
 }
 
 .btn-secondary {
-    background-color: #757575;
+    background: linear-gradient(135deg, #616161, #757575);
+    box-shadow: 0 4px 14px rgba(117, 117, 117, 0.25);
 }
 
 .btn-secondary:hover {
-    background-color: #9e9e9e;
+    box-shadow: 0 8px 20px rgba(117, 117, 117, 0.35);
 }
 
 .btn-profile {
-    background-color: #2874a6;
+    background: linear-gradient(135deg, #1e88e5, #42a5f5);
+    box-shadow: 0 4px 14px rgba(30, 136, 229, 0.3);
 }
 
 .btn-profile:hover {
-    background-color: #3498db;
+    box-shadow: 0 8px 22px rgba(30, 136, 229, 0.45);
 }
 
 .btn-orange {
-    background-color: #f57c00;
+    background: linear-gradient(135deg, #f57c00, #ff9800);
+    box-shadow: 0 4px 14px rgba(245, 124, 0, 0.3);
 }
 
 .btn-orange:hover {
-    background-color: #fb8c00;
+    box-shadow: 0 8px 22px rgba(245, 124, 0, 0.45);
 }
 
 .btn-brown {
-    background-color: #4e342e;
+    background: linear-gradient(135deg, #4e342e, #6d4c41);
+    box-shadow: 0 4px 14px rgba(78, 52, 46, 0.3);
 }
 
 .btn-brown:hover {
-    background-color: #6d4c41;
+    box-shadow: 0 8px 22px rgba(78, 52, 46, 0.45);
 }
 
 .btn-purple {
@@ -1985,5 +2047,281 @@ body[data-theme="dark"] .treatment-step-item {
     background: linear-gradient(90deg, var(--primary-green), var(--primary-hover));
     border-radius: 10px;
     transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Modals & Overlays Glassmorphism Premium */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 16px;
+    animation: fadeInOverlay 0.25s ease forwards;
+}
+
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-card {
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--glass-blur) !important;
+    -webkit-backdrop-filter: var(--glass-blur) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: var(--radius-card) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35) !important;
+    padding: 24px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: popupModal 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes popupModal {
+    from { opacity: 0; transform: scale(0.92) translateY(12px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Bakım Rehberi Kartları Premium Izgara & Renkli Kenarlıklar */
+.care-card {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.care-item {
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(8px);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text-title);
+    border: 1px solid var(--glass-border);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.care-item:hover {
+    transform: translateX(4px);
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 6px 16px rgba(46, 125, 50, 0.12);
+}
+
+[data-theme="dark"] .care-item {
+    background: rgba(255, 255, 255, 0.05);
+    color: #a5d6a7;
+}
+
+[data-theme="dark"] .care-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Care Item Renkli Sol Kenarlık Vurguları */
+#careSun { border-left: 4px solid #ff9800 !important; }
+#careWater { border-left: 4px solid #0288d1 !important; }
+#careTemp { border-left: 4px solid #e53935 !important; }
+#careSeason { border-left: 4px solid #43a047 !important; }
+#careRegion { border-left: 4px solid #8e24aa !important; }
+#careRebloom { border-left: 4px solid #00897b !important; }
+
+/* Arama Kutusu Neon Focus */
+#searchInput {
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-radius: 12px;
+}
+
+#searchInput:focus {
+    border-color: var(--primary-green) !important;
+    box-shadow: 0 0 0 4px rgba(46, 125, 50, 0.22), 0 8px 20px rgba(46, 125, 50, 0.12) !important;
+    transform: scale(1.008);
+}
+
+/* Trivia Kartı Parlaması */
+.trivia-card {
+    background: linear-gradient(135deg, rgba(255, 248, 225, 0.85), rgba(255, 236, 179, 0.6));
+    border: 1px solid #ffe082;
+    border-radius: 14px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #5d4037;
+    font-weight: 600;
+    margin-top: 10px;
+    box-shadow: 0 4px 14px rgba(255, 193, 7, 0.15);
+    transition: transform 0.2s ease;
+}
+
+.trivia-card:hover {
+    transform: translateY(-2px);
+}
+
+[data-theme="dark"] .trivia-card {
+    background: linear-gradient(135deg, rgba(50, 40, 20, 0.7), rgba(70, 55, 25, 0.5));
+    border-color: #f57c00;
+    color: #ffe082;
+}
+
+/* 🖼️ 3D Perspective Tilt Görsel Kutusu & Botanik Onaylı Rozet */
+.image-box-wrapper {
+    perspective: 1000px;
+}
+
+.image-box {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-card);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    transition: transform 0.15s cubic-bezier(0.1, 0.5, 0.1, 1), box-shadow 0.3s ease;
+    transform-style: preserve-3d;
+    cursor: pointer;
+}
+
+.image-box:hover {
+    box-shadow: 0 20px 45px rgba(46, 125, 50, 0.28);
+}
+
+.image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease, filter 0.3s ease;
+}
+
+.image-box:hover img {
+    transform: scale(1.06);
+}
+
+.verified-botanical-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(46, 125, 50, 0.35);
+    color: var(--primary-green);
+    font-size: 11px;
+    font-weight: 800;
+    padding: 6px 12px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 4px 15px rgba(46, 125, 50, 0.25);
+    z-index: 10;
+    animation: badgeGlow 3s infinite alternate;
+    pointer-events: none;
+}
+
+[data-theme="dark"] .verified-botanical-badge {
+    background: rgba(20, 35, 22, 0.92);
+    border-color: rgba(129, 199, 132, 0.45);
+    color: #81c784;
+}
+
+@keyframes badgeGlow {
+    0% { box-shadow: 0 4px 15px rgba(46, 125, 50, 0.25); transform: translateY(0); }
+    100% { box-shadow: 0 4px 22px rgba(46, 125, 50, 0.55), 0 0 12px rgba(129, 199, 132, 0.5); transform: translateY(-2px); }
+}
+
+/* 🔍 Resim Üzerinde Yuvarlak Mercek Büyüteç (Magnifying Lens) */
+.magnifying-lens {
+    position: absolute;
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.6);
+    background-repeat: no-repeat;
+    pointer-events: none;
+    z-index: 25;
+    transition: opacity 0.2s ease;
+}
+
+/* 🔍 Tam Ekran Görsel Modalı & Canlı Yakınlaştırma (Fullscreen Zoom) */
+.fullscreen-overlay {
+    background: rgba(0, 0, 0, 0.88) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+    flex-direction: column;
+    z-index: 10000;
+}
+
+.fullscreen-body {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 20px;
+    cursor: pointer;
+}
+
+#fullscreenImage {
+    max-width: 90vw;
+    max-height: 82vh;
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+    transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+    user-select: none;
+}
+
+/* ⬆️ Yumuşak Başa Dön (Back to Top) Butonu */
+.back-to-top-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(46, 125, 50, 0.3);
+    color: var(--primary-green);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.18);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(15px) scale(0.9);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 900;
+}
+
+[data-theme="dark"] .back-to-top-btn {
+    background: rgba(20, 35, 22, 0.9);
+    border-color: rgba(129, 199, 132, 0.4);
+    color: #81c784;
+}
+
+.back-to-top-btn.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.back-to-top-btn:hover {
+    transform: translateY(-4px) scale(1.1);
+    background: var(--primary-green);
+    color: #ffffff;
+    box-shadow: 0 12px 30px rgba(46, 125, 50, 0.4);
 }
 

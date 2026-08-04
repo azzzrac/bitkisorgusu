@@ -356,6 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function resetDoctorModal() {
         doctorModal.style.display = 'none';
         doctorSelectedBase64 = null;
+        if (typeof stopDoctorCamera === 'function') stopDoctorCamera();
         if (doctorFileInput) doctorFileInput.value = '';
         if (doctorNotesInput) doctorNotesInput.value = '';
         if (doctorPreviewImage) {
@@ -848,6 +849,172 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
         });
     }
 
+    // 📷 CANLI KAMERA KONTROLLERİ (AI DOKTOR)
+    const btnStartCamera = document.getElementById('btnStartCamera');
+    const doctorCameraContainer = document.getElementById('doctorCameraContainer');
+    const doctorCameraVideo = document.getElementById('doctorCameraVideo');
+    const doctorCameraCanvas = document.getElementById('doctorCameraCanvas');
+    const btnCapturePhoto = document.getElementById('btnCapturePhoto');
+    const btnStopCamera = document.getElementById('btnStopCamera');
+    let doctorMediaStream = null;
+
+    function stopDoctorCamera() {
+        if (doctorMediaStream) {
+            doctorMediaStream.getTracks().forEach(track => track.stop());
+            doctorMediaStream = null;
+        }
+        if (doctorCameraVideo) doctorCameraVideo.srcObject = null;
+        if (doctorCameraContainer) doctorCameraContainer.style.display = 'none';
+    }
+
+    if (btnStartCamera) {
+        btnStartCamera.addEventListener('click', async () => {
+            try {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    alert('⚠️ Tarayıcınız canlı kamera erişimini desteklemiyor.');
+                    return;
+                }
+                doctorMediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+                });
+                if (doctorCameraVideo) {
+                    doctorCameraVideo.srcObject = doctorMediaStream;
+                }
+                if (doctorCameraContainer) {
+                    doctorCameraContainer.style.display = 'flex';
+                }
+            } catch (err) {
+                console.error("Kamera açma hatası:", err);
+                alert("⚠️ Kamera açılamadı. İzinlerin verildiğinden veya cihaz kamerasının kullanılabilir olduğundan emin olun.");
+            }
+        });
+    }
+
+    if (btnStopCamera) {
+        btnStopCamera.addEventListener('click', stopDoctorCamera);
+    }
+
+    if (btnCapturePhoto) {
+        btnCapturePhoto.addEventListener('click', () => {
+            if (!doctorCameraVideo || !doctorMediaStream) return;
+            const width = doctorCameraVideo.videoWidth || 640;
+            const height = doctorCameraVideo.videoHeight || 480;
+            if (doctorCameraCanvas) {
+                doctorCameraCanvas.width = width;
+                doctorCameraCanvas.height = height;
+                const ctx = doctorCameraCanvas.getContext('2d');
+                ctx.drawImage(doctorCameraVideo, 0, 0, width, height);
+
+                const dataUrl = doctorCameraCanvas.toDataURL('image/jpeg', 0.85);
+                doctorSelectedBase64 = dataUrl.split(',')[1];
+                doctorSelectedMime = 'image/jpeg';
+
+                if (doctorPreviewImage) {
+                    doctorPreviewImage.src = dataUrl;
+                    doctorPreviewImage.style.display = 'block';
+                }
+                if (doctorUploadContent) doctorUploadContent.style.display = 'none';
+            }
+
+            stopDoctorCamera();
+        });
+    }
+
+    // 📄 DOKTOR TEŞHİS VE REÇETE RAPORU YAZDIRMA / PDF İNDİRME
+    const btnPrintDoctorReport = document.getElementById('btnPrintDoctorReport');
+    if (btnPrintDoctorReport) {
+        btnPrintDoctorReport.addEventListener('click', () => {
+            const diseaseName = document.getElementById('reportDiseaseName')?.textContent || 'Bitki Teşhisi';
+            const plantType = document.getElementById('reportPlantType')?.textContent || '';
+            const severity = document.getElementById('reportSeverity')?.textContent || 'Orta';
+            const symptomsHTML = document.getElementById('reportSymptomsList')?.innerHTML || '';
+            const causesText = document.getElementById('reportCauses')?.textContent || '';
+            const treatmentListEl = document.getElementById('reportTreatmentList');
+            let treatmentStepsHTML = '';
+            if (treatmentListEl) {
+                const labels = treatmentListEl.querySelectorAll('.treatment-step-text');
+                if (labels.length > 0) {
+                    labels.forEach(lbl => {
+                        treatmentStepsHTML += `<li style="margin-bottom:8px;">📌 ${lbl.textContent}</li>`;
+                    });
+                } else {
+                    treatmentStepsHTML = treatmentListEl.innerHTML;
+                }
+            }
+            const preventionText = document.getElementById('reportPrevention')?.textContent || '';
+            const imgSrc = doctorPreviewImage ? doctorPreviewImage.src : '';
+
+            const printWin = window.open('', '_blank', 'width=800,height=900');
+            if (!printWin) {
+                alert('⚠️ Yazdırma penceresi engellendi. Lütfen pop-up engelleyicinizi izin verin.');
+                return;
+            }
+
+            printWin.document.write(`
+                <!DOCTYPE html>
+                <html lang="tr">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Bitki Teşhis & Tedavi Reçetesi - ${diseaseName}</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 30px; color: #1c2a1d; line-height: 1.5; background: #fff; }
+                        .header { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #2e7d32; padding-bottom: 15px; margin-bottom: 20px; }
+                        .logo { font-size: 22px; font-weight: 800; color: #2e7d32; }
+                        .date { font-size: 13px; color: #666; }
+                        .badge { display: inline-block; padding: 4px 12px; color: #fff; font-weight: bold; border-radius: 12px; font-size: 13px; }
+                        .report-box { border: 1px solid #c8e6c9; background: #f1f8e9; border-radius: 10px; padding: 20px; margin-top: 15px; }
+                        h2 { color: #1b5e20; margin-top: 5px; margin-bottom: 5px; }
+                        h3 { color: #2e7d32; margin-top: 18px; margin-bottom: 8px; border-bottom: 1px dashed #a5d6a7; padding-bottom: 4px; }
+                        ul { margin-top: 4px; padding-left: 20px; }
+                        .img-container { text-align: center; margin: 15px 0; }
+                        .img-container img { max-height: 180px; border-radius: 8px; border: 1px solid #ccc; }
+                        .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #ddd; padding-top: 15px; }
+                        @media print {
+                            body { padding: 0; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <div class="logo">🌱 Bitki Keşif Portalı — Resmi AI Teşhis Raporu</div>
+                        <div class="date">Tarih: ${new Date().toLocaleDateString('tr-TR')}</div>
+                    </div>
+                    
+                    ${imgSrc ? `<div class="img-container"><img src="${imgSrc}" alt="Teşhis Edilen Yaprak"></div>` : ''}
+
+                    <div class="report-box">
+                        <span class="badge" style="background: ${severity.toLowerCase().includes('yüksek') ? '#e53935' : (severity.toLowerCase().includes('düşük') ? '#43a047' : '#fb8c00')}">${severity}</span>
+                        <h2>${diseaseName}</h2>
+                        <div style="font-size: 14px; font-style: italic; color: #444; margin-bottom: 15px;">${plantType}</div>
+
+                        <h3>🔍 Tespit Edilen Belirtiler</h3>
+                        <ul>${symptomsHTML}</ul>
+
+                        <h3>💡 Muhtemel Kök Neden</h3>
+                        <p>${causesText}</p>
+
+                        <h3>📋 Adım Adım Tedavi Reçetesi</h3>
+                        <ul style="list-style: none; padding-left: 0;">${treatmentStepsHTML}</ul>
+
+                        <h3>🛡️ Gelecek İçin Koruyucu Tavsiye</h3>
+                        <p>${preventionText}</p>
+                    </div>
+
+                    <div class="footer">
+                        Bu reçete Bitki Keşif Portalı Gemini AI Yapay Zeka Teşhis Motoru tarafından oluşturulmuştur.
+                    </div>
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                        };
+                    </script>
+                </body>
+                </html>
+            `);
+            printWin.document.close();
+        });
+    }
+
 
 
 
@@ -1145,12 +1312,23 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
         resultContent.style.display = 'none';
 
         plantImage.style.display = 'none';
+        plantImage.src = '';
+        plantImage.removeAttribute('src');
         imagePlaceholderText.style.display = 'block';
         imagePlaceholderText.textContent = 'Resim burada görünür.';
         zoomHint.style.display = 'none';
 
+        const verifiedBadge = document.getElementById('verifiedBadge');
+        if (verifiedBadge) verifiedBadge.style.display = 'none';
+
+        const magnifyingLens = document.getElementById('magnifyingLens');
+        if (magnifyingLens) magnifyingLens.style.display = 'none';
+
         updateCareTips('-', '-', '-');
         triviaText.textContent = '💡 Biliyor muydunuz? Bitkiler dünyadaki oksijenin %99\'unu üretir!';
+
+        const petSafetyCard = document.getElementById('petSafetyCard');
+        if (petSafetyCard) petSafetyCard.style.display = 'none';
 
         btnFavAdd.disabled = true;
         btnSaveImg.disabled = true;
@@ -1329,6 +1507,7 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
             zoomHint.style.display = 'none';
             updateCareTips('-', '-', '-');
             triviaText.textContent = '💡 Biliyor muydunuz? Bitkiler dünyadaki oksijenin %99\'unu üretir!';
+            if (petSafetyCard) petSafetyCard.style.display = 'none';
 
             resultLayout.classList.remove('animate-full-fade-down');
         }
@@ -1404,17 +1583,20 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
                     finalImgUrl = await fetchFallbackPlantImage(baslik, botName);
                 }
 
+                const verifiedBadge = document.getElementById('verifiedBadge');
                 if (finalImgUrl) {
                     plantImage.src = finalImgUrl;
                     plantImage.style.display = 'block';
                     imagePlaceholderText.style.display = 'none';
                     zoomHint.style.display = 'inline-block';
+                    if (verifiedBadge) verifiedBadge.style.display = 'flex';
                     if (currentSonuc) currentSonuc.resimUrl = finalImgUrl;
                 } else {
                     plantImage.style.display = 'none';
                     imagePlaceholderText.style.display = 'block';
                     imagePlaceholderText.textContent = 'Resim bulunamadı.';
                     zoomHint.style.display = 'none';
+                    if (verifiedBadge) verifiedBadge.style.display = 'none';
                 }
 
 
@@ -2508,15 +2690,154 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
         }
     };
 
+    let fullscreenScale = 1;
+
     window.openFullscreenImg = function (src, title) {
+        if (!src || src.trim() === '') return;
+        fullscreenScale = 1;
         fullscreenImage.src = src;
-        fullscreenTitle.textContent = `📸 ${title}`;
+        fullscreenImage.style.transform = 'scale(1)';
+        fullscreenImage.style.cursor = 'zoom-in';
+        fullscreenTitle.textContent = `📸 ${title || 'Bitki Görseli'}`;
         fullscreenModal.style.display = 'flex';
     };
 
-    // 📄 PDF BAKIM KARTI VE TEŞHİS REÇETESİ İNDİRME / YAZDIRMA
+    if (btnCloseFullscreen) {
+        btnCloseFullscreen.addEventListener('click', () => {
+            fullscreenModal.style.display = 'none';
+            fullscreenScale = 1;
+            fullscreenImage.style.transform = 'scale(1)';
+        });
+    }
+
+    if (fullscreenModal) {
+        // ❌ Ekranın boş siyah alanına tıklayınca kapat
+        fullscreenModal.addEventListener('click', (e) => {
+            if (e.target === fullscreenModal || e.target.classList.contains('fullscreen-body')) {
+                fullscreenModal.style.display = 'none';
+                fullscreenScale = 1;
+                fullscreenImage.style.transform = 'scale(1)';
+            }
+        });
+
+        // 🔍 Fare tekerleği (wheel) ile canlı yakınlaştırma / uzaklaştırma
+        fullscreenModal.addEventListener('wheel', (e) => {
+            if (fullscreenModal.style.display !== 'flex') return;
+            e.preventDefault();
+            if (e.deltaY < 0) {
+                fullscreenScale = Math.min(fullscreenScale + 0.25, 3.5);
+            } else {
+                fullscreenScale = Math.max(fullscreenScale - 0.25, 1);
+            }
+            fullscreenImage.style.transform = `scale(${fullscreenScale})`;
+            fullscreenImage.style.cursor = fullscreenScale > 1 ? 'zoom-out' : 'zoom-in';
+        }, { passive: false });
+    }
+
+    if (fullscreenImage) {
+        // 🔎 Görsele tıklayınca 1.8x yakınlaştır / geri çek
+        fullscreenImage.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (fullscreenScale === 1) {
+                fullscreenScale = 1.8;
+                fullscreenImage.style.transform = 'scale(1.8)';
+                fullscreenImage.style.cursor = 'zoom-out';
+            } else {
+                fullscreenScale = 1;
+                fullscreenImage.style.transform = 'scale(1)';
+                fullscreenImage.style.cursor = 'zoom-in';
+            }
+        });
+    }
+
+    // ⌨️ ESC tuşuna basınca tam ekranı kapat
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && fullscreenModal && fullscreenModal.style.display === 'flex') {
+            fullscreenModal.style.display = 'none';
+            fullscreenScale = 1;
+            if (fullscreenImage) fullscreenImage.style.transform = 'scale(1)';
+        }
+    });
+
+    // ⬆️ YUMUŞAK BAŞA DÖN (BACK TO TOP) BUTONU MANİPÜLASYONU
+    const btnBackToTop = document.getElementById('btnBackToTop');
+    if (btnBackToTop) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 280) {
+                btnBackToTop.classList.add('visible');
+            } else {
+                btnBackToTop.classList.remove('visible');
+            }
+        });
+
+        btnBackToTop.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+
+    // 🖼️ 3D PERSPECTIVE TILT & TIKLAMA İLE TAM EKRAN AÇMA (BİTKİ GÖRSEL KUTUSU)
+    if (imageBox) {
+        imageBox.addEventListener('click', () => {
+            if (plantImage && plantImage.style.display !== 'none' && plantImage.src && plantImage.src.trim() !== '' && currentSonuc) {
+                openFullscreenImg(plantImage.src, currentSonuc.baslik || 'Bitki Görseli');
+            }
+        });
+
+        imageBox.addEventListener('mousemove', (e) => {
+            const rect = imageBox.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            const rotateX = ((y - centerY) / centerY) * -10;
+            const rotateY = ((x - centerX) / centerX) * 10;
+
+            imageBox.style.transform = `rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`;
+        });
+
+        imageBox.addEventListener('mouseleave', () => {
+            imageBox.style.transform = 'rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+        });
+    }
+
+    // 🔍 YUVARLAK MERCEK BÜYÜTEÇ EFEKTİ (MAGNIFYING LENS)
+    const magnifyingLens = document.getElementById('magnifyingLens');
+    if (imageBox && magnifyingLens && plantImage) {
+        imageBox.addEventListener('mousemove', (e) => {
+            if (plantImage.style.display === 'none' || !plantImage.src) {
+                magnifyingLens.style.display = 'none';
+                return;
+            }
+
+            const rect = imageBox.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const lensSize = 130;
+            const zoomLevel = 2.4;
+
+            const posX = x - (lensSize / 2);
+            const posY = y - (lensSize / 2);
+
+            magnifyingLens.style.left = posX + 'px';
+            magnifyingLens.style.top = posY + 'px';
+            magnifyingLens.style.backgroundImage = `url('${plantImage.src}')`;
+            magnifyingLens.style.backgroundSize = `${rect.width * zoomLevel}px ${rect.height * zoomLevel}px`;
+            magnifyingLens.style.backgroundPosition = `-${(x * zoomLevel) - (lensSize / 2)}px -${(y * zoomLevel) - (lensSize / 2)}px`;
+            magnifyingLens.style.display = 'block';
+        });
+
+        imageBox.addEventListener('mouseleave', () => {
+            magnifyingLens.style.display = 'none';
+        });
+    }
+
+    // 📄 PDF BAKIM KARTI İNDİRME / YAZDIRMA
     const btnExportPdf = document.getElementById('btnExportPdf');
-    const btnPrintDoctorReport = document.getElementById('btnPrintDoctorReport');
 
     if (btnExportPdf) {
         btnExportPdf.addEventListener('click', () => {
@@ -2524,12 +2845,6 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
                 alert('⚠️ Lütfen önce bir bitki sorgulayın.');
                 return;
             }
-            window.print();
-        });
-    }
-
-    if (btnPrintDoctorReport) {
-        btnPrintDoctorReport.addEventListener('click', () => {
             window.print();
         });
     }
