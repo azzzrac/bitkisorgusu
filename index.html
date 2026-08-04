@@ -7,6 +7,14 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <!-- 📱 Progressive Web App (PWA) Manifest & Mobile Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1b5e20">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="BitkiPortalı">
+    <link rel="apple-touch-icon" href="https://img.icons8.com/emoji/192/000000/potted-plant-emoji.png">
     <title>🌱 Bitki Rehberi | Mobil & Web</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -58,6 +66,7 @@
                 <button class="btn btn-doctor" id="btnOpenDoctor">🩺 Bitki Doktoru (AI Teşhis)</button>
                 <button class="btn btn-profile" id="btnProfile">👤 Giriş Yap / Kayıt Ol</button>
                 <button class="btn btn-icon" id="btnThemeToggle" title="Temayı Değiştir">🌙</button>
+                <button class="btn btn-sm btn-success" id="btnInstallPWA" style="display: none; background: #2e7d32; color: #fff; font-weight: 700; border-radius: 8px; box-shadow: 0 4px 12px rgba(46,125,50,0.3);">📲 Uygulamayı Yükle</button>
             </div>
 
 
@@ -704,8 +713,8 @@
     <!-- Firebase SDK (Compat Version) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="firebase-config.js?v=31"></script>
-    <script src="app.js?v=31"></script>
+    <script src="firebase-config.js?v=32"></script>
+    <script src="app.js?v=32"></script>
 </body>
 
 

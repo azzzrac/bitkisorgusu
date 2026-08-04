@@ -3545,6 +3545,39 @@ Lütfen sadece ve sadece aşağıdaki geçerli JSON formatında yanıt ver (baş
         }
     };
 
+    // 📲 PROGRESSIVE WEB APP (PWA) SERVICE WORKER KAYDI & UYGULAMAYI YÜKLE MANİPÜLASYONU
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then((reg) => console.log('✅ Service Worker başarıyla yüklendi:', reg.scope))
+                .catch((err) => console.warn('⚠️ Service Worker kaydı başarısız:', err));
+        });
+    }
+
+    let deferredPrompt = null;
+    const btnInstallPWA = document.getElementById('btnInstallPWA');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (btnInstallPWA) {
+            btnInstallPWA.style.display = 'inline-block';
+            btnInstallPWA.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    console.log(`📲 PWA Yükleme Seçimi: ${outcome}`);
+                    deferredPrompt = null;
+                    btnInstallPWA.style.display = 'none';
+                }
+            });
+        }
+    });
+
+    window.addEventListener('appinstalled', () => {
+        console.log('🎉 Bitki Portalı uygulaması cihaza başarıyla yüklendi!');
+        if (btnInstallPWA) btnInstallPWA.style.display = 'none';
+    });
 
 });
 
